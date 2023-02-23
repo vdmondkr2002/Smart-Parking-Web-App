@@ -9,6 +9,7 @@ import {CssBaseline,ThemeProvider} from "@mui/material";
 import {createTheme} from '@mui/material/styles';
 import { themeSettings } from './theme/theme';
 import RegisterPage from './components/LoginPageComponents/RegisterPage';
+import LoginPage from './components/LoginPageComponents/LoginPage';
 
 
 const App = ()=>{
@@ -28,7 +29,8 @@ const App = ()=>{
                     <Navbar/>
                     <Routes>
                         <Route exact path="/" element={<Home/>}/>
-                        <Route exact path="/login" element={<RegisterPage/>}/>
+                        <Route exact path="/register" element={<RegisterPage/>}/>
+                        <Route exact path="/login" element={<LoginPage/>}/>
                         <Route exact path="/aboutus" element={<AboutUs/>}/>
                     </Routes>
                 </Container>
