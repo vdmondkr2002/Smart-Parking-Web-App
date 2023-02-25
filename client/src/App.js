@@ -12,6 +12,7 @@ import LoginPage from './components/LoginPageComponents/LoginPage';
 import { useDispatch } from 'react-redux';
 import { asyncloadUser } from './state';
 import LandingPage from './components/LandingPageComponents/LandingPage';
+import Footer from './components/Footer/Footer';
 
 
 const App = ()=>{
@@ -19,7 +20,6 @@ const App = ()=>{
     const styles ={
         root:{
           padding:0,
-          maxWidth:"100vw",
           position:"relative"
         }
     }
@@ -33,7 +33,7 @@ const App = ()=>{
         <Router>
             <ThemeProvider theme={theme}>
                 <CssBaseline/>
-                <Container className={styles.root}>
+                <Container className={styles.root} maxWidth="1300px">
                     <Navbar/>
                     <Routes>
                         <Route exact path="/" element={<LandingPage/>}/>
@@ -41,6 +41,7 @@ const App = ()=>{
                         <Route exact path="/login" element={<LoginPage/>}/>
                         <Route exact path="/aboutus" element={<AboutUs/>}/>
                     </Routes>
+                    <Footer/>
                 </Container>
             </ThemeProvider>
         </Router>

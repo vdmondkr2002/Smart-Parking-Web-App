@@ -35,7 +35,9 @@ const DeskTopNav = ()=>{
         },
         root:{
             flexGrow:1,
-            justifyContent:"space-between"
+            justifyContent:"space-between",
+            background:
+            "linear-gradient(90deg, rgba(218, 159, 249,1) 10%, rgb(121, 82, 179) 55%)", 
         },
         menuButton:{
             marginRight: theme.spacing(2),
