@@ -1,7 +1,8 @@
-const { sendOTPValidator } = require("../validators/joi-validator")
+const { sendOTPValidator,verifyEmailValidator,loginValidator } = require("../validators/joi-validator")
 const User = require('../models/User')
 const { generateOTP } = require("../Utils/generateOTP")
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 const sendEmail = require('../Utils/sendEmail')
 
 const createUser = async(formData)=>{
@@ -86,13 +87,105 @@ exports.sendOTP = async(req,res)=>{
             return res.status(400).json({msg:"Password don't match"})
         }
 
-        // const newUser = await createUser(req.body)
+        const newUser = await createUser(req.body)
         
-        // if(newUser.badMsg){
-        //     return res.status(500).json({msg:"Unable to sign up please try again later"})
-        // }
+        if(newUser.badMsg){
+            return res.status(500).json({msg:"Unable to sign up please try again later"})
+        }
 
         return res.status(200).json({msg:"OTP Sent to your email id"})
+    }catch(err){
+        return res.status(500).json({msg:"Something went wrong.."})
+    }
+}
+
+
+const validateUserSignUp = async(email,otp)=>{
+    const user = await User.findOne({email})
+    console.log(user)
+    if(!user){
+        return {badMsg:"Send OTP first"}
+    }
+    console.log(user.otp," and ",otp)
+    if(user && user.otp !== otp){
+        console.log("invalid otp")
+        return {badMsg:"Invalid OTP"}
+    }
+    const updatedUser = await User.findByIdAndUpdate(user._id,{
+        $set:{verified:true},
+    })
+    
+    return {goodMsg:"You're Registered Successfully, Login Now"}
+}
+exports.verifyEmail = async(req,res)=>{
+    console.log(req.body)
+
+    const {error} = veri.validate(req.body);
+    
+    try{
+        const {email,otp} = req.body;
+        
+        const user = await validateUserSignUp(email,otp)
+
+        if(user.badMsg){
+            return res.status(400).json({msg:user.badMsg})
+        }
+
+        return res.status(200).json({msg:user.goodMsg})
+    }catch(err){
+        return res.status(500).json({msg:"Something went wrong.."})
+    }
+}
+
+exports.signIn = async(req,res)=>{
+    const {email,password} = req.body
+    const {error} = loginValidator.validate({email,password})
+    console.log(email,password)
+    console.log(error)
+    try{
+        if(error)
+            return res.status(400).json({msg:error.details[0].message})
+        
+        //Check email
+        const oldUser = await User.findOne({email:email})
+        if(!oldUser)
+            return res.status(404).json({msg:"User doesn't exist" })
+        
+        if(!oldUser.verified)
+            return res.status(400).json({msg:"Please verify your account first! Check the link sent on mail during registration"})
+        console.log(oldUser)
+        //Check passowrd
+        const isMatch = await bcrypt.compare(password,oldUser.password)
+        console.log("password matched")
+        if(!isMatch)
+            return res.status(400).json({msg:"Invalid credentials"})
+
+        const payload = {
+            email: oldUser.email,
+            id:oldUser._id
+        }
+
+        const token = jwt.sign(payload,process.env.TOKEN_SECRET,{expiresIn:"3h"})
+        console.log(token)
+        console.log("token signed")
+        return res.status(200).json(token)
+    }catch(err){
+        return res.status(500).json({msg:"Something went wrong.."})
+    }
+
+}
+
+
+exports.getCurrentUser = async(req,res)=>{
+    console.log("loading user")
+    try{
+        if(!req.userId){
+            return res.status(401).json({msg:"Unauthorized"})
+        }
+        
+        const user = await User.findById(req.userId)
+        console.log("User->",user)
+        return res.status(200).json({firstName:user.firstName,lastName:user.lastName,userName:user.userName,_id:user._id,email:user.email})
     }catch(err){
         return res.status(500).json({msg:"Something went wrong.."})
     }

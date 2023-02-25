@@ -7,6 +7,7 @@ import MenuIcon from '@mui/icons-material/Menu'
 
 import logo from '../../images/Parking-logo.jpg'
 import { useTheme } from '@emotion/react';
+import { setLogout } from '../../state';
 
 const MobileNav = ({mobileDrawer,setMobileDrawer})=>{
     const dispatch = useDispatch();
@@ -56,7 +57,8 @@ const MobileNav = ({mobileDrawer,setMobileDrawer})=>{
         }
     }
     const logout = () => {
-        
+        console.log("logging out")
+        dispatch(setLogout())
     };
 
     const handleDrawerOpen = ()=>{
@@ -93,7 +95,7 @@ const MobileNav = ({mobileDrawer,setMobileDrawer})=>{
                             </Button>
                         </Grid>
                         <Grid item >
-                            <Button component={RouterLink} variant="contained" color="primary" to="/about" sx={styles.navItems}>
+                            <Button component={RouterLink} variant="contained" color="primary" to="/aboutus" sx={styles.navItems}>
                                 <MenuItem>About Us</MenuItem> 
                             </Button>
                         </Grid>

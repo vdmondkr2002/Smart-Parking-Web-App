@@ -9,11 +9,11 @@ import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } 
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useTheme } from "@emotion/react";
-import { asyncsendOTP, asyncsignUp } from '../../state/index'
+import { asyncsendOTP, asyncsignUp, asyncverifyEmail } from '../../state/index'
 import Alert from "../../Utils/Alert";
 
 const initialState = {
-    userName: '', email: '', mobileNo: '', confirmPassword: '', password: '', firstName: '', lastName: '',otp:''
+    userName: '', email: '', mobileNo: '', confirmPassword: '', password: '', firstName: '', lastName: '', otp: ''
 }
 
 
@@ -85,34 +85,50 @@ const RegisterPage = () => {
         formContainer: {
             marginTop: "1rem"
         },
-        otpField:{
-            flexGrow:0.5,
-            maxWidth:"30em"
+        otpField: {
+            flexGrow: 0.5,
+            maxWidth: "30em"
         }
 
     }
 
+    
+
+
     const [formData, setFormData] = useState(initialState)
     const [showPassword1, setshowPassword1] = useState(false);
     const [showPassword2, setshowPassword2] = useState(false);
-    const [otpSent,setOtpSent] = useState(false);
+    const [otpSent, setOtpSent] = useState(false);
+    const [alreadyotp, setAlreadyOTP] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
-    const alert = useSelector(state=>state.auth.alert)
+    const alert = useSelector(state => state.auth.alert)
+    const user = useSelector(state=>state.auth.user)
 
+    
     useEffect(()=>{
-        if(alert.msg=="OTP Sent to your email id"){
-            setOtpSent(true);
+        if(user._id){
+            navigate("/")
         }
-    },[alert])
+    },[user])
+
+    useEffect(() => {
+        if (alert.msg == "OTP Sent to your email id") {
+            setOtpSent(true);
+        }else if (alert.msg == "You're Registered Successfully, Login Now"){
+            navigate("/login")
+        }
+    }, [alert])
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if(!otpSent){
+        if (!otpSent) {
             dispatch(asyncsendOTP(formData))
+        } else {
+            dispatch(asyncverifyEmail(formData))
         }
         console.log("Submitting form...")
     }
@@ -134,26 +150,22 @@ const RegisterPage = () => {
         e.preventDefault();
     };
 
-    const handleCloseDialog = () => {
-        setOpenDialog(false);
-    }
-
-    const handleClickOpenDialog = () => {
-        setOpenDialog(true)
-    }
-
     const handleResetEmail = () => {
         console.log("Reset email sent..")
     }
 
-    const handleClickSignIn = ()=>{
+    const handleClickSignIn = () => {
         navigate("/login")
     }
 
+    const handleAlreadyOTP = () => {
+        setOtpSent(true)
+        setAlreadyOTP(true)
+    }
     return (
         <Grow in>
             <Container sx={styles.formCont}>
-                <Alert/>
+                <Alert />
                 <Paper sx={styles.paper}>
                     <Grid container spacing={3}>
                         <Grid item xs={12} sm={12}>
@@ -172,30 +184,37 @@ const RegisterPage = () => {
                             </Paper>
                             <form autoComplete="off" noValidate sx={styles.form} onSubmit={handleSubmit}>
                                 <Grid container sx={styles.formContainer} spacing={2}>
-                                    <Grid item sm={6} xs={12} sx={styles.ipFields}>
-                                        <TextField
-                                            name="firstName"
-                                            type="text"
-                                            variant="outlined"
-                                            required
-                                            fullWidth
-                                            label="Enter Your first name"
-                                            onChange={handleChange}
-                                            value={formData.firstName}
-                                        />
-                                    </Grid>
-                                    <Grid item sm={6} xs={12} sx={styles.ipFields}>
-                                        <TextField
-                                            name="lastName"
-                                            type="text"
-                                            variant="outlined"
-                                            required
-                                            fullWidth
-                                            label="Enter Your last name"
-                                            onChange={handleChange}
-                                            value={formData.lastName}
-                                        />
-                                    </Grid>
+                                    {
+                                        !alreadyotp ? (
+                                            <>
+                                                <Grid item sm={6} xs={12} sx={styles.ipFields}>
+                                                    <TextField
+                                                        name="firstName"
+                                                        type="text"
+                                                        variant="outlined"
+                                                        required
+                                                        fullWidth
+                                                        label="Enter Your first name"
+                                                        onChange={handleChange}
+                                                        value={formData.firstName}
+                                                    />
+                                                </Grid>
+                                                <Grid item sm={6} xs={12} sx={styles.ipFields}>
+                                                    <TextField
+                                                        name="lastName"
+                                                        type="text"
+                                                        variant="outlined"
+                                                        required
+                                                        fullWidth
+                                                        label="Enter Your last name"
+                                                        onChange={handleChange}
+                                                        value={formData.lastName}
+                                                    />
+                                                </Grid>
+                                            </>
+                                        ) : null
+                                    }
+
                                     <Grid item sm={12} sx={styles.ipFields}>
                                         <TextField
                                             name="email"
@@ -209,86 +228,94 @@ const RegisterPage = () => {
                                             value={formData.email}
                                         />
                                     </Grid>
-                                    <Grid item sm={12} sx={styles.ipFields}>
-                                        <TextField
-                                            name="mobileNo"
-                                            type="text"
-                                            variant="outlined"
-
-                                            required
-                                            fullWidth
-                                            label="Enter Your Mobile No"
-                                            onChange={handleChange}
-                                            value={formData.mobileNo}
-                                        />
-                                    </Grid>
-                                    <Grid item sm={12} sx={styles.ipFields}>
-                                        <TextField
-                                            name="userName"
-                                            type="text"
-                                            variant="outlined"
-                                            required
-                                            fullWidth
-                                            label="Enter a username"
-                                            onChange={handleChange}
-                                            value={formData.userName}
-                                            sx={styles.inputField}
-                                        />
-                                    </Grid>
-                                    <Grid item sm={12} sx={styles.ipFields}>
-                                        <FormControl required fullWidth sx={styles.margin} variant="outlined">
-                                            <InputLabel htmlFor="password">Password</InputLabel>
-                                            <OutlinedInput
-                                                id="password"
-                                                name="password"
-                                                type={showPassword1 ? 'text' : 'password'}
-                                                value={formData.password}
-                                                onChange={handleChange}
-                                                endAdornment={
-                                                    <InputAdornment position="end">
-                                                        <IconButton
-                                                            aria-label="toggle password visibility"
-                                                            onClick={handleClickShowPassword1}
-                                                            onMouseDown={handleMouseDownPassword}
-                                                            edge="end"
-                                                        >
-                                                            {showPassword1 ? <VisibilityIcon /> : <VisibilityOffIcon />}
-                                                        </IconButton>
-                                                    </InputAdornment>
-                                                }
-                                                labelwidth={80}
-                                            />
-                                            <FormHelperText required variant="outlined" children="Password must be atleast 6 characters" />
-                                        </FormControl>
-                                    </Grid>
-                                    <Grid item sm={12} sx={styles.ipFields}>
-                                        <FormControl required fullWidth sx={styles.margin} variant="outlined">
-                                            <InputLabel htmlFor="confirmPassword">Confirm Your Password</InputLabel>
-                                            <OutlinedInput
-                                                id="confirmPassword"
-                                                name="confirmPassword"
-                                                type={showPassword2 ? 'text' : 'password'}
-                                                value={formData.confirmPassword}
-                                                onChange={handleChange}
-                                                endAdornment={
-                                                    <InputAdornment position="end">
-                                                        <IconButton
-                                                            aria-label="toggle password visibility"
-                                                            onClick={handleClickShowPassword2}
-                                                            onMouseDown={handleMouseDownPassword}
-                                                            edge="end"
-                                                        >
-                                                            {showPassword2 ? <VisibilityIcon /> : <VisibilityOffIcon />}
-                                                        </IconButton>
-                                                    </InputAdornment>
-                                                }
-                                                labelwidth={170}
-                                            />
-                                            <FormHelperText required variant="outlined" children="Must be same as password above" />
-                                        </FormControl>
-                                    </Grid>
                                     {
-                                        otpSent?(
+                                        !alreadyotp ? (
+                                            <>
+
+                                                <Grid item sm={12} sx={styles.ipFields}>
+                                                    <TextField
+                                                        name="mobileNo"
+                                                        type="text"
+                                                        variant="outlined"
+
+                                                        required
+                                                        fullWidth
+                                                        label="Enter Your Mobile No"
+                                                        onChange={handleChange}
+                                                        value={formData.mobileNo}
+                                                    />
+                                                </Grid>
+                                                <Grid item sm={12} sx={styles.ipFields}>
+                                                    <TextField
+                                                        name="userName"
+                                                        type="text"
+                                                        variant="outlined"
+                                                        required
+                                                        fullWidth
+                                                        label="Enter a username"
+                                                        onChange={handleChange}
+                                                        value={formData.userName}
+                                                        sx={styles.inputField}
+                                                    />
+                                                </Grid>
+                                                <Grid item sm={12} sx={styles.ipFields}>
+                                                    <FormControl required fullWidth sx={styles.margin} variant="outlined">
+                                                        <InputLabel htmlFor="password">Password</InputLabel>
+                                                        <OutlinedInput
+                                                            id="password"
+                                                            name="password"
+                                                            type={showPassword1 ? 'text' : 'password'}
+                                                            value={formData.password}
+                                                            onChange={handleChange}
+                                                            endAdornment={
+                                                                <InputAdornment position="end">
+                                                                    <IconButton
+                                                                        aria-label="toggle password visibility"
+                                                                        onClick={handleClickShowPassword1}
+                                                                        onMouseDown={handleMouseDownPassword}
+                                                                        edge="end"
+                                                                    >
+                                                                        {showPassword1 ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                                                                    </IconButton>
+                                                                </InputAdornment>
+                                                            }
+                                                            labelwidth={80}
+                                                        />
+                                                        <FormHelperText required variant="outlined" children="Password must be atleast 6 characters" />
+                                                    </FormControl>
+                                                </Grid>
+                                                <Grid item sm={12} sx={styles.ipFields}>
+                                                    <FormControl required fullWidth sx={styles.margin} variant="outlined">
+                                                        <InputLabel htmlFor="confirmPassword">Confirm Your Password</InputLabel>
+                                                        <OutlinedInput
+                                                            id="confirmPassword"
+                                                            name="confirmPassword"
+                                                            type={showPassword2 ? 'text' : 'password'}
+                                                            value={formData.confirmPassword}
+                                                            onChange={handleChange}
+                                                            endAdornment={
+                                                                <InputAdornment position="end">
+                                                                    <IconButton
+                                                                        aria-label="toggle password visibility"
+                                                                        onClick={handleClickShowPassword2}
+                                                                        onMouseDown={handleMouseDownPassword}
+                                                                        edge="end"
+                                                                    >
+                                                                        {showPassword2 ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                                                                    </IconButton>
+                                                                </InputAdornment>
+                                                            }
+                                                            labelwidth={170}
+                                                        />
+                                                        <FormHelperText required variant="outlined" children="Must be same as password above" />
+                                                    </FormControl>
+                                                </Grid>
+                                            </>
+                                        ) : null
+                                    }
+
+                                    {
+                                        otpSent ? (
                                             <Grid item sm={12} sx={styles.otpField}>
                                                 <TextField
                                                     name="otp"
@@ -303,10 +330,10 @@ const RegisterPage = () => {
                                                     sx={styles.otpField}
                                                 />
                                             </Grid>
-                                        ):null
+                                        ) : null
                                     }
                                     {
-                                        otpSent?(
+                                        otpSent ? (
                                             <Grid item sm={12} sx={styles.submitBtn}>
                                                 <Button
                                                     variant="contained"
@@ -314,10 +341,10 @@ const RegisterPage = () => {
                                                     sx={styles.button}
                                                     color="primary"
                                                 >
-                                                    <Typography>Enter OTP</Typography>
+                                                    <Typography>Verify OTP & Register</Typography>
                                                 </Button>
                                             </Grid>
-                                        ):(
+                                        ) : (
                                             <Grid item sm={12} sx={styles.submitBtn}>
                                                 <Button
                                                     variant="contained"
@@ -330,13 +357,28 @@ const RegisterPage = () => {
                                             </Grid>
                                         )
                                     }
-                                    
+                                    {
+                                        !otpSent ? (
+                                            <Grid item sm={12} sx={styles.submitBtn}>
+                                                <Button
+                                                    variant="contained"
+                                                    type="submit"
+                                                    sx={styles.button}
+                                                    onClick={handleAlreadyOTP}
+                                                    color="primary"
+                                                >
+                                                    <Typography>Already have a OTP?</Typography>
+                                                </Button>
+                                            </Grid>
+                                        ) : null
+                                    }
+
                                 </Grid>
                             </form>
                             <Box fontWeight="fontWeightMedium" m={2}>
                                 <Typography variant="h6" >
-                                    Already have an Account? <Button color="primary" variant="contained" sx={styles.signUpBtn} 
-                                    onClick={handleClickSignIn}>Sign In</Button>
+                                    Already have an Account? <Button color="primary" variant="contained" sx={styles.signUpBtn}
+                                        onClick={handleClickSignIn}>Sign In</Button>
                                 </Typography>
                             </Box>
                         </Grid>

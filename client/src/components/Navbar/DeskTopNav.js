@@ -11,6 +11,7 @@ import {Link,Toolbar,Button,Menu,MenuItem,Avatar,Typography} from '@mui/material
 /*components and constants */
 import logo from '../../images/Parking-logo.jpg'
 import { useTheme } from '@emotion/react';
+import { setLogout } from '../../state';
 
 
 
@@ -20,7 +21,7 @@ const DeskTopNav = ()=>{
     const location = useLocation();
     const [anchorEl,setAnchorEl] = useState(null);
     const user = useSelector(state=>state.auth.user);
-    console.log(user);
+    
     const theme = useTheme();
 
 
@@ -67,7 +68,8 @@ const DeskTopNav = ()=>{
     }
 
     const logout = ()=>{
-
+        console.log("logging out")
+        dispatch(setLogout())
     }
 
     const handleClickAvatar = (e)=>{
@@ -90,7 +92,7 @@ const DeskTopNav = ()=>{
                             Home
                         </Typography>
                     </Button>
-                    <Button component={RouterLink} color="inherit" to="/about" sx={styles.about}>
+                    <Button component={RouterLink} color="inherit" to="/aboutus" sx={styles.about}>
                         <Typography variant="h6" sx={styles.name}>
                             About
                         </Typography>

@@ -1,15 +1,17 @@
-import React, { useMemo } from 'react';
+import React, { useMemo,useEffect } from 'react';
 import { BrowserRouter as Router,Routes,Route } from 'react-router-dom';
 
 import {Container,AppBar,} from '@mui/material'
 import Navbar from './components/Navbar/Navbar';
-import Home from './components/HomePageComponents/Home';
 import AboutUs from './components/AboutUsComponents/About';
 import {CssBaseline,ThemeProvider} from "@mui/material";
 import {createTheme} from '@mui/material/styles';
 import { themeSettings } from './theme/theme';
 import RegisterPage from './components/LoginPageComponents/RegisterPage';
 import LoginPage from './components/LoginPageComponents/LoginPage';
+import { useDispatch } from 'react-redux';
+import { asyncloadUser } from './state';
+import LandingPage from './components/LandingPageComponents/LandingPage';
 
 
 const App = ()=>{
@@ -21,6 +23,12 @@ const App = ()=>{
           position:"relative"
         }
     }
+
+    const dispatch = useDispatch()
+
+    useEffect(()=>{
+        dispatch(asyncloadUser())
+    })
     return (
         <Router>
             <ThemeProvider theme={theme}>
@@ -28,7 +36,7 @@ const App = ()=>{
                 <Container className={styles.root}>
                     <Navbar/>
                     <Routes>
-                        <Route exact path="/" element={<Home/>}/>
+                        <Route exact path="/" element={<LandingPage/>}/>
                         <Route exact path="/register" element={<RegisterPage/>}/>
                         <Route exact path="/login" element={<LoginPage/>}/>
                         <Route exact path="/aboutus" element={<AboutUs/>}/>

@@ -11,4 +11,14 @@ const sendOTPValidator = joi.object({
     otp:joi.string().optional()
 })
 
-module.exports = {sendOTPValidator}
+const loginValidator = joi.object({
+    email:joi.string().required().email(),
+    password:joi.string().min(6).required()
+})
+
+const verifyEmailValidator = joi.object({
+    email:joi.string().required().email(),
+    otp:joi.string().optional()
+})
+
+module.exports = {sendOTPValidator,loginValidator,verifyEmailValidator}

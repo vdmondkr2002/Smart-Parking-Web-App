@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from 'react-router-dom'
 
@@ -9,7 +9,8 @@ import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } 
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useTheme } from "@emotion/react";
-import { asyncsignUp } from '../../state/index'
+import { asyncsignIn, asyncsignUp } from '../../state/index'
+import Alert from "../../Utils/Alert";
 
 const initialState = {
     userName: '', email: '', mobileNo: '', confirmPassword: '', password: '', firstName: '', lastName: ''
@@ -90,29 +91,26 @@ const LoginPage = () => {
     const [showPassword1, setshowPassword1] = useState(false);
     const [showPassword2, setshowPassword2] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
-    const [loginToggle, setLoginToggle] = useState(false);
+    const user = useSelector(state=>state.auth.user)
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
+
+    useEffect(()=>{
+        if(user._id){
+            navigate("/")
+        }
+    },[user])
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (loginToggle) {
-
-        } else {
-
-
-        }
+        dispatch(asyncsignIn(formData))
         console.log("Submitting form...")
     }
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value })
-    }
-
-    const toggleLoginButton = () => {
-        setLoginToggle(prevState => !prevState);
-        setFormData({ ...formData, password: '', firstName: '', lastName: '', userName: '', bio: '', email: '', confirmPassword: '' })
     }
 
     const handleClickShowPassword1 = () => {
@@ -145,6 +143,7 @@ const LoginPage = () => {
     return (
         <Grow in>
             <Container sx={styles.formCont}>
+                <Alert/>
                 <Paper sx={styles.paper}>
                     <Grid container spacing={3}>
                         <Grid item xs={12} sm={12}>
@@ -174,19 +173,6 @@ const LoginPage = () => {
                                             label="Enter Your Email"
                                             onChange={handleChange}
                                             value={formData.email}
-                                        />
-                                    </Grid>
-                                    <Grid item sm={12} sx={styles.ipFields}>
-                                        <TextField
-                                            name="mobileNo"
-                                            type="text"
-                                            variant="outlined"
-
-                                            required
-                                            fullWidth
-                                            label="Enter Your Mobile No"
-                                            onChange={handleChange}
-                                            value={formData.mobileNo}
                                         />
                                     </Grid>
                                     <Grid item sm={12} sx={styles.ipFields}>
