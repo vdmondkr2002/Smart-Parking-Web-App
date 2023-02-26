@@ -1,4 +1,4 @@
-import { Avatar, Box, Button, Divider, Grid, Link, List, ListItem, ListItemAvatar, ListItemText, Paper, Typography } from '@mui/material'
+import {Avatar, Box, Button, Divider, Grid, Link, List, ListItem, ListItemAvatar, ListItemText, Paper, Typography } from '@mui/material'
 import TrendingUpIcon from '@mui/icons-material/TrendingUp'
 import {Link as RouterLink} from 'react-router-dom'
 import { useEffect } from 'react'
@@ -7,6 +7,7 @@ import mainImage from '../../images/landingImg.svg'
 import heroImage from '../../images/smart-parking-hero-removebg.png'
 import { useNavigate } from 'react-router-dom'
 import { useTheme } from '@emotion/react'
+import Alert from "../../Utils/Alert";
 
 const style = {
     box1: {
@@ -58,12 +59,16 @@ const LandingPage = () => {
 
 
     useEffect(() => {
-        if (!user._id) {
-            navigate("/login")
+        if (user._id) {
+            if(user.role==="admin"){
+                navigate("/admindb")
+            }else
+                navigate("/home")
         }
     }, [user])
     return (
         <Paper sx={style.bgImg}>
+            <Alert/>
             <Grid container>
                 <Grid item sm={6} xs={12}>
                     <Grid container sx={style.heroLeft}>

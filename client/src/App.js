@@ -13,6 +13,8 @@ import { useDispatch } from 'react-redux';
 import { asyncloadUser } from './state';
 import LandingPage from './components/LandingPageComponents/LandingPage';
 import Footer from './components/Footer/Footer';
+import AdminDashboard from './components/AdminDashboardComponents/AdminDashboard';
+import HomePage from './components/HomePageComponents/HomePage';
 
 
 const App = ()=>{
@@ -40,6 +42,8 @@ const App = ()=>{
                         <Route exact path="/register" element={<RegisterPage/>}/>
                         <Route exact path="/login" element={<LoginPage/>}/>
                         <Route exact path="/aboutus" element={<AboutUs/>}/>
+                        <Route exact path="/admindb" element={<AdminDashboard/>} />
+                        <Route exact path="/home" element={<HomePage/>}/>
                     </Routes>
                     <Footer/>
                 </Container>

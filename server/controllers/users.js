@@ -13,6 +13,7 @@ const createUser = async(formData)=>{
         //Get the hashed password
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(formData.password,salt)
+        
         console.log("re")
         //generate otp
         const otpGenerated = generateOTP();
@@ -23,10 +24,12 @@ const createUser = async(formData)=>{
         const newUser = await User.create({
             email:formData.email,password:hashedPassword,
             firstName:formData.firstName,lastName:formData.lastName,
-            userName:formData.lastName,mobileNo:formData.mobileNo,
+            userName:formData.userName,mobileNo:formData.mobileNo,
             createdAt:new Date().toISOString(),
             otp:otpGenerated
         })
+
+        
 
         if (!newUser) {
             console.log("Here")
@@ -120,7 +123,7 @@ const validateUserSignUp = async(email,otp)=>{
 exports.verifyEmail = async(req,res)=>{
     console.log(req.body)
 
-    const {error} = veri.validate(req.body);
+    const {error} = verifyEmailValidator.validate(req.body);
     
     try{
         const {email,otp} = req.body;
@@ -145,7 +148,7 @@ exports.signIn = async(req,res)=>{
     try{
         if(error)
             return res.status(400).json({msg:error.details[0].message})
-        
+            
         //Check email
         const oldUser = await User.findOne({email:email})
         if(!oldUser)
@@ -164,6 +167,24 @@ exports.signIn = async(req,res)=>{
             email: oldUser.email,
             id:oldUser._id
         }
+        // const salt = await bcrypt.genSalt(10)
+        // const hashedAdminPassword = await bcrypt.hash("admin123",salt)
+
+        // const newAdmin = await User.create({
+        //     email:"smartparking678@gmail.com",
+        //     password:hashedAdminPassword,
+        //     firstName:"Smart",lastName:"Parker",
+        //     userName:"smParker1",mobileNo:"9292929292",
+        //     createdAt:new Date().toISOString(),
+        //     otp:"1234567891",
+        //     role:"admin",verified:true
+        // })
+
+        // if(newAdmin){
+        //     console.log("admin created")
+        // }
+
+
 
         const token = jwt.sign(payload,process.env.TOKEN_SECRET,{expiresIn:"3h"})
         console.log(token)
@@ -185,7 +206,7 @@ exports.getCurrentUser = async(req,res)=>{
         
         const user = await User.findById(req.userId)
         console.log("User->",user)
-        return res.status(200).json({firstName:user.firstName,lastName:user.lastName,userName:user.userName,_id:user._id,email:user.email})
+        return res.status(200).json({firstName:user.firstName,lastName:user.lastName,userName:user.userName,_id:user._id,email:user.email,role:user.role})
     }catch(err){
         return res.status(500).json({msg:"Something went wrong.."})
     }

@@ -123,13 +123,16 @@ const authSlice = createSlice({
             state.user = action.payload.userData
             console.log("In signIn reducer")
         }).addCase(asyncloadUser.fulfilled,(state,action)=>{
-            if(action.payload.msg){
-                localStorage.removeItem('authToken')
-                state.user = {};
-            }else{
-                state.user = action.payload
+            if(action.payload){
+                if(action.payload.msg){
+                    localStorage.removeItem('authToken')
+                    state.user = {};
+                }else{
+                    state.user = action.payload
+                }
+                console.log("In loaduser reducer")
             }
-            console.log("In loaduser reducer")
+           
         })
 
     }

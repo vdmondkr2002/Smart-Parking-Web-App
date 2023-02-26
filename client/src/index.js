@@ -3,8 +3,19 @@ import { Provider } from 'react-redux';
 import { createRoot } from 'react-dom/client';
 import { configureStore } from '@reduxjs/toolkit'
 import authReducer from './state/index'
+import "leaflet/dist/leaflet.css";
+import L from 'leaflet';
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
 import App from './App';
+
+let DefaultIcon = L.icon({
+    iconUrl: icon,
+    shadowUrl: iconShadow
+});
+
+L.Marker.prototype.options.icon = DefaultIcon;
 
 const store = configureStore({
     reducer: {

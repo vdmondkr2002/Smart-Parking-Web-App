@@ -98,8 +98,11 @@ const LoginPage = () => {
 
 
     useEffect(()=>{
-        if(user._id){
-            navigate("/")
+        if (user._id) {
+            if(user.role==="admin"){
+                navigate("/admindb")
+            }else
+                navigate("/home")
         }
     },[user])
 
