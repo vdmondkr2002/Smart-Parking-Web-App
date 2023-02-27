@@ -24,3 +24,7 @@ export const verifyEmail = (formData)=>API.post(`${urlUser}/verifyEmail`,formDat
 export const signIn = (formData)=>API.post(`${urlUser}/signIn`,formData)
 
 export const getCurrentUser = ()=>API.get(`${urlUser}`)
+
+const urlParkingLot = '/api/v1/parkingLots'
+
+export const postParkingLot = (formData)=>API.post(`${urlParkingLot}`,formData)

@@ -1,35 +1,19 @@
 import { Button, Grid, Grow, TextField, Typography } from "@mui/material"
 import { Container } from "@mui/system"
 import { useEffect, useRef, useState } from "react"
-import { useSelector } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import {styled} from '@mui/material/styles'
 import Alert from '../../Utils/Alert'
 import { useTheme } from "@emotion/react"
-import { MapContainer, TileLayer, useMap,Marker,Popup,useMapEvents } from 'react-leaflet'
+import { MapContainer, TileLayer, useMap,Marker,Popup,useMapEvents,MapConsumer } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css';
+import { asyncpostParkingLot } from "../../state"
 
 const initialState = {
-    parkName:'',noOfCarSlots:0,noOfBikeSlots:0,address:'',parkingChargesCar:0,parkingChargesBike:0
+    parkName:'',noOfCarSlots:0,noOfBikeSlots:0,address:'',parkingChargesCar:0,parkingChargesBike:0,lat:'19.1485',lng:'73.133'
 }
-function LocationMarker() {
-    const [position, setPosition] = useState(null)
-    const map = useMapEvents({
-      click() {
-        map.locate()
-      },
-      locationfound(e) {
-        setPosition(e.latlng)
-        map.flyTo(e.latlng, map.getZoom())
-      },
-    })
-  
-    return position === null ? null : (
-      <Marker position={position}>
-        <Popup>You are here</Popup>
-      </Marker>
-    )
-  }
+
 const AdminDashboard = () => {
     const styles = {
         form: {
@@ -48,11 +32,64 @@ const AdminDashboard = () => {
 
         formCont: {
             marginTop: "5em",
-            width: "auto"
+            width: "auto",
+            marginBottom:"2em"
         },
         ipFields: {
             flexGrow: 1,
         },
+    }
+
+    const LocationMarker = ()=>{
+        
+        const map = useMapEvents({
+          click(e) {
+            const loc = []
+            loc.push(e.latlng['lat'])
+            loc.push(e.latlng['lng'])
+            setPosition(loc)
+          },
+          load: ()=> {
+            console.log("Loaded map")
+          },
+          zoomend: () => {
+            if (!map) return;
+            const position = map.getCenter();
+            const loc = []
+            loc.push(position.lat)
+            loc.push(position.lng)
+            setPosition(loc);
+            setZoomLvl(map.getZoom());
+          },
+          dragend: () => {
+            if (!map) return;
+            const position = map.getCenter();
+            const loc = []
+            loc.push(position.lat)
+            loc.push(position.lng)
+            setPosition(loc);
+            setZoomLvl(map.getZoom());
+          },
+        })
+      
+        useEffect(()=>{
+            if(!foundCurrLoc){
+                map.locate().on("locationfound",(e)=>{
+                    console.log("Helo->>>>>>>>",e.latlng['lat'],e.latlng['lng'])
+                    console.log("rinning")
+                    const loc = []
+                    loc.push(e.latlng['lat'])
+                    loc.push(e.latlng['lng'])
+                    setPosition(loc)
+                    map.flyTo(e.latlng, zoomLvl);
+                    setFoundCurrLoc(true)
+    
+                })
+                
+            }
+            
+        },[map])
+        return null;
     }
     const theme = useTheme()
     const Div = styled('div')(( ) => ({
@@ -64,9 +101,13 @@ const AdminDashboard = () => {
 
     const [formData, setFormData] = useState(initialState)
     const user = useSelector(state => state.auth.user)
-    const position = [51.505, -0.09]
+    const [foundCurrLoc,setFoundCurrLoc] = useState(false)
+    const dispatch = useDispatch()
+    const [zoomLvl,setZoomLvl] = useState(13);
+    const [position,setPosition]= useState([19.1485, 73.133])
+    
     const navigate = useNavigate()
-    const mapRef = useRef()
+    
     useEffect(() => {
         if (!user._id) {
             navigate("/login")
@@ -76,9 +117,19 @@ const AdminDashboard = () => {
             }
         }
     }, [user])
+    
 
-    const handleSubmit = () => {
-
+    useEffect(()=>{
+        if(position!==undefined){
+            console.log(position)
+            setFormData({...formData,lat:position[0].toString(),lng:position[1].toString()})
+        }
+        
+    },[position])
+    const handleSubmit = (e) => {
+        e.preventDefault()
+        dispatch(asyncpostParkingLot(formData))
+        
     }
 
     const handleChange = (e) => {
@@ -154,7 +205,7 @@ const AdminDashboard = () => {
                                 </Grid>
                                 <Grid item sm={6}>
                                     <TextField
-                                        name="noOfBikeSlots"
+                                        name="parkingChargesBike"
                                         type="number"
                                         variant="outlined"
                                         required
@@ -175,7 +226,7 @@ const AdminDashboard = () => {
                                 </Grid>
                                 <Grid item sm={6}>
                                     <TextField
-                                        name="noOfCarSlots"
+                                        name="parkingChargesCar"
                                         type="number"
                                         variant="outlined"
                                         required
@@ -202,19 +253,74 @@ const AdminDashboard = () => {
                             />
                         </Grid>
                         <Grid item xs={12} sx={styles.ipFields}>
-                            <Button variant="contained">Pick a location</Button>
-                            <MapContainer style={{ height: "400px" }} center={[51.505, -0.09]} zoom={13} scrollWheelZoom={false}>
-                                <TileLayer
-                                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                />
-                                <Marker position={[51.505, -0.09]}>
-                                    <Popup>
-                                    A pretty CSS3 popup. <br /> Easily customizable.
-                                    </Popup>
-                                </Marker>
-                                <LocationMarker/>
-                            </MapContainer>
+                            <Grid container>
+                                <Grid item xs={12} sm={4}>
+                                    
+                                    <Button variant="contained">Pick a location</Button>
+                                </Grid>
+                                <Grid item xs={12} sm={4}>
+                                    <Grid container>
+                                        <Grid item sm={5}>
+                                            <Div>{"Latitude"}</Div>
+                                        </Grid>
+                                        <Grid item sm={6}>
+                                            <TextField
+                                                name="lat"
+                                                type="text"
+                                                InputLabelProps={{ shrink: true }}
+                                                variant="outlined"
+                                                required
+                                                fullWidth
+                                                label="Latitude"
+                                                
+                                                onChange={handleChange}
+                                                value={formData.lat}
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                                <Grid item xs={12} sm={4}>
+                                <Grid container>
+                                        <Grid item sm={5}>
+                                            <Div>{"Longitude"}</Div>
+                                        </Grid>
+                                        <Grid item sm={6}>
+                                            <TextField
+                                                name="lng"
+                                                type="text"
+                                                InputLabelProps={{ shrink: true }}
+                                                variant="outlined"
+                                                required
+                                                fullWidth
+                                                label="Longitude"
+                                                
+                                                onChange={handleChange}
+                                                value={formData.lng}
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                                <Grid item xs={12}>
+                                    <MapContainer  style={{ height: "400px" }} center={position} zoom={zoomLvl} >
+                                        <TileLayer 
+                                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                        />
+                                        <Marker position={position}>
+                                            <Popup>
+                                            A pretty CSS3 popup. <br /> Easily customizable.
+                                            </Popup>
+                                        </Marker>
+                                        
+                                        <LocationMarker/>
+                                    </MapContainer>
+                                </Grid>
+                            </Grid>
+                            
+                            
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Button sx={{width:"100%",padding:"1em"}} variant="contained" type="submit">Submit</Button>
                         </Grid>
                     </Grid>
                 </form>

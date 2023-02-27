@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import {signUp,sendOTP,verifyEmail, signIn, getCurrentUser} from '../api/index.js'
+import {signUp,sendOTP,verifyEmail, signIn, getCurrentUser,postParkingLot} from '../api/index.js'
 import decode from 'jwt-decode'
 
 const initialStore = {
@@ -92,6 +92,22 @@ export const asyncloadUser = createAsyncThunk('users/loadUser',async()=>{
     }
 })
 
+export const asyncpostParkingLot = createAsyncThunk('parkings/postParkingLot',async(formData)=>{
+    console.log("posting parking lot")
+    try{
+        const {data} = await postParkingLot(formData);
+        return {...data,type:'success'}
+    }catch(err){
+        if(err.response){
+            const data = err.response.data
+            console.log(data)
+            return {...data,type:"error"};
+        }else{
+            console.log("Error",err);
+        }
+    }
+})
+
 const authSlice = createSlice({
     name:"auth",
     initialState:initialStore,
@@ -133,6 +149,9 @@ const authSlice = createSlice({
                 console.log("In loaduser reducer")
             }
            
+        }).addCase(asyncpostParkingLot.fulfilled,(state,action)=>{
+            state.alert=action.payload
+            console.log("In postParking reducer")
         })
 
     }

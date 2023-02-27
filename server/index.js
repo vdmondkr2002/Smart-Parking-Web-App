@@ -23,6 +23,7 @@ app.use(cors())
 
 
 app.use('/api/v1/users',require('./routes/users'))
+app.use('/api/v1/parkingLots',require('./routes/parkingLots'))
 
 const PORT = process.env.PORT || 5000
 

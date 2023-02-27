@@ -21,4 +21,22 @@ const verifyEmailValidator = joi.object({
     otp:joi.string().optional()
 })
 
-module.exports = {sendOTPValidator,loginValidator,verifyEmailValidator}
+const postParkingValidator = joi.object({
+    parkName:joi.string().required(),
+    noOfCarSlots:joi.string().required(),
+    noOfBikeSlots:joi.string().required(),
+    address:joi.string().required(),
+    parkingChargesCar:joi.string().required(),
+    parkingChargesBike:joi.string().required(),
+    lat:joi.string().required(),
+    lng:joi.string().required()
+})
+
+const getParkingValidator = joi.object({
+    lat:joi.string().required(),
+    lng:joi.string().required(),
+    startTime:joi.string().required(),
+    endTime:joi.string().required()
+})
+
+module.exports = {sendOTPValidator,loginValidator,verifyEmailValidator,postParkingValidator,getParkingValidator}
