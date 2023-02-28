@@ -28,3 +28,9 @@ export const getCurrentUser = ()=>API.get(`${urlUser}`)
 const urlParkingLot = '/api/v1/parkingLots'
 
 export const postParkingLot = (formData)=>API.post(`${urlParkingLot}`,formData)
+
+export const getFreeParkingLots = (formData)=>API.get(`${urlParkingLot}`,{
+    params:formData
+})
+
+export const bookSlot = (formData)=>API.post(`${urlParkingLot}/book`,formData)

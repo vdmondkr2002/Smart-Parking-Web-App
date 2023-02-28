@@ -1,11 +1,11 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import {signUp,sendOTP,verifyEmail, signIn, getCurrentUser,postParkingLot} from '../api/index.js'
+import {signUp,sendOTP,verifyEmail, signIn, getCurrentUser,postParkingLot, getFreeParkingLots, bookSlot} from '../api/index.js'
 import decode from 'jwt-decode'
 
 const initialStore = {
     user: {},
     alert: {},
-    
+    freeParkingLots: []
 }
 
 export const asyncsignUp = createAsyncThunk('users/signUp',async()=>{
@@ -108,6 +108,42 @@ export const asyncpostParkingLot = createAsyncThunk('parkings/postParkingLot',as
     }
 })
 
+export const asyncgetParkingLot = createAsyncThunk('parkings/getParkingLot',async(formData)=>{
+    console.log("Get Parking Lot")
+    console.log(formData)
+    try{
+        const {data} = await getFreeParkingLots(formData);
+        
+        return {alertData:{msg:data.msg,type:'success'},freeParkingLots:data.freeParkingLots}
+    }catch(err){
+        if(err.response){
+            const data = err.response.data
+            console.log(data)
+            return {...data,type:"error"};
+        }else{
+            console.log("Error",err);
+        }
+    }
+})
+
+export const asyncBookSlot = createAsyncThunk('parkings/bookSlot',async(formData)=>{
+    console.log("Book parking slot")
+    console.log(formData)
+    try{
+        const {data} = await bookSlot(formData);
+        console.log(data)
+        return {msg:data.msg,type:'success'}
+    }catch(err){
+        if(err.response){
+            const data = err.response.data
+            console.log(data)
+            return {...data,type:"error"};
+        }else{
+            console.log("Error",err);
+        }
+    }
+})
+
 const authSlice = createSlice({
     name:"auth",
     initialState:initialStore,
@@ -152,6 +188,20 @@ const authSlice = createSlice({
         }).addCase(asyncpostParkingLot.fulfilled,(state,action)=>{
             state.alert=action.payload
             console.log("In postParking reducer")
+        }).addCase(asyncgetParkingLot.fulfilled,(state,action)=>{
+            if(action.payload){
+                if(action.payload.msg){
+                   state.alert = action.payload
+                }else{
+                    state.alert = action.payload.alertData
+                    state.freeParkingLots = action.payload.freeParkingLots
+                }
+            }
+            
+            console.log("In postParking reducer")
+        }).addCase(asyncBookSlot.fulfilled,(state,action)=>{
+            state.alert = action.payload
+            console.log("In bookslot reducer")
         })
 
     }

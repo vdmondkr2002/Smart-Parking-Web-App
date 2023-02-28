@@ -36,7 +36,15 @@ const getParkingValidator = joi.object({
     lat:joi.string().required(),
     lng:joi.string().required(),
     startTime:joi.string().required(),
-    endTime:joi.string().required()
+    endTime:joi.string().required(),
+    vehicleType:joi.string().required()
 })
 
-module.exports = {sendOTPValidator,loginValidator,verifyEmailValidator,postParkingValidator,getParkingValidator}
+const bookSlotValidator = joi.object({
+    slotId:joi.string().required(),
+    lotId:joi.string().required(),
+    startTime:joi.string().required(),
+    endTime:joi.string().required(),
+    vehicleType:joi.string().required()
+})
+module.exports = {sendOTPValidator,loginValidator,verifyEmailValidator,postParkingValidator,getParkingValidator,bookSlotValidator}

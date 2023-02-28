@@ -1,10 +1,11 @@
 const express = require('express')
 const router = express.Router()
 const auth = require('../middleware/auth')
-const {postParkingLot, getParkingLots} = require('../controllers/parkingLots')
+const {postParkingLot, getParkingLots,bookSlot} = require('../controllers/parkingLots')
 
 
 router.post('',auth,postParkingLot)
-router.get('',getParkingLots)
+router.get('',auth,getParkingLots)
+router.post('/book',auth,bookSlot)
 
 module.exports = router

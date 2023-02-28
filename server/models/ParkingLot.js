@@ -34,7 +34,11 @@ const ParkingLotSchema = mongoose.Schema({
     //     type:String,
     //     requried:true
     // },
-    parkingSlots:[{
+    carParkingSlots:[{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'ParkingSlot'
+    }],
+    bikeParkingSlots:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:'ParkingSlot'
     }],

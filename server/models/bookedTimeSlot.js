@@ -12,6 +12,10 @@ const BookedTimeSlotSchema = mongoose.Schema({
     },
     booker:{
         type:mongoose.Schema.Types.ObjectId
+    },
+    vehicleType:{
+        type:String,
+        required:true
     }
 })
 
