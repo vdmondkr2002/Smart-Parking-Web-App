@@ -49,8 +49,9 @@ const App = ()=>{
                         <Route exact path="/home" element={<HomePage/>}/>
                         <Route exact path="/addparkingLot" element={<AddParkingLot/>}/>
                     </Routes>
-                    <Footer/>
+                    
                 </Container>
+                <Footer/>
             </ThemeProvider>
         </Router>
        
