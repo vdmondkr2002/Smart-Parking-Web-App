@@ -69,9 +69,12 @@ const DeskTopNav = ()=>{
         
     }
 
+    const navigate = useNavigate()
+
     const logout = ()=>{
         console.log("logging out")
         dispatch(setLogout())
+        navigate("/login")
     }
 
     const handleClickAvatar = (e)=>{
@@ -89,7 +92,7 @@ const DeskTopNav = ()=>{
                     <img src={logo} width="150rem" alt="Logo"/>
                 </Link>
                 <div sx={styles.middle}>
-                    <Button component={RouterLink} to="/" color="inherit" sx={styles.home}>
+                    <Button component={RouterLink} to={user._id?"/home":"/"} color="inherit" sx={styles.home}>
                         <Typography variant="h6" sx={styles.name}>
                             Home
                         </Typography>

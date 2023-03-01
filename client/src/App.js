@@ -15,6 +15,8 @@ import LandingPage from './components/LandingPageComponents/LandingPage';
 import Footer from './components/Footer/Footer';
 import AdminDashboard from './components/AdminDashboardComponents/AdminDashboard';
 import HomePage from './components/HomePageComponents/HomePage';
+import ProfilePage from './components/ProfilePageComponents/ProfilePage';
+import AddParkingLot from './components/AdminDashboardComponents/AddParkingLot';
 
 
 const App = ()=>{
@@ -43,7 +45,9 @@ const App = ()=>{
                         <Route exact path="/login" element={<LoginPage/>}/>
                         <Route exact path="/aboutus" element={<AboutUs/>}/>
                         <Route exact path="/admindb" element={<AdminDashboard/>} />
+                        <Route exact path="/profile" element={<ProfilePage/>}/>
                         <Route exact path="/home" element={<HomePage/>}/>
+                        <Route exact path="/addparkingLot" element={<AddParkingLot/>}/>
                     </Routes>
                     <Footer/>
                 </Container>

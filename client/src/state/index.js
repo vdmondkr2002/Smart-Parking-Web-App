@@ -1,11 +1,12 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import {signUp,sendOTP,verifyEmail, signIn, getCurrentUser,postParkingLot, getFreeParkingLots, bookSlot} from '../api/index.js'
+import {signUp,sendOTP,verifyEmail, signIn, getCurrentUser,postParkingLot, getFreeParkingLots, bookSlot, getBookedSlots} from '../api/index.js'
 import decode from 'jwt-decode'
 
 const initialStore = {
     user: {},
     alert: {},
-    freeParkingLots: []
+    freeParkingLots: [],
+    bookedTimeSlots: []
 }
 
 export const asyncsignUp = createAsyncThunk('users/signUp',async()=>{
@@ -144,6 +145,22 @@ export const asyncBookSlot = createAsyncThunk('parkings/bookSlot',async(formData
     }
 })
 
+export const asyncgetBookedSlots = createAsyncThunk('parkings/getBookedSlots',async()=>{
+    console.log("Get Booked Slots")
+    try{
+        const {data} = await getBookedSlots();
+        return {alertData:{msg:data.msg,type:'success'},bookedTimeSlots:data.bookedTimeSlots}
+    }catch(err){
+        if(err.response){
+            const data = err.response.data
+            console.log(data)
+            return {...data,type:"error"};
+        }else{
+            console.log("Error",err);
+        }
+    }
+})
+
 const authSlice = createSlice({
     name:"auth",
     initialState:initialStore,
@@ -154,10 +171,14 @@ const authSlice = createSlice({
         setLogout:(state)=>{
             localStorage.removeItem('authToken')
             state.user = {};
+            state.bookedTimeSlots = {}
+            state.freeParkingLots = {}
         },
         clearAlert:(state)=>{
-            console.log("i am called")
             state.alert = {}
+        },
+        clearFreeParkingLots:(state)=>{
+            state.freeParkingLots = []
         }
     },
     extraReducers(builder){
@@ -202,10 +223,19 @@ const authSlice = createSlice({
         }).addCase(asyncBookSlot.fulfilled,(state,action)=>{
             state.alert = action.payload
             console.log("In bookslot reducer")
+        }).addCase(asyncgetBookedSlots.fulfilled,(state,action)=>{
+            if(action.payload){
+                if(action.payload.msg){
+                    state.alert=action.payload
+                }else{
+                    state.alert = action.payload.alertData
+                    state.bookedTimeSlots = action.payload.bookedTimeSlots
+                }
+            }
         })
 
     }
 })
 
-export const {setUser,setLogout,clearAlert} = authSlice.actions
+export const {setUser,setLogout,clearAlert,clearFreeParkingLots} = authSlice.actions
 export default authSlice.reducer;

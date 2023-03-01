@@ -112,13 +112,14 @@ exports.getParkingLots = async(req,res)=>{
         })
         console.log("Found booked")
         console.log(bookedParkingSlots)
-
+        const bookedParkingSlotsIDs = bookedParkingSlots.map(slot=>slot.parkingSlot.toString())
+        console.log(bookedParkingSlotsIDs)
         const freeParkingLots = []
 
         if(vehicleType=="Bike"){
             parkingLots.forEach((lot)=>{
-                const freeSlots = lot.bikeParkingSlots.filter(slot=>!bookedParkingSlots.includes(slot))
-                const engagedSlots = lot.bikeParkingSlots.filter(slot=>bookedParkingSlots.includes(slot))
+                const freeSlots = lot.bikeParkingSlots.filter(slot=>!bookedParkingSlotsIDs.includes(slot._id.toString()))
+                const engagedSlots = lot.bikeParkingSlots.filter(slot=>bookedParkingSlotsIDs.includes(slot._id.toString()))
                 if(freeSlots.length>0){
                     // console.log(lot)
                     // console.log({id:lot._id,name:lot.name,charges:lot.parkingChargesBike*periodHours,freeSlots:freeSlots,engagedSlots:engagedSlots,address:lot.address,location:lot.location.coordinates,distance:lot.distance})
@@ -127,8 +128,8 @@ exports.getParkingLots = async(req,res)=>{
             })
         }else{
             parkingLots.forEach((lot)=>{
-                const freeSlots = lot.carParkingSlots.filter(slot=>!bookedParkingSlots.includes(slot))
-                const engagedSlots = lot.carParkingSlots.filter(slot=>bookedParkingSlots.includes(slot))
+                const freeSlots = lot.carParkingSlots.filter(slot=>!bookedParkingSlotsIDs.includes(slot._id.toString()))
+                const engagedSlots = lot.carParkingSlots.filter(slot=>bookedParkingSlotsIDs.includes(slot._id.toString()))
                 if(freeSlots.length>0){
                     freeParkingLots.push({id:lot._id,name:lot.name,charges:lot.parkingChargesCar*periodHours,freeSlots:freeSlots,engagedSlots:engagedSlots,address:lot.address,location:lot.location.coordinates,distance:lot.distance})
                 }
@@ -172,10 +173,59 @@ exports.bookSlot = async(req,res)=>{
         }
 
         const bookedSlot = await BookedTimeSlot.create({
-            startTime:storebookingStart,endTime:storebookingEnd,parkingSlot:mongoose.Types.ObjectId(slotId),booker:req.userId,vehicleType:vehicleType
+            startTime:storebookingStart,endTime:storebookingEnd,parkingSlot:mongoose.Types.ObjectId(slotId),parkingLot:mongoose.Types.ObjectId(lotId),booker:req.userId,vehicleType:vehicleType
         })
          
         return res.status(200).json({msg:"Slot Booked"})
+    }catch(err){
+        return res.status(500).json({msg:"Something went wrong.."})
+    }
+}
+
+exports.getBookedTimeSlots = async(req,res)=>{
+    if(!req.userId){
+        return res.status(401).json({msg:"Unauthorized"})
+    }
+    console.log("Get Booked time slots for->",req.userId)
+    try{
+        var bookedTimeSlots = await BookedTimeSlot.find({
+            booker:req.userId
+        })
+        const slotIds = []
+        for(let slot of bookedTimeSlots){
+            if(!slotIds.includes(slot.parkingLot)){
+                slotIds.push(slot.parkingLot)
+            }
+        }
+        var parkingLots = await ParkingLot.find({
+            _id:{
+                $in:slotIds
+            }
+        })
+        var parkingLotMap= {}
+        parkingLots = parkingLots.map((lot)=>{
+            parkingLotMap[lot._id]=lot
+            return {_id:lot._id,name:lot.name,address:lot.address,location:lot.location.coordinates,parkingChargesBike:lot.parkingChargesBike,parkingChargesCar:lot.parkingChargesCar}
+        })
+        
+        
+        console.log(parkingLots)
+        console.log(parkingLotMap)
+        
+        
+        console.log(bookedTimeSlots)
+        bookedTimeSlots = bookedTimeSlots.map(timeSlot=>{
+            // {...timeSlot,charges:((timeSlot.endTime-timeSlot.startTime)/1000*60*60)*timeSlot.parkingLot.}
+            if(timeSlot.vehicleType=="Bike"){
+                const charges= ((timeSlot.endTime-timeSlot.startTime)/(1000*60*60))*parkingLotMap[timeSlot.parkingLot].parkingChargesBike
+                return {...timeSlot._doc,parkingLot:parkingLotMap[timeSlot.parkingLot],charges:charges}
+            }else{
+                const charges= ((timeSlot.endTime-timeSlot.startTime)/(1000*60*60))*parkingLotMap[timeSlot.parkingLot].parkingChargesCar
+                return {...timeSlot._doc,parkingLot:parkingLotMap[timeSlot.parkingLot],charges:charges}
+            }
+        })
+        console.log(bookedTimeSlots)
+        return res.status(200).json({msg:"Booked slots returned for user",bookedTimeSlots:bookedTimeSlots})
     }catch(err){
         return res.status(500).json({msg:"Something went wrong.."})
     }

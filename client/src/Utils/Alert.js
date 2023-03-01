@@ -15,9 +15,7 @@ const Alert = ()=>{
     const [openAlert,setOpenAlert] = useState(false);
 
     useEffect(()=>{
-        console.log("setting")
         if(alert.msg){
-            console.log("setting true")
             setOpenAlert(true);
         }
     },[alert])

@@ -7,6 +7,7 @@ import SquareIcon from '@mui/icons-material/Square';
 import ParkingSlot from "./ParkingSlot";
 import { asyncBookSlot } from "../../state";
 import { useDispatch } from "react-redux";
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
 const ParkingLotCard = ({ vehicleType,startTime,endTime,name, noOfFreeSlots, charges, distance, id, freeSlots, engagedSlots, address, lat, lng }) => {
     const styles = {
@@ -39,6 +40,7 @@ const ParkingLotCard = ({ vehicleType,startTime,endTime,name, noOfFreeSlots, cha
 
     const handleClose = () => {
         console.log("dialog closed")
+        setChanged('')
         setOpen(false)
     }
 
@@ -108,6 +110,23 @@ const ParkingLotCard = ({ vehicleType,startTime,endTime,name, noOfFreeSlots, cha
                         <Typography variant="h4" component="div" fontWeight="bold" gutterBottom>
                             {name}
                         </Typography>
+                    </Grid>
+                    <Grid item xs={4} sx={{ fontWeight: "bold" }}>
+                        Time Slot For Booking:
+                    </Grid>
+                    <Grid item xs={8}>
+                        <Grid container>
+                            <Grid item xs={2}>
+                                <AccessTimeIcon fontSize="large"/> 
+                            </Grid>
+                            <Grid item xs={10}>
+                                <Typography variant="h6">
+                                    {startTime.format('DD MMM hh:00 A')} - {endTime.format('DD MMM hh:00 A')}
+                                </Typography>
+                                
+                            </Grid>
+                        </Grid>
+                        
                     </Grid>
                     <Grid item xs={8} sm={4} sx={{ fontWeight: "bold" }}>
                         Total Charges:

@@ -10,6 +10,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useTheme } from "@emotion/react";
 import { asyncsignIn, asyncsignUp } from '../../state/index'
+import loginImg from '../../images/secure_login.svg'
 import Alert from "../../Utils/Alert";
 
 const initialState = {
@@ -49,7 +50,7 @@ const LoginPage = () => {
             position: "relative",
             height: "auto",
             paddingBottom: "1em",
-
+            padding:"1em"
         },
         form: {
             display: "flex",
@@ -91,20 +92,20 @@ const LoginPage = () => {
     const [showPassword1, setshowPassword1] = useState(false);
     const [showPassword2, setshowPassword2] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
-    const user = useSelector(state=>state.auth.user)
+    const user = useSelector(state => state.auth.user)
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
 
-    useEffect(()=>{
+    useEffect(() => {
         if (user._id) {
-            if(user.role==="admin"){
+            if (user.role === "admin") {
                 navigate("/admindb")
-            }else
+            } else
                 navigate("/home")
         }
-    },[user])
+    }, [user])
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -140,13 +141,13 @@ const LoginPage = () => {
         console.log("Reset email sent..")
     }
 
-    const handleClickSignUp = ()=>{
+    const handleClickSignUp = () => {
         navigate("/register")
     }
     return (
         <Grow in>
             <Container sx={styles.formCont}>
-                <Alert/>
+                <Alert />
                 <Paper sx={styles.paper}>
                     <Grid container spacing={3}>
                         <Grid item xs={12} sm={12}>
@@ -157,71 +158,80 @@ const LoginPage = () => {
                             </Paper>
                         </Grid>
                         <Grid item xs={12} sm={12}>
-                            <Paper sx={styles.title}>
-                                <Typography variant="h4" align="center">
-                                    <LockOpenIcon /> Login To Access Your Account
-                                </Typography>
-                            </Paper>
-
-                            <form autoComplete="off" noValidate sx={styles.form} onSubmit={handleSubmit}>
-                                <Grid container sx={styles.formContainer} spacing={2}>
-                                    <Grid item sm={12} sx={styles.ipFields}>
-                                        <TextField
-                                            name="email"
-                                            type="email"
-                                            variant="outlined"
-
-                                            required
-                                            fullWidth
-                                            label="Enter Your Email"
-                                            onChange={handleChange}
-                                            value={formData.email}
-                                        />
-                                    </Grid>
-                                    <Grid item sm={12} sx={styles.ipFields}>
-                                        <FormControl required fullWidth sx={styles.margin} variant="outlined">
-                                            <InputLabel htmlFor="password">Password</InputLabel>
-                                            <OutlinedInput
-                                                id="password"
-                                                name="password"
-                                                type={showPassword1 ? 'text' : 'password'}
-                                                value={formData.password}
-                                                onChange={handleChange}
-                                                endAdornment={
-                                                    <InputAdornment position="end">
-                                                        <IconButton
-                                                            aria-label="toggle password visibility"
-                                                            onClick={handleClickShowPassword1}
-                                                            onMouseDown={handleMouseDownPassword}
-                                                            edge="end"
-                                                        >
-                                                            {showPassword1 ? <VisibilityIcon /> : <VisibilityOffIcon />}
-                                                        </IconButton>
-                                                    </InputAdornment>
-                                                }
-                                                labelWidth={80}
-                                            />
-                                            <FormHelperText required variant="outlined" children="Password must be atleast 6 characters" />
-                                        </FormControl>
-                                    </Grid>
-                                    <Grid item sm={12} sx={styles.submitBtn}>
-                                        <Button
-                                            variant="contained"
-                                            type="submit"
-                                            sx={styles.button}
-                                            color="primary"
-                                        >
-                                            <Typography>Login</Typography>
-                                        </Button>
-                                    </Grid>
-
+                            <Grid container spacing={2}>
+                                <Grid item xs={12} sm={5} sx={{padding:"1em"}}>
+                                    <img src={loginImg} alt="login" width="100%"/>
                                 </Grid>
-                            </form>
-                            <Box fontWeight="fontWeightMedium" m={2}>
-                                <Typography variant="h6" >
-                                    Don't have an Account? <Button color="primary" variant="contained" sx={styles.signUpBtn} onClick={handleClickSignUp}>Create One</Button>
-                                </Typography>
-                            </Box>
+                                <Grid item xs={12} sm={7}>
+                                    <Paper sx={styles.title}>
+                                        <Typography variant="h4" align="center">
+                                            <LockOpenIcon /> Login To Access Your Account
+                                        </Typography>
+                                    </Paper>
+
+                                    <form autoComplete="off" noValidate sx={styles.form} onSubmit={handleSubmit}>
+                                        <Grid container sx={styles.formContainer} spacing={2}>
+                                            <Grid item sm={12} sx={styles.ipFields}>
+                                                <TextField
+                                                    name="email"
+                                                    type="email"
+                                                    variant="outlined"
+
+                                                    required
+                                                    fullWidth
+                                                    label="Enter Your Email"
+                                                    onChange={handleChange}
+                                                    value={formData.email}
+                                                />
+                                            </Grid>
+                                            <Grid item sm={12} sx={styles.ipFields}>
+                                                <FormControl required fullWidth sx={styles.margin} variant="outlined">
+                                                    <InputLabel htmlFor="password">Password</InputLabel>
+                                                    <OutlinedInput
+                                                        id="password"
+                                                        name="password"
+                                                        label="password"
+                                                        type={showPassword1 ? 'text' : 'password'}
+                                                        value={formData.password}
+                                                        onChange={handleChange}
+                                                        endAdornment={
+                                                            <InputAdornment position="end">
+                                                                <IconButton
+                                                                    aria-label="toggle password visibility"
+                                                                    onClick={handleClickShowPassword1}
+                                                                    onMouseDown={handleMouseDownPassword}
+                                                                    edge="end"
+                                                                >
+                                                                    {showPassword1 ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                                                                </IconButton>
+                                                            </InputAdornment>
+                                                        }
+                                                        labelWidth={80}
+                                                    />
+                                                    <FormHelperText required variant="outlined" children="Password must be atleast 6 characters" />
+                                                </FormControl>
+                                            </Grid>
+                                            <Grid item sm={12} sx={styles.submitBtn}>
+                                                <Button
+                                                    variant="contained"
+                                                    type="submit"
+                                                    sx={styles.button}
+                                                    color="primary"
+                                                >
+                                                    <Typography>Login</Typography>
+                                                </Button>
+                                            </Grid>
+
+                                        </Grid>
+                                    </form>
+                                    <Box fontWeight="fontWeightMedium" m={2}>
+                                        <Typography variant="h6" >
+                                            Don't have an Account? <Button color="primary" variant="contained" sx={styles.signUpBtn} onClick={handleClickSignUp}>Create One</Button>
+                                        </Typography>
+                                    </Box>
+                                </Grid>
+                            </Grid>
+
                         </Grid>
                     </Grid>
                 </Paper>

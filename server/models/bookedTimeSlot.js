@@ -2,12 +2,15 @@ const mongoose = require('mongoose')
 
 const BookedTimeSlotSchema = mongoose.Schema({
     startTime:{
-        type:Date
+        type:Number
     },
     endTime:{
-        type:Date
+        type:Number
     },
     parkingSlot:{
+        type:mongoose.Schema.Types.ObjectId
+    },
+    parkingLot:{
         type:mongoose.Schema.Types.ObjectId
     },
     booker:{

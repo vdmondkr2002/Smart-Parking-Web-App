@@ -8,7 +8,6 @@ API.interceptors.request.use((req)=>{
         req.headers.Authorization = `Bearer ${
             JSON.parse(localStorage.getItem('authToken'))
         }`
-        console.log(req.headers.Authorization)
     }
     return req;
 })
@@ -34,3 +33,5 @@ export const getFreeParkingLots = (formData)=>API.get(`${urlParkingLot}`,{
 })
 
 export const bookSlot = (formData)=>API.post(`${urlParkingLot}/book`,formData)
+
+export const getBookedSlots = ()=>API.get(`${urlParkingLot}/bookedSlots`)

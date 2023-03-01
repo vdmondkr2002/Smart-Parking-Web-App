@@ -1,4 +1,4 @@
-import { Button, Grid, Grow, TextField, Typography } from "@mui/material"
+import { Button, Grid, Grow, Paper, TextField, Typography } from "@mui/material"
 import { Container } from "@mui/system"
 import { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
@@ -8,13 +8,16 @@ import Alert from '../../Utils/Alert'
 import { useTheme } from "@emotion/react"
 import { MapContainer, TileLayer, useMap,Marker,Popup,useMapEvents,MapConsumer } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css';
+
 import { asyncpostParkingLot } from "../../state"
+import AddBox from "@mui/icons-material/AddBox"
 
 const initialState = {
     parkName:'',noOfCarSlots:0,noOfBikeSlots:0,address:'',parkingChargesCar:0,parkingChargesBike:0,lat:'19.1485',lng:'73.133'
 }
 
-const AdminDashboard = () => {
+const AddParkingLot = () => {
+    const theme = useTheme()
     const styles = {
         form: {
             display: "flex",
@@ -37,6 +40,18 @@ const AdminDashboard = () => {
         },
         ipFields: {
             flexGrow: 1,
+        },
+        titlePaper: {
+            display: "flex",
+            flexDirection: "column",
+            textAlign: "center",
+            alignItems: "center",
+            position: "relative",
+            height: "auto",
+            backgroundColor: theme.palette.primary.dark,
+            padding: "0.5em 0 0.5em 0",
+            color: "#ffc",
+            fontWeight: 600
         },
     }
 
@@ -91,7 +106,7 @@ const AdminDashboard = () => {
         },[map])
         return null;
     }
-    const theme = useTheme()
+    
     const Div = styled('div')(( ) => ({
         ...theme.typography.button,
         backgroundColor: theme.palette.background.paper,
@@ -101,6 +116,7 @@ const AdminDashboard = () => {
 
     const [formData, setFormData] = useState(initialState)
     const user = useSelector(state => state.auth.user)
+    const alert = useSelector(state => state.auth.alert)
     const [foundCurrLoc,setFoundCurrLoc] = useState(false)
     const dispatch = useDispatch()
     const [zoomLvl,setZoomLvl] = useState(13);
@@ -108,17 +124,12 @@ const AdminDashboard = () => {
     
     const navigate = useNavigate()
     
-    useEffect(() => {
-        if (!user._id) {
-            navigate("/login")
-        } else {
-            if (user.role === "user") {
-                navigate("/admindb")
-            }
-        }
-    }, [user])
     
-
+    useEffect(()=>{
+        if(alert.msg=="Parking Lot Added"){
+            navigate("/admindb")
+        }
+    },[alert])
     useEffect(()=>{
         if(position!==undefined){
             console.log(position)
@@ -144,6 +155,14 @@ const AdminDashboard = () => {
                 <Alert />
                 <form autoComplete="off" noValidate sx={styles.form} onSubmit={handleSubmit}>
                     <Grid container sx={styles.formContainer} spacing={3}>
+                        <Grid item xs={12} sm={12}>
+                                <Button sx={{padding:"1em"}} fullWidth variant="contained" startIcon={<AddBox fontSize="large"/>}>
+                                    <Typography variant="h3">
+                                        Add a New Parking Lot
+                                    </Typography>
+                                </Button>
+                                
+                        </Grid>
                         <Grid item sm={12} xs={12} sx={styles.ipFields}>
                             <TextField
                                 name="parkName"
@@ -329,4 +348,4 @@ const AdminDashboard = () => {
         </Grow>
     )
 }
-export default AdminDashboard;
+export default AddParkingLot;

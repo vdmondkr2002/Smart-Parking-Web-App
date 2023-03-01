@@ -11,7 +11,7 @@ import { format } from 'date-fns'
 
 import Alert from '../../Utils/Alert'
 import { useMapEvents, MapContainer, Marker, Popup, TileLayer } from "react-leaflet"
-import { asyncgetParkingLot } from "../../state"
+import { asyncgetParkingLot, clearFreeParkingLots } from "../../state"
 import ParkingLotCard from "./ParkingLotCard"
 
 const HomePage = () => {
@@ -40,15 +40,23 @@ const HomePage = () => {
         }
     }
     const user = useSelector(state => state.auth.user)
+    const alert = useSelector(state => state.auth.alert)
     const freeParkingLots = useSelector(state => state.auth.freeParkingLots)
     const [startTime, setStartTime] = useState(dayjs(format(Date.now() + 1000 * 60 * 60, 'yyyy-MM-dd hh:00 a')))
     const [endTime, setEndTime] = useState(dayjs(format(Date.now() + 1000 * 60 * 60 * 2, 'yyyy-MM-dd hh:00 a')));
     const [vehicleType, setVehicleType] = useState('')
     const [position, setPosition] = useState([19.1485, 73.133]);
     const [foundCurrLoc, setFoundCurrLoc] = useState(false)
+    const [sortBy,setSortBy] = useState('distance')
     const [zoomLvl, setZoomLvl] = useState(13)
     const navigate = useNavigate()
     const dispatch = useDispatch()
+
+    useEffect(()=>{
+        if(alert.msg=="Slot Booked"){
+            navigate("/profile")
+        }
+    },[alert])
     useEffect(() => {
         if (!user._id) {
             navigate("/login")
@@ -107,7 +115,7 @@ const HomePage = () => {
         dispatch(asyncgetParkingLot(data))
     }
     const handleChangeStart = (newValue) => {
-
+        dispatch(clearFreeParkingLots())
         setStartTime(newValue)
         setEndTime(newValue.add(1, 'hour'))
     }
@@ -116,6 +124,7 @@ const HomePage = () => {
     const handleChangeEnd = (newValue) => {
         // const newVal = newValue
         // console.log({...newVal,minute:0})
+        dispatch(clearFreeParkingLots())
         newValue.set('minute', 0)
         console.log(newValue)
         setEndTime(newValue)
@@ -126,11 +135,29 @@ const HomePage = () => {
             setPosition(position.map((pos, ind) => ind == 0 ? e.target.value : pos))
         else
             setPosition(position.map((pos, ind) => ind == 1 ? e.target.value : pos))
+        dispatch(clearFreeParkingLots())
     }
 
     const handleChangeVehicleTp = (e)=>{
         setVehicleType(e.target.value)
+        dispatch(clearFreeParkingLots())
     }
+
+    const handleChangeSortBy = (e)=>{
+        setSortBy(e.target.value)
+    }
+
+    const compByCharges = (a,b)=>{
+        if(a.charges<b.charges){
+            return -1;
+        }
+        if(a.charges>b.charges){
+            return 1;
+        }
+        return 0;
+    }
+
+    
     return (
         <Grow in>
             <Container sx={styles.formCont}>
@@ -146,7 +173,7 @@ const HomePage = () => {
                                     id="demo-simple-select"
                                     value={vehicleType}
                                     defaultValue={"Bike"}
-                                    label="Age"
+                                    label="Type Of Vehicle"
                                     onChange={handleChangeVehicleTp}
                                 >
                                     <MenuItem value={"Bike"}>Bike</MenuItem>
@@ -282,16 +309,53 @@ const HomePage = () => {
                         </Grid>
                     </Grid>
                 </form>
-                <Grid container sx={styles.slotsCont} spacing={3}>
+                    
+                        
+                        
                     {
-                        freeParkingLots.map((freeLot)=>(
-                            <Grid item xs={12} sm={4}>
-                                <ParkingLotCard startTime={startTime} endTime={endTime} vehicleType={vehicleType} key={freeLot.id} id={freeLot.id} freeSlots={freeLot.freeSlots} engagedSlots={freeLot.engagedSlots} address={freeLot.address} lat={freeLot.location[0]} lng={freeLot.location[1]}charges={freeLot.charges} name={freeLot.name} noOfFreeSlots={freeLot.freeSlots.length} distance={parseInt(freeLot.distance) }/>
+                        freeParkingLots.length>0?(
+                            <>
+                            <Grid container sx={styles.slotsCont} spacing={3}>
+                                <Grid item xs={8}>
+
+                                </Grid>
+                                <Grid item xs={4}>
+                                    <FormControl fullWidth>
+                                        <InputLabel id="demo-simple-select-label">Sort By</InputLabel>
+                                        <Select
+                                            labelId="demo-simple-select-label"
+                                            id="demo-simple-select"
+                                            value={sortBy}
+                                            defaultValue={"distance"}
+                                            label="Sort By"
+                                            onChange={handleChangeSortBy}
+                                        >
+                                            <MenuItem value={"distance"}>Distance</MenuItem>
+                                            <MenuItem value={"charges"}>Charges</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
                             </Grid>
-                            
-                        ))
+                            {
+                                (sortBy=="distance")?(
+                                    freeParkingLots.map((freeLot)=>(
+                                        <Grid item xs={12} sm={4}>
+                                            <ParkingLotCard startTime={startTime} endTime={endTime} vehicleType={vehicleType} key={freeLot.id} id={freeLot.id} freeSlots={freeLot.freeSlots} engagedSlots={freeLot.engagedSlots} address={freeLot.address} lat={freeLot.location[0]} lng={freeLot.location[1]}charges={freeLot.charges} name={freeLot.name} noOfFreeSlots={freeLot.freeSlots.length} distance={parseInt(freeLot.distance) }/>
+                                        </Grid>
+                                        
+                                    ))
+                                ):(
+                                    [...freeParkingLots].sort((a,b)=>a.charges-b.charges).map((freeLot)=>(
+                                        <Grid item xs={12} sm={4}>
+                                            <ParkingLotCard startTime={startTime} endTime={endTime} vehicleType={vehicleType} key={freeLot.id} id={freeLot.id} freeSlots={freeLot.freeSlots} engagedSlots={freeLot.engagedSlots} address={freeLot.address} lat={freeLot.location[0]} lng={freeLot.location[1]}charges={freeLot.charges} name={freeLot.name} noOfFreeSlots={freeLot.freeSlots.length} distance={parseInt(freeLot.distance) }/>
+                                        </Grid>
+                                        
+                                    ))
+                                )
+                            }
+                            </>
+                        ):null
                     }
-                </Grid>
             </Container>
         </Grow>
     )
