@@ -23,7 +23,8 @@ const LoginPage = () => {
     const styles = {
         formCont: {
             marginTop: "5em",
-            width: "auto"
+            width: "auto",
+            marginBottom:"5em"
         },
         titlePaper: {
             display: "flex",

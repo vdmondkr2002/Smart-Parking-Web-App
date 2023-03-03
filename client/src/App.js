@@ -17,6 +17,8 @@ import AdminDashboard from './components/AdminDashboardComponents/AdminDashboard
 import HomePage from './components/HomePageComponents/HomePage';
 import ProfilePage from './components/ProfilePageComponents/ProfilePage';
 import AddParkingLot from './components/AdminDashboardComponents/AddParkingLot';
+import ContactUs from './components/ContactUsComponents/ContactUs';
+import News from './components/NewsComponents/News';
 
 
 const App = ()=>{
@@ -48,6 +50,8 @@ const App = ()=>{
                         <Route exact path="/profile" element={<ProfilePage/>}/>
                         <Route exact path="/home" element={<HomePage/>}/>
                         <Route exact path="/addparkingLot" element={<AddParkingLot/>}/>
+                        <Route exact path="/contactus" element={<ContactUs/>}/>
+                        <Route exact path="/news" element={<News/>}/>
                     </Routes>
                     
                 </Container>

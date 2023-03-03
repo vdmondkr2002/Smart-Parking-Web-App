@@ -47,4 +47,11 @@ const bookSlotValidator = joi.object({
     endTime:joi.string().required(),
     vehicleType:joi.string().required()
 })
-module.exports = {sendOTPValidator,loginValidator,verifyEmailValidator,postParkingValidator,getParkingValidator,bookSlotValidator}
+
+const feedbackValidator = joi.object({
+    firstName:joi.string().min(2).max(30).required(),
+    lastName:joi.string().min(2).max(40).required(),
+    country:joi.string().min(2).max(40).required(),
+    feedback:joi.string().required()
+})
+module.exports = {sendOTPValidator,loginValidator,verifyEmailValidator,postParkingValidator,getParkingValidator,bookSlotValidator,feedbackValidator}

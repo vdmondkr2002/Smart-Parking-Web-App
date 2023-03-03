@@ -24,6 +24,8 @@ export const signIn = (formData)=>API.post(`${urlUser}/signIn`,formData)
 
 export const getCurrentUser = ()=>API.get(`${urlUser}`)
 
+export const postFeedback = (formData)=>API.post(`${urlUser}/feedback`,formData)
+
 const urlParkingLot = '/api/v1/parkingLots'
 
 export const postParkingLot = (formData)=>API.post(`${urlParkingLot}`,formData)
@@ -35,3 +37,4 @@ export const getFreeParkingLots = (formData)=>API.get(`${urlParkingLot}`,{
 export const bookSlot = (formData)=>API.post(`${urlParkingLot}/book`,formData)
 
 export const getBookedSlots = ()=>API.get(`${urlParkingLot}/bookedSlots`)
+

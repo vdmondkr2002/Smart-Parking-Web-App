@@ -4,7 +4,8 @@ const ParkingSlot = require('../models/ParkingSlot')
 const User = require('../models/User')
 const dayjs = require('dayjs')
 const { postParkingValidator, getParkingValidator, bookSlotValidator } = require('../validators/joi-validator')
-const { mongo, default: mongoose } = require('mongoose')
+const mongoose = require('mongoose')
+const axios = require('axios')
 
 exports.postParkingLot = async(req,res)=>{
     if(!req.userId){
@@ -94,6 +95,19 @@ exports.getParkingLots = async(req,res)=>{
                 },
             }
         ])
+        let url = "https://nominatim.openstreetmap.org/reverse?format=jsonv2"+"&lat="+lat+"&lon="+lng;
+        // fetch(url, {
+        //     method: "GET",
+        //     mode: "cors",
+        //     headers: {
+        //       "Access-Control-Allow-Origin": "https://o2cj2q.csb.app"
+        //     }
+        //   })
+        //     .then((response) => response.json())
+        //     .then((data) => console.log(data.display_name))
+            ;
+        const response = await axios.get(url,{headers:{'Access-Control-Allow-Origin':'https://o2cj2q.csb.app',mode:'cors'}})
+        console.log(response.data)
         // console.log(parkingLots)
         const bookingStart = dayjs(startTime)
         const bookingEnd = dayjs(endTime)
@@ -140,6 +154,7 @@ exports.getParkingLots = async(req,res)=>{
         console.log(freeParkingLots)
         return res.status(200).json({msg:"Free parking lots returned",freeParkingLots:freeParkingLots})
     }catch(err){
+        console.log(err)
         return res.status(500).json({msg:"Something went wrong.."})
     }
 }

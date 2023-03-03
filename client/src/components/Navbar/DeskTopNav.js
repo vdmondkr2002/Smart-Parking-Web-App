@@ -97,6 +97,16 @@ const DeskTopNav = ()=>{
                             Home
                         </Typography>
                     </Button>
+                    <Button component={RouterLink} color="inherit" to="/news" sx={styles.about}>
+                        <Typography variant="h6" sx={styles.name}>
+                            News
+                        </Typography>
+                    </Button>
+                    <Button component={RouterLink} color="inherit" to="/contactus" sx={styles.about}>
+                        <Typography variant="h6" sx={styles.name}>
+                            Contact
+                        </Typography>
+                    </Button>
                     <Button component={RouterLink} color="inherit" to="/aboutus" sx={styles.about}>
                         <Typography variant="h6" sx={styles.name}>
                             About

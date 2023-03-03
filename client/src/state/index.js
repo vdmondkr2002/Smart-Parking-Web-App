@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import {signUp,sendOTP,verifyEmail, signIn, getCurrentUser,postParkingLot, getFreeParkingLots, bookSlot, getBookedSlots} from '../api/index.js'
+import {signUp,sendOTP,verifyEmail, signIn, getCurrentUser,postParkingLot, getFreeParkingLots, bookSlot, getBookedSlots, postFeedback} from '../api/index.js'
 import decode from 'jwt-decode'
 
 const initialStore = {
@@ -110,7 +110,8 @@ export const asyncpostParkingLot = createAsyncThunk('parkings/postParkingLot',as
 })
 
 export const asyncgetParkingLot = createAsyncThunk('parkings/getParkingLot',async(formData)=>{
-    console.log("Get Parking Lot")
+    
+    console.log("Get Booked Slots")
     console.log(formData)
     try{
         const {data} = await getFreeParkingLots(formData);
@@ -145,8 +146,24 @@ export const asyncBookSlot = createAsyncThunk('parkings/bookSlot',async(formData
     }
 })
 
+export const asyncpostFeedback = createAsyncThunk('users/postFeedback',async(formData)=>{
+    console.log("Post feedback form")
+    try{
+        const {data} = await postFeedback(formData);
+        console.log(data)
+        return {msg:data.msg,type:'success'}
+    }catch(err){
+        if(err.response){
+            const data = err.response.data
+            console.log(data)
+            return {...data,type:"error"};
+        }else{
+            console.log("Error",err);
+        }
+    }
+})
 export const asyncgetBookedSlots = createAsyncThunk('parkings/getBookedSlots',async()=>{
-    console.log("Get Booked Slots")
+    
     try{
         const {data} = await getBookedSlots();
         return {alertData:{msg:data.msg,type:'success'},bookedTimeSlots:data.bookedTimeSlots}
@@ -232,6 +249,9 @@ const authSlice = createSlice({
                     state.bookedTimeSlots = action.payload.bookedTimeSlots
                 }
             }
+        }).addCase(asyncpostFeedback.fulfilled,(state,action)=>{
+            state.alert = action.payload
+            console.log("in feedback reducer")
         })
 
     }
