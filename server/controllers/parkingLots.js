@@ -95,18 +95,19 @@ exports.getParkingLots = async(req,res)=>{
                 },
             }
         ])
-        let url = "https://nominatim.openstreetmap.org/reverse?format=jsonv2"+"&lat="+lat+"&lon="+lng;
-        // fetch(url, {
-        //     method: "GET",
-        //     mode: "cors",
-        //     headers: {
-        //       "Access-Control-Allow-Origin": "https://o2cj2q.csb.app"
-        //     }
-        //   })
-        //     .then((response) => response.json())
-        //     .then((data) => console.log(data.display_name))
-            ;
+        // let url = "https://nominatim.openstreetmap.org/reverse?format=jsonv2"+"&lat="+lat+"&lon="+lng;
+        // const response = await axios.get(url,{headers:{'Access-Control-Allow-Origin':'https://o2cj2q.csb.app',mode:'cors'}})
+
+        // console.log(response.data)
+        const street = 'Shakar Pawshe Road'
+        const place = 'KDMC Kolsewadi Municipal Hospital'
+        let url = `https://nominatim.openstreetmap.org/search?
+        city=Kalyan
+        &state=Maharashtra
+        &country=India
+        &postalcode=421306&format=json`;
         const response = await axios.get(url,{headers:{'Access-Control-Allow-Origin':'https://o2cj2q.csb.app',mode:'cors'}})
+        
         console.log(response.data)
         // console.log(parkingLots)
         const bookingStart = dayjs(startTime)
@@ -218,10 +219,9 @@ exports.getBookedTimeSlots = async(req,res)=>{
             }
         })
         var parkingLotMap= {}
-        parkingLots = parkingLots.map((lot)=>{
-            parkingLotMap[lot._id]=lot
-            return {_id:lot._id,name:lot.name,address:lot.address,location:lot.location.coordinates,parkingChargesBike:lot.parkingChargesBike,parkingChargesCar:lot.parkingChargesCar}
-        })
+        for(let lot of parkingLots){
+            parkingLotMap[lot._id]={_id:lot._id,name:lot.name,address:lot.address,location:lot.location.coordinates,parkingChargesBike:lot.parkingChargesBike,parkingChargesCar:lot.parkingChargesCar}
+        }
         
         
         console.log(parkingLots)

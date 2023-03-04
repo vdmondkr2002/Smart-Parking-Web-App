@@ -54,4 +54,9 @@ const feedbackValidator = joi.object({
     country:joi.string().min(2).max(40).required(),
     feedback:joi.string().required()
 })
-module.exports = {sendOTPValidator,loginValidator,verifyEmailValidator,postParkingValidator,getParkingValidator,bookSlotValidator,feedbackValidator}
+
+const latLonValidator = joi.object({
+    lat:joi.string().required(),
+    lng:joi.string().required()
+})
+module.exports = {sendOTPValidator,loginValidator,verifyEmailValidator,postParkingValidator,getParkingValidator,bookSlotValidator,feedbackValidator,latLonValidator}

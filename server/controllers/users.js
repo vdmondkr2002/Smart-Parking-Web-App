@@ -153,7 +153,7 @@ exports.signIn = async (req, res) => {
         const oldUser = await User.findOne({ email: email })
         if (!oldUser)
             return res.status(404).json({ msg: "User doesn't exist" })
-
+        console.log(oldUser)
         if (!oldUser.verified)
             return res.status(400).json({ msg: "Please verify your account first! Check the link sent on mail during registration" })
         console.log(oldUser)
@@ -167,22 +167,6 @@ exports.signIn = async (req, res) => {
             email: oldUser.email,
             id: oldUser._id
         }
-        // const salt = await bcrypt.genSalt(10)
-        // const hashedAdminPassword = await bcrypt.hash("admin123",salt)
-
-        // const newAdmin = await User.create({
-        //     email:"smartparking678@gmail.com",
-        //     password:hashedAdminPassword,
-        //     firstName:"Smart",lastName:"Parker",
-        //     userName:"smParker1",mobileNo:"9292929292",
-        //     createdAt:new Date().toISOString(),
-        //     otp:"1234567891",
-        //     role:"admin",verified:true
-        // })
-
-        // if(newAdmin){
-        //     console.log("admin created")
-        // }
 
 
 

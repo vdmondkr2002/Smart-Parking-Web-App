@@ -14,6 +14,9 @@ import { useMapEvents, MapContainer, Marker, Popup, TileLayer,Polyline,Polygon }
 import { asyncgetParkingLot, clearFreeParkingLots } from "../../state"
 import ParkingLotCard from "./ParkingLotCard"
 import L from 'leaflet'
+import 'leaflet-routing-machine'
+// import L from 'leaflet-routing-machine/dist/leaflet-routing-machine.js'
+import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
 
 const HomePage = () => {
     const styles = {
@@ -47,7 +50,9 @@ const HomePage = () => {
     const [endTime, setEndTime] = useState(dayjs(format(Date.now() + 1000 * 60 * 60 * 2, 'yyyy-MM-dd hh:00 a')));
     const [vehicleType, setVehicleType] = useState('')
     const [position, setPosition] = useState([19.1485, 73.133]);
-    const [polyline,setPolyline] = useState([ [19.2309672, 73.140302], [19.2309672, 73.1405278],[19.2314513,73.1405278],[19.2314513,73.140302],[19.2309672, 73.140302] ])
+    const [polyline,setPolyline] = useState([ [19.2735184,73.1183625], [19.2735184,73.1724625],[19.2159482, 73.1724625],[19.2159482, 73.1183625],[19.2735184,73.1183625] ])
+    const [distances,setDistances] = useState([])
+    const [times,setTimes] = useState([])
     const [foundCurrLoc, setFoundCurrLoc] = useState(false)
     const [sortBy, setSortBy] = useState('distance')
     const [zoomLvl, setZoomLvl] = useState(13)
@@ -61,6 +66,24 @@ const HomePage = () => {
         popupAnchor: [1, -34],
         shadowSize: [41, 41]
     });
+
+    const redIcon = new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    })
+    useEffect(()=>{
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                 setPosition([position.coords.latitude,position.coords.longitude])
+            }, () => {
+                console.log("Not able to locate")
+            });
+       }
+    },[])
     useEffect(() => {
         if (alert.msg == "Slot Booked") {
             navigate("/profile")
@@ -75,6 +98,8 @@ const HomePage = () => {
             }
         }
     }, [user])
+
+    
 
     const MyMapComponent = () => {
         const map = useMapEvents({
@@ -103,16 +128,48 @@ const HomePage = () => {
                 setZoomLvl(map.getZoom());
             },
         })
+        var routeControl = L.Routing.control({
+            waypoints:[
+                L.latLng(19.292,73.292),
+                L.latLng(19.19,73.19)
+            ]
+        })
+        // useEffect(() => {
+        //     if (!foundCurrLoc) {
+        //         map.locate().on("locationfound",(e)=>{
+        //             console.log("Helo->>>>>>>>",e.latlng['lat'],e.latlng['lng'])
+        //             console.log("rinning")
+        //             const loc = []
+        //             loc.push(e.latlng['lat'])
+        //             loc.push(e.latlng['lng'])
+        //             setPosition(loc)
+        //             map.flyTo(e.latlng, zoomLvl);
+        //             setFoundCurrLoc(true)
+    
+        //         })
+        //     }
 
-        useEffect(() => {
-            if (!foundCurrLoc) {
-                map.locate().on("locationfound", (e) => {
-                    console.log("user location found")
-                    console.log(e.latlng)
-                    setFoundCurrLoc(true)
-                })
-            }
-        }, [map])
+        // }, [map])
+
+        // useEffect(()=>{
+            
+        //     var myRoute = L.Routing.osrmv1()
+        //     for(let pk of freeParkingLots){
+        //         var w1 = L.latLng(position[0],position[1])
+        //         var w2 = L.latLng(pk.location[0],pk.location[1])
+        //         let rwP1 = new L.Routing.Waypoint;
+        //         rwP1.latLng = w1
+        //         let rwP2 = new L.Routing.Waypoint;
+        //         rwP2.latLng = w2
+        //         myRoute.route([rwP1,rwP2],(err,routes)=>{
+        //             let dist = routes[0].summary.totalDistance
+        //             console.log(dist);
+        //             setDistances([...distances,dist])    
+        //         })
+        //     }
+            
+        // },[freeParkingLots])
+
     }
 
     const handleSubmit = (e) => {
@@ -317,12 +374,33 @@ const HomePage = () => {
 
                                             ) : null
                                         }
-                                        <Marker position={position}>
+                                        <Marker icon={redIcon} position={position}>
                                             <Popup>
                                                 You selected location
                                             </Popup>
                                         </Marker>
-                                        <Polygon positions={polyline}/>
+                                        {/* [ '19.2159482', '19.2735184', '73.1183625', '73.1724625' ] */}
+                                        {/* <Marker position={[19.2159482, 73.1183625]}>
+                                            <Popup>
+                                                1
+                                            </Popup>
+                                        </Marker>
+                                        <Marker position={[19.2159482, 73.1724625]}>
+                                            <Popup>
+                                                2
+                                            </Popup>
+                                        </Marker>
+                                        <Marker position={[19.2735184,73.1183625]}>
+                                            <Popup>
+                                                3
+                                            </Popup>
+                                        </Marker>
+                                        <Marker position={[19.2735184,73.1724625]}>
+                                            <Popup>
+                                                4
+                                            </Popup>
+                                        </Marker> */}
+                                        {/* <Polygon positions={polyline}/> */}
                                         <MyMapComponent />
                                     </MapContainer>
                                 </Grid>
@@ -368,14 +446,14 @@ const HomePage = () => {
                                     (sortBy == "distance") ? (
                                         freeParkingLots.map((freeLot) => (
                                             <Grid item xs={12} sm={4}>
-                                                <ParkingLotCard startTime={startTime} endTime={endTime} vehicleType={vehicleType} key={freeLot.id} id={freeLot.id} freeSlots={freeLot.freeSlots} engagedSlots={freeLot.engagedSlots} address={freeLot.address} lat={freeLot.location[0]} lng={freeLot.location[1]} charges={freeLot.charges} name={freeLot.name} noOfFreeSlots={freeLot.freeSlots.length} distance={parseInt(freeLot.distance)} />
+                                                <ParkingLotCard startTime={startTime} endTime={endTime} vehicleType={vehicleType} key={freeLot.id} id={freeLot.id} freeSlots={freeLot.freeSlots} engagedSlots={freeLot.engagedSlots} address={freeLot.address} lat={freeLot.location[0]} lng={freeLot.location[1]} currLoc={position} charges={freeLot.charges} name={freeLot.name} noOfFreeSlots={freeLot.freeSlots.length} distance={parseInt(freeLot.distance)} />
                                             </Grid>
 
                                         ))
                                     ) : (
                                         [...freeParkingLots].sort((a, b) => a.charges - b.charges).map((freeLot) => (
                                             <Grid item xs={12} sm={4}>
-                                                <ParkingLotCard startTime={startTime} endTime={endTime} vehicleType={vehicleType} key={freeLot.id} id={freeLot.id} freeSlots={freeLot.freeSlots} engagedSlots={freeLot.engagedSlots} address={freeLot.address} lat={freeLot.location[0]} lng={freeLot.location[1]} charges={freeLot.charges} name={freeLot.name} noOfFreeSlots={freeLot.freeSlots.length} distance={parseInt(freeLot.distance)} />
+                                                <ParkingLotCard startTime={startTime} endTime={endTime} vehicleType={vehicleType} key={freeLot.id} id={freeLot.id} freeSlots={freeLot.freeSlots} engagedSlots={freeLot.engagedSlots} address={freeLot.address} lat={freeLot.location[0]} lng={freeLot.location[1]} currLoc={position} charges={freeLot.charges} name={freeLot.name} noOfFreeSlots={freeLot.freeSlots.length} distance={parseInt(freeLot.distance)} />
                                             </Grid>
 
                                         ))

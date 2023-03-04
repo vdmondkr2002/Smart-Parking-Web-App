@@ -87,25 +87,35 @@ const AddParkingLot = () => {
           },
         })
       
-        useEffect(()=>{
-            if(!foundCurrLoc){
-                map.locate().on("locationfound",(e)=>{
-                    console.log("Helo->>>>>>>>",e.latlng['lat'],e.latlng['lng'])
-                    console.log("rinning")
-                    const loc = []
-                    loc.push(e.latlng['lat'])
-                    loc.push(e.latlng['lng'])
-                    setPosition(loc)
-                    map.flyTo(e.latlng, zoomLvl);
-                    setFoundCurrLoc(true)
+        // useEffect(()=>{
+        //     if(!foundCurrLoc){
+        //         map.locate().on("locationfound",(e)=>{
+        //             console.log("Helo->>>>>>>>",e.latlng['lat'],e.latlng['lng'])
+        //             console.log("rinning")
+        //             const loc = []
+        //             loc.push(e.latlng['lat'])
+        //             loc.push(e.latlng['lng'])
+        //             setPosition(loc)
+        //             map.flyTo(e.latlng, zoomLvl);
+        //             setFoundCurrLoc(true)
     
-                })
+        //         })
                 
-            }
+        //     }
             
-        },[map])
+        // },[map])
         return null;
     }
+
+    useEffect(()=>{
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                 setPosition([position.coords.latitude,position.coords.longitude])
+            }, () => {
+                console.log("Not able to locate")
+            });
+       }
+    },[])
     
     const Div = styled('div')(( ) => ({
         ...theme.typography.button,
@@ -123,8 +133,18 @@ const AddParkingLot = () => {
     const [position,setPosition]= useState([19.1485, 73.133])
     
     const navigate = useNavigate()
+
     
-    
+    useEffect(() => {
+        if (!user._id) {
+            navigate("/login")
+        } else {
+            if (user.role === "user") {
+                navigate("/home")
+            }
+        }
+    }, [user])
+
     useEffect(()=>{
         if(alert.msg=="Parking Lot Added"){
             navigate("/admindb")

@@ -38,3 +38,14 @@ export const bookSlot = (formData)=>API.post(`${urlParkingLot}/book`,formData)
 
 export const getBookedSlots = ()=>API.get(`${urlParkingLot}/bookedSlots`)
 
+const urlAdmin = '/api/v1/admin'
+
+export const getUsersName = ()=>API.get(`${urlAdmin}/users`)
+
+export const getUserHistory = (formData)=>API.get(`${urlAdmin}/userHistory`,{params:formData})
+
+export const getParkingLotsNear = (formData)=>API.get(`${urlAdmin}/parkingLotsNear`,{params:formData})
+
+export const getParkingLots = ()=>API.get(`${urlAdmin}/parkingLots`)
+
+export const getParkingLotHistory = (formData)=>API.get(`${urlAdmin}/parkingLotHistory`,{params:formData})

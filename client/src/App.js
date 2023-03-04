@@ -19,6 +19,7 @@ import ProfilePage from './components/ProfilePageComponents/ProfilePage';
 import AddParkingLot from './components/AdminDashboardComponents/AddParkingLot';
 import ContactUs from './components/ContactUsComponents/ContactUs';
 import News from './components/NewsComponents/News';
+import AnalyzeHistory from './components/AdminDashboardComponents/AnalyzeHistory';
 
 
 const App = ()=>{
@@ -52,6 +53,7 @@ const App = ()=>{
                         <Route exact path="/addparkingLot" element={<AddParkingLot/>}/>
                         <Route exact path="/contactus" element={<ContactUs/>}/>
                         <Route exact path="/news" element={<News/>}/>
+                        <Route exact path="/analysis" element={<AnalyzeHistory/>} />
                     </Routes>
                     
                 </Container>

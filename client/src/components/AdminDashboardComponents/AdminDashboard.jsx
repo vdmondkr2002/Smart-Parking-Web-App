@@ -57,7 +57,7 @@ const AdminDashboard = ()=>{
                             <img src={analyzeParkingImg} alt="view history" width="100%" sx={styles.image} loading="lazy"/>
                         </Grid>
                         <Grid item xs={6}>
-                            <Button fullWidth component={RouterLink} sx={{padding:"1em"}} startIcon={<EqualizerIcon/>} variant="contained"  to="/addParkingLot">
+                            <Button fullWidth component={RouterLink} sx={{padding:"1em"}} startIcon={<EqualizerIcon/>} variant="contained"  to="/analysis">
                                 
                                 <Typography variant="h6">
                                     Analyze History

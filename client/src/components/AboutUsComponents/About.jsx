@@ -38,7 +38,7 @@ const AboutUs = ()=>{
                                     </Typography>
                                 </Grid>
                                 <Grid item xs={12}>
-                                    <Typography variant="h4" component="p" sx={{fontSize:"20px",color:"Highlight"}}>
+                                    <Typography variant="h4" component="p" sx={{fontSize:"20px",color:"white"}}>
                                         Our application aims to provide parking facility for Light motor vehicles. Here, the users will be able to book a 
                                         parking slot according to their convenience. Also, the parking space owners will be able to generate revenue from it. 
                                         The user and the parking space owner will get live location using GPS system. Moreover, the software will give UID 

@@ -1,12 +1,15 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import {signUp,sendOTP,verifyEmail, signIn, getCurrentUser,postParkingLot, getFreeParkingLots, bookSlot, getBookedSlots, postFeedback} from '../api/index.js'
+import {signUp,sendOTP,verifyEmail, signIn, getCurrentUser,postParkingLot, getFreeParkingLots, bookSlot, getBookedSlots, postFeedback, getUsersName, getUserHistory, getParkingLots, getParkingLotsNear, getParkingLotHistory} from '../api/index.js'
 import decode from 'jwt-decode'
 
 const initialStore = {
     user: {},
     alert: {},
     freeParkingLots: [],
-    bookedTimeSlots: []
+    bookedTimeSlots: [],
+    usersName: [],
+    parkingLotNames:[],
+    parkingLotDetails:{}
 }
 
 export const asyncsignUp = createAsyncThunk('users/signUp',async()=>{
@@ -178,6 +181,83 @@ export const asyncgetBookedSlots = createAsyncThunk('parkings/getBookedSlots',as
     }
 })
 
+export const asyncgetUsersName = createAsyncThunk('admin/getUsersName',async()=>{
+    try{
+        const {data} = await getUsersName();
+        return {alertData:{msg:data.msg,type:'success'},usersName:data.usersName}
+    }catch(err){
+        if(err.response){
+            const data = err.response.data
+            console.log(data)
+            return {...data,type:"error"};
+        }else{
+            console.log("Error",err);
+        }
+    }
+})
+
+export const asyncgetUserHistory = createAsyncThunk('admin/getUserHistory',async(formData)=>{
+    try{
+        const {data} = await getUserHistory(formData)
+        return {alertData:{msg:data.msg,type:'success'},bookedTimeSlots:data.bookedTimeSlots}
+    }catch(err){
+        if(err.response){
+            const data = err.response.data
+            console.log(data)
+            return {...data,type:"error"};
+        }else{
+            console.log("Error",err);
+        }
+    }
+})
+
+export const asyncgetParkingLots = createAsyncThunk('admin/getparkingLots',async()=>{
+    try{
+        console.log("getting parking lots")
+        const {data} = await getParkingLots();
+        return {alertData:{msg:data.msg,type:'success'},parkingLots:data.parkingLots}
+    }catch(err){
+        if(err.response){
+            const data = err.response.data
+            console.log(data)
+            return {...data,type:"error"};
+        }else{
+            console.log("Error",err);
+        }
+    }
+})
+
+export const asyncgetParkingLotsNear = createAsyncThunk('admin/getparkingLotsNear',async(formData)=>{
+    try{
+        const {data} = await getParkingLotsNear(formData);
+        return {alertData:{msg:data.msg,type:'success'},parkingLots:data.parkingLots}
+    }catch(err){
+        if(err.response){
+            const data = err.response.data
+            console.log(data)
+            return {...data,type:"error"};
+        }else{
+            console.log("Error",err);
+        }
+    }
+})
+
+export const asyncgetParkingLotHistory = createAsyncThunk('admin/getParkingLotHistory',async(formData)=>{
+    try{
+        const {data} = await getParkingLotHistory(formData);
+        console.log(data)
+        return {alertData:{msg:data.msg,type:'success'},bookedTimeSlots:data.bookedTimeSlots,parkingLotDetails:data.parkingLotDetails}
+    }catch(err){
+        if(err.response){
+            const data = err.response.data
+            console.log(data)
+            return {...data,type:"error"};
+        }else{
+            console.log("Error",err);
+        }
+    }
+})
+
 const authSlice = createSlice({
     name:"auth",
     initialState:initialStore,
@@ -196,6 +276,12 @@ const authSlice = createSlice({
         },
         clearFreeParkingLots:(state)=>{
             state.freeParkingLots = []
+        },
+        clearBookedTimeSlots:(state)=>{
+            state.bookedTimeSlots = []
+        },
+        clearParkingLotDetails:(state)=>{
+            state.parkingLotDetails = {}
         }
     },
     extraReducers(builder){
@@ -252,10 +338,62 @@ const authSlice = createSlice({
         }).addCase(asyncpostFeedback.fulfilled,(state,action)=>{
             state.alert = action.payload
             console.log("in feedback reducer")
+        }).addCase(asyncgetUsersName.fulfilled,(state,action)=>{
+            
+            if(action.payload){
+                if(action.payload.msg){
+                    state.alert=action.payload
+                }else{
+                    state.alert = action.payload.alertData;
+                    state.usersName = action.payload.usersName;
+                }
+            }
+        }).addCase(asyncgetUserHistory.fulfilled,(state,action)=>{
+            if(action.payload){
+                if(action.payload.msg){
+                    state.alert=action.payload
+                }else{
+                    state.alert = action.payload.alertData
+                    state.bookedTimeSlots = action.payload.bookedTimeSlots
+                }
+            }
+        }).addCase(asyncgetParkingLots.fulfilled,(state,action)=>{
+            if(action.payload){
+                if(action.payload.msg){
+                    state.alert=action.payload
+                }else{
+                    state.alert = action.payload.alertData
+                    state.parkingLotNames = action.payload.parkingLots
+                }
+            }
+        }).addCase(asyncgetParkingLotsNear.fulfilled,(state,action)=>{
+            if(action.payload){
+                if(action.payload.msg){
+                    state.alert=action.payload
+                }else{
+                    state.alert = action.payload.alertData
+                    state.parkingLotNames = action.payload.parkingLots
+                }
+            }
+        }).addCase(asyncgetParkingLotHistory.fulfilled,(state,action)=>{
+            console.log("Parking lot history reducer")
+            if(action.payload){
+                if(action.payload.msg){
+                    console.log("Here2")
+                    state.alert=action.payload
+                }else{
+                    console.log("Here")
+                    state.alert = action.payload.alertData;
+                    state.bookedTimeSlots = action.payload.bookedTimeSlots;
+                    state.parkingLotDetails = action.payload.parkingLotDetails;
+                }
+            }
         })
 
     }
 })
 
-export const {setUser,setLogout,clearAlert,clearFreeParkingLots} = authSlice.actions
+
+
+export const {setUser,setLogout,clearAlert,clearFreeParkingLots,clearBookedTimeSlots,clearParkingLotDetails} = authSlice.actions
 export default authSlice.reducer;

@@ -1,15 +1,18 @@
 import { Button, Card, CardActions, CardContent, CardMedia, Dialog, DialogTitle, Grid, Typography } from "@mui/material";
-import PaidIcon from '@mui/icons-material/Paid';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { useEffect, useState } from "react";
-import CropSquareIcon from '@mui/icons-material/CropSquare';
-import SquareIcon from '@mui/icons-material/Square';
 import ParkingSlot from "./ParkingSlot";
 import { asyncBookSlot } from "../../state";
 import { useDispatch } from "react-redux";
+import { useMapEvents, MapContainer, Marker, Popup, TileLayer,Polyline,Polygon } from "react-leaflet"
+import L from 'leaflet'
+import ForwardIcon from '@mui/icons-material/Forward';
+import 'leaflet-routing-machine'
+import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
+
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
-const ParkingLotCard = ({ vehicleType,startTime,endTime,name, noOfFreeSlots, charges, distance, id, freeSlots, engagedSlots, address, lat, lng }) => {
+const ParkingLotCard = ({ vehicleType,startTime,endTime,name, noOfFreeSlots, charges, distance, id, freeSlots, engagedSlots, address, lat, lng ,currLoc}) => {
     const styles = {
         dialog:{
             padding:"2em"
@@ -20,6 +23,11 @@ const ParkingLotCard = ({ vehicleType,startTime,endTime,name, noOfFreeSlots, cha
     const [engagedSllots,setEngagedSllots] = useState(engagedSlots)
     const [changed,setChanged] = useState('')
     const [prevChanged,setPrevChanged] = useState('')
+    const [position,setPosition] = useState([(currLoc[0]+lat)/2,(currLoc[1]+lng)/2])
+    const [map,setMap] = useState()
+    const [zoomLvl,setZoomLvl] = useState(13)
+
+
     const dispatch = useDispatch()
     useEffect(()=>{
         setParkingSlots([...freeSlots,...engagedSlots])
@@ -27,8 +35,25 @@ const ParkingLotCard = ({ vehicleType,startTime,endTime,name, noOfFreeSlots, cha
         console.log(freeSlots)
     },[open])
 
+    
 
 
+    const MyMapComponent = ()=>{
+        const map = useMapEvents({
+
+        })
+
+        useEffect(()=>{
+            L.Routing.control({
+                waypoints:[
+                    L.latLng(currLoc[0],currLoc[1]),
+                    L.latLng(lat,lng)
+                ],createMarker:()=>null
+                
+            }).addTo(map)
+            
+        },[map])
+    }
 
     const handleShowDetails = () => {
         console.log("clicked")
@@ -43,6 +68,24 @@ const ParkingLotCard = ({ vehicleType,startTime,endTime,name, noOfFreeSlots, cha
         setChanged('')
         setOpen(false)
     }
+
+    const redIcon = new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    })
+
+    const greenIcon = new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
 
     const handleBookSlot = ()=>{
         console.log(changed,id,startTime,endTime,vehicleType)
@@ -77,7 +120,7 @@ const ParkingLotCard = ({ vehicleType,startTime,endTime,name, noOfFreeSlots, cha
                             {noOfFreeSlots}
                         </Grid>
                         <Grid item xs={8} sx={{ fontWeight: "bold" }}>
-                            Distance:
+                            Expected Distance:
                         </Grid>
                         <Grid item xs={4}>
                             {distance} m
@@ -100,9 +143,11 @@ const ParkingLotCard = ({ vehicleType,startTime,endTime,name, noOfFreeSlots, cha
                     <Button variant="contained" onClick={handleShowDetails} fullWidth>Show Details</Button>
                 </CardActions>
             </Card>
-            <Dialog onClose={handleClose} open={open} sx={styles.dialog}>
+            <Dialog maxWidth='lg' fullWidth onClose={handleClose} open={open} sx={styles.dialog}>
 
-                <Grid sx={styles.dialog} container spacing={2} alignItems="center" >
+                <Grid container>
+                    <Grid item sm={5}>
+                    <Grid sx={styles.dialog} container spacing={2} alignItems="center" >
                     <Grid item xs={2}>
                         <LocationOnIcon fontSize="large" />
                     </Grid>
@@ -141,7 +186,7 @@ const ParkingLotCard = ({ vehicleType,startTime,endTime,name, noOfFreeSlots, cha
                         {noOfFreeSlots}
                     </Grid>
                     <Grid item xs={8} sm={4} sx={{ fontWeight: "bold" }}>
-                        Distance:
+                        Expected Distance:
                     </Grid>
                     <Grid item xs={4} sm={2}>
                         {distance} m
@@ -153,7 +198,7 @@ const ParkingLotCard = ({ vehicleType,startTime,endTime,name, noOfFreeSlots, cha
                         [...freeSlots,...engagedSlots].sort().map((slot)=>(
                             <Grid item xs={2}>
                                 
-                                    {engagedSllots.includes(slot)?<ParkingSlot prevChanged={prevChanged} setPrevChanged={setPrevChanged} setChanged={setChanged}  changed={changed} id={slot} booked={true}/>:<ParkingSlot prevChanged={prevChanged} setPrevChanged={setPrevChanged}  setChanged={setChanged} changed={changed} id={slot} booked={false}/>}
+                                    {engagedSllots.includes(slot)?<ParkingSlot prevChanged={prevChanged} setPrevChanged={setPrevChanged} setChanged={setChanged}  changed={changed} id={slot} booked={true}/>:<ParkingSlot prevChanged={prevChanged} setPrevChanged={setPrevChanged}  setChanged={setChanged}  changed={changed} id={slot} booked={false}/>}
                                 
                             </Grid>
                         ))
@@ -161,7 +206,35 @@ const ParkingLotCard = ({ vehicleType,startTime,endTime,name, noOfFreeSlots, cha
                     <Grid item xs={12}>
                         <Button fullWidth onClick={handleBookSlot} variant="contained">Book Slot</Button>
                     </Grid>
+                    <Grid item xs={12}>
+                        <Typography variant="body">
+                            * You can take a screenshot of the map on right for reference 
+                        </Typography>
+                    </Grid>
                 </Grid>
+                    </Grid>
+                    <Grid item sm={7}>
+                        <MapContainer style={{ height: "400px",width:"100%" }} center={position} zoom={zoomLvl} >
+                            
+                            <TileLayer
+                                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                        />
+                            <Marker icon={redIcon} position={currLoc}>
+                                            <Popup>
+                                                You selected location
+                                            </Popup>
+                                        </Marker>
+                                        <Marker icon={greenIcon} position={[lat,lng]}>
+                                            <Popup>
+                                                {name}
+                                            </Popup>
+                                        </Marker>
+                            <MyMapComponent/>
+                        </MapContainer>
+                    </Grid>
+                </Grid>
+                
             </Dialog>
         </>
     )
