@@ -170,13 +170,26 @@ exports.bookSlot = async(req,res)=>{
             return res.status(400).json({msg:error.details[0].message})
         }
 
+        
         const {lotId,slotId,startTime,endTime,vehicleType} = req.body
         console.log(lotId,slotId,startTime,endTime,vehicleType)
         const storebookingStart = new Date(startTime).getTime()
         const storebookingEnd = new Date(endTime).getTime()
+        const date = new Date()
+        console.log(new Date(startTime).getDate())
+        if((storebookingEnd-storebookingStart)<=0){
+            return res.status(400).json({msg:"Please Enter a Valid time frame"})
+        }else if(storebookingStart<Date.now()){
+            return res.status(400).json({msg:"Cannot book slot in past"})
+        }else if(new Date(startTime).getDate()>date.getDate()+1){
+            console.log("Helo")
+            return res.status(400).json({msg:"Cannot book a slot starting after next day"})
+        }else if( (storebookingEnd-storebookingStart)/(1000*60*60)>3){
+            return res.status(400).json({msg:"Slot cannot be of more than three hours"})
+        }
 
         const futureBookedParkingSlots = await BookedTimeSlot.find({
-            startTime:{
+            endTime:{
                 $gte:Date.now()
             },
             vehicleType:vehicleType

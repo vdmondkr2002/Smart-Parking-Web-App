@@ -261,7 +261,8 @@ const HomePage = () => {
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DateTimePicker
                                     disablePast
-                                    maxDate={dayjs(format(Date.now(), 'yyyy-MM-dd hh:00')).add(1, 'day')}
+                                    minDateTime={dayjs(format(Date.now(),'yyyy-MM-dd hh:00 a..aa'))}
+                                    maxDate={dayjs(format(Date.now(), 'yyyy-MM-dd hh:00 a..aa')).add(1, 'day')}
                                     label="pick a start time"
                                     value={startTime}
                                     views={['year', 'month', 'day', 'hours']}
