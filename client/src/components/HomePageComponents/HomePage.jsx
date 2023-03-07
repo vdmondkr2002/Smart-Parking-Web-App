@@ -97,15 +97,6 @@ const HomePage = () => {
     useEffect(()=>{
         console.log(vehicleType)
     },[vehicleType])
-    useEffect(()=>{
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition((position) => {
-                 setPosition([position.coords.latitude,position.coords.longitude])
-            }, () => {
-                console.log("Not able to locate")
-            });
-       }
-    },[])
     useEffect(() => {
         if (alert.msg == "Slot Booked") {
             navigate("/profile")
@@ -150,12 +141,21 @@ const HomePage = () => {
                 setZoomLvl(map.getZoom());
             },
         })
-        var routeControl = L.Routing.control({
-            waypoints:[
-                L.latLng(19.292,73.292),
-                L.latLng(19.19,73.19)
-            ]
-        })
+        useEffect(() => {
+            if(!foundCurrLoc){
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition((position) => {
+                        const loc = [position.coords.latitude, position.coords.longitude]
+                        setPosition(loc)
+                        map.flyTo({ 'lat': loc[0], 'lng': loc[1] }, zoomLvl)
+                    }, () => {
+                        console.log("Not able to locate")
+                    });
+                }
+                setFoundCurrLoc(true)
+            }
+            
+        }, [map])
         // useEffect(() => {
         //     if (!foundCurrLoc) {
         //         map.locate().on("locationfound",(e)=>{
@@ -444,28 +444,6 @@ const HomePage = () => {
                                                 You selected location
                                             </Popup>
                                         </Marker>
-                                        {/* [ '19.2159482', '19.2735184', '73.1183625', '73.1724625' ] */}
-                                        {/* <Marker position={[19.2159482, 73.1183625]}>
-                                            <Popup>
-                                                1
-                                            </Popup>
-                                        </Marker>
-                                        <Marker position={[19.2159482, 73.1724625]}>
-                                            <Popup>
-                                                2
-                                            </Popup>
-                                        </Marker>
-                                        <Marker position={[19.2735184,73.1183625]}>
-                                            <Popup>
-                                                3
-                                            </Popup>
-                                        </Marker>
-                                        <Marker position={[19.2735184,73.1724625]}>
-                                            <Popup>
-                                                4
-                                            </Popup>
-                                        </Marker> */}
-                                        {/* <Polygon positions={polyline}/> */}
                                         <MyMapComponent />
                                     </MapContainer>
                                 </Grid>
@@ -511,14 +489,14 @@ const HomePage = () => {
                                     (sortBy == "distance") ? (
                                         freeParkingLots.map((freeLot) => (
                                             <Grid item xs={12} sm={4}>
-                                                <ParkingLotCard startTime={startTime} endTime={endTime} vehicleType={vehicleType} key={freeLot.id} id={freeLot.id} freeSlots={freeLot.freeSlots} engagedSlots={freeLot.engagedSlots} address={freeLot.address} lat={freeLot.location[0]} lng={freeLot.location[1]} currLoc={position} charges={freeLot.charges} name={freeLot.name} noOfFreeSlots={freeLot.freeSlots.length} distance={parseInt(freeLot.distance)} />
+                                                <ParkingLotCard startTime={startTime} endTime={endTime} vehicleType={vehicleType} lotImages={freeLot.lotImages} key={freeLot.id} id={freeLot.id} freeSlots={freeLot.freeSlots} engagedSlots={freeLot.engagedSlots} address={freeLot.address} lat={freeLot.location[0]} lng={freeLot.location[1]} currLoc={position} charges={freeLot.charges} name={freeLot.name} noOfFreeSlots={freeLot.freeSlots.length} distance={parseInt(freeLot.distance)} />
                                             </Grid>
 
                                         ))
                                     ) : (
                                         [...freeParkingLots].sort((a, b) => a.charges - b.charges).map((freeLot) => (
                                             <Grid item xs={12} sm={4}>
-                                                <ParkingLotCard startTime={startTime} endTime={endTime} vehicleType={vehicleType} key={freeLot.id} id={freeLot.id} freeSlots={freeLot.freeSlots} engagedSlots={freeLot.engagedSlots} address={freeLot.address} lat={freeLot.location[0]} lng={freeLot.location[1]} currLoc={position} charges={freeLot.charges} name={freeLot.name} noOfFreeSlots={freeLot.freeSlots.length} distance={parseInt(freeLot.distance)} />
+                                                <ParkingLotCard startTime={startTime} endTime={endTime} vehicleType={vehicleType} lotImages={freeLot.lotImages}  key={freeLot.id} id={freeLot.id} freeSlots={freeLot.freeSlots} engagedSlots={freeLot.engagedSlots} address={freeLot.address} lat={freeLot.location[0]} lng={freeLot.location[1]} currLoc={position} charges={freeLot.charges} name={freeLot.name} noOfFreeSlots={freeLot.freeSlots.length} distance={parseInt(freeLot.distance)} />
                                             </Grid>
 
                                         ))

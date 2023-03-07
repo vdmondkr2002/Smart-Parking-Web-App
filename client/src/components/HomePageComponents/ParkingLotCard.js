@@ -1,4 +1,4 @@
-import { Box, Button, Card, CardActions, CardContent, CardMedia, Dialog, DialogTitle, FormHelperText, Grid, IconButton, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, Card, CardActions, CardContent, CardMedia, Dialog, DialogTitle, FormHelperText, Grid, IconButton, ImageList, ImageListItem, Stack, TextField, Typography } from "@mui/material";
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { useEffect, useState } from "react";
 import ParkingSlot from "./ParkingSlot";
@@ -12,11 +12,12 @@ import 'leaflet-routing-machine'
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
 import Compress from 'compress.js'
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import CancelIcon from "@mui/icons-material/Cancel";
 
 const initialState = {
     selectedImg:'',vehicleNo:''
 }
-const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, charges, distance, id, freeSlots, engagedSlots, address, lat, lng, currLoc }) => {
+const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, charges, distance, id, freeSlots, engagedSlots, address, lat, lng, currLoc,lotImages }) => {
     const styles = {
         dialog: {
             padding: "2em"
@@ -28,6 +29,7 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
     }
     const [open, setOpen] = useState(false)
     const [open2, setOpen2] = useState(false)
+    const [open3, setOpen3] = useState(false)
     const [parkingSlots, setParkingSlots] = useState([...freeSlots, ...engagedSlots])
     const [formData,setFormData] = useState(initialState)
     const [engagedSllots, setEngagedSllots] = useState(engagedSlots)
@@ -75,6 +77,12 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
         setOpen(true)
     }
 
+    const handleClose = () => {
+        console.log("dialog closed")
+        setChanged('')
+        setOpen(false)
+    }
+
     const handleOpenDialog2 = () => {
         setOpen2(true)
     }
@@ -83,11 +91,19 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
         setOpen2(false)
     }
 
-    const handleClose = () => {
-        console.log("dialog closed")
-        setChanged('')
-        setOpen(false)
+    
+
+    
+
+    const handleClickOpenDialog3 = ()=>{
+        setOpen3(true)
     }
+
+    const handelClickCloseDialog3 = ()=>{
+        setOpen3(false)
+    }
+
+
 
     const redIcon = new L.Icon({
         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
@@ -234,6 +250,15 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
 
                             </Grid>
                             {
+                                lotImages && lotImages.length>0?(
+                                    <Grid item xs={12}>
+                                        <Button fullWidth onClick={handleClickOpenDialog3} variant="contained">Check out photos</Button>
+                                    </Grid>
+                                ):null
+                                
+                            }
+                            
+                            {
                                 [...freeSlots, ...engagedSlots].sort().map((slot) => (
                                     <Grid item xs={2}>
 
@@ -332,6 +357,30 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
                 </form>
 
             </Dialog>
+            <Dialog fullWidth onClose={handelClickCloseDialog3} open={open3}>
+                <Grid container sx={styles.dialog} justifyContent="center">
+                    <Grid item xs={12}>
+                        {
+                            lotImages && lotImages.length>0?(
+                                <ImageList sx={{ width: 500, height:170,margin:"auto" }} cols={lotImages.length} rowHeight={160}>
+                                {lotImages.map((img,index)=>(
+                                    <ImageListItem  key={index}>
+                                        <img src={img}
+                                        srcSet={img}
+                                        alt="Image title"
+                                        loading="lazy"
+                                        />
+                                    </ImageListItem>
+                                ))}
+                                 </ImageList>
+                            ):null
+                            
+                       
+                        }
+                    </Grid>
+                </Grid>
+            </Dialog>
+            
         </>
     )
 }

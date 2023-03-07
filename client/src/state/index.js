@@ -118,7 +118,7 @@ export const asyncgetParkingLot = createAsyncThunk('parkings/getParkingLot',asyn
     console.log(formData)
     try{
         const {data} = await getFreeParkingLots(formData);
-        
+        console.log(formData)
         return {alertData:{msg:data.msg,type:'success'},freeParkingLots:data.freeParkingLots}
     }catch(err){
         if(err.response){
@@ -336,6 +336,7 @@ const authSlice = createSlice({
             state.alert=action.payload
             console.log("In postParking reducer")
         }).addCase(asyncgetParkingLot.fulfilled,(state,action)=>{
+            console.log(action.payload)
             if(action.payload){
                 if(action.payload.msg){
                    state.alert = action.payload
@@ -345,7 +346,7 @@ const authSlice = createSlice({
                 }
             }
             
-            console.log("In postParking reducer")
+            console.log("In get free Parking reducer")
         }).addCase(asyncBookSlot.fulfilled,(state,action)=>{
             state.alert = action.payload
             console.log("In bookslot reducer")

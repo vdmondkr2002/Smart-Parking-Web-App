@@ -32,7 +32,8 @@ const postParkingValidator = joi.object({
     lat:joi.string().required(),
     lng:joi.string().required(),
     openTime:joi.string().required(),
-    closeTime:joi.string().required()
+    closeTime:joi.string().required(),
+    imgFiles:joi.array().required()
 })
 
 const getParkingValidator = joi.object({

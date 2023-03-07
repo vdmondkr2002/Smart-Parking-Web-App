@@ -90,7 +90,7 @@ const ProfilePage = () => {
             }, () => {
                 console.log("Not able to locate")
             });
-       }
+        }
         dispatch(asyncgetBookedSlots())
         dispatch(clearFreeParkingLots())
     }, [])

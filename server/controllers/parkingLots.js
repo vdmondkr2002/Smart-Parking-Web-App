@@ -24,7 +24,7 @@ exports.postParkingLot = async(req,res)=>{
         if(reqUser.role!=="admin"){
             return res.status(401).json({msg:"Unauthorized"})
         }
-        var {parkName,noOfCarSlots,noOfBikeSlots,address,parkingChargesCar,parkingChargesBike,lat,lng,openTime,closeTime} = req.body
+        var {parkName,noOfCarSlots,noOfBikeSlots,address,parkingChargesCar,parkingChargesBike,lat,lng,openTime,closeTime,imgFiles} = req.body
         console.log(parkName,noOfCarSlots,noOfBikeSlots,address,parkingChargesCar,parkingChargesBike,lat,lng,openTime,closeTime)
         
         noOfBikeSlots = parseInt(noOfBikeSlots)
@@ -43,7 +43,7 @@ exports.postParkingLot = async(req,res)=>{
         loc.push(parseFloat(lng))
         const locPoint = {type:'Point',coordinates:loc}
         const newParkingLot = await ParkingLot.create({
-            name:parkName,noOfCarSlots,noOfBikeSlots,address,parkingChargesCar,parkingChargesBike,location:locPoint,openTime:openTime,closeTime:closeTime
+            name:parkName,noOfCarSlots,noOfBikeSlots,address,parkingChargesCar,parkingChargesBike,location:locPoint,openTime:openTime,closeTime:closeTime,lotImages:imgFiles
         })
         console.log(newParkingLot)
         const carParkingSlotsIDs = []
@@ -156,7 +156,7 @@ exports.getParkingLots = async(req,res)=>{
                 if(freeSlots.length>0){
                     // console.log(lot)
                     // console.log({id:lot._id,name:lot.name,charges:lot.parkingChargesBike*periodHours,freeSlots:freeSlots,engagedSlots:engagedSlots,address:lot.address,location:lot.location.coordinates,distance:lot.distance})
-                    freeParkingLots.push({id:lot._id,name:lot.name,charges:lot.parkingChargesBike*periodHours,freeSlots:freeSlots,engagedSlots:engagedSlots,address:lot.address,location:lot.location.coordinates,distance:lot.distance})
+                    freeParkingLots.push({id:lot._id,name:lot.name,charges:lot.parkingChargesBike*periodHours,lotImages:lot.lotImages,freeSlots:freeSlots,engagedSlots:engagedSlots,address:lot.address,location:lot.location.coordinates,distance:lot.distance})
                 }
             })
         }else{
@@ -164,7 +164,7 @@ exports.getParkingLots = async(req,res)=>{
                 const freeSlots = lot.carParkingSlots.filter(slot=>!bookedParkingSlotsIDs.includes(slot._id.toString()))
                 const engagedSlots = lot.carParkingSlots.filter(slot=>bookedParkingSlotsIDs.includes(slot._id.toString()))
                 if(freeSlots.length>0){
-                    freeParkingLots.push({id:lot._id,name:lot.name,charges:lot.parkingChargesCar*periodHours,freeSlots:freeSlots,engagedSlots:engagedSlots,address:lot.address,location:lot.location.coordinates,distance:lot.distance})
+                    freeParkingLots.push({id:lot._id,name:lot.name,charges:lot.parkingChargesCar*periodHours,lotImages:lot.lotImages,freeSlots:freeSlots,engagedSlots:engagedSlots,address:lot.address,location:lot.location.coordinates,distance:lot.distance})
                 }
             })
         }

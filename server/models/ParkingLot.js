@@ -43,6 +43,9 @@ const ParkingLotSchema = mongoose.Schema({
     location:{
         type:PointSchema,
         required:true
+    },
+    lotImages:{
+        type:[String]
     }
 })
 
