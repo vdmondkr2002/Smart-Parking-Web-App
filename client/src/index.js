@@ -6,7 +6,9 @@ import authReducer from './state/index'
 import "leaflet/dist/leaflet.css";
 import L from 'leaflet';
 import icon from 'leaflet/dist/images/marker-icon.png';
+import * as ServiceWorkerRegistration from './serviceWorkerRegistration'
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+import {asyncSubsribeUser} from './Utils/subscription'
 import './index.css'
 
 import App from './App';
@@ -31,3 +33,7 @@ root.render(
     </Provider>
 
 );
+
+ServiceWorkerRegistration.register()
+
+asyncSubsribeUser()

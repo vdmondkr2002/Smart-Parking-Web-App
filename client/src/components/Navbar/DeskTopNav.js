@@ -135,14 +135,19 @@ const DeskTopNav = ()=>{
                             open={Boolean(anchorEl)}
                             onClose={handleAvatarMenuClose}
                             >
-                                <MenuItem onClick={handleAvatarMenuClose}>
-                                <Button component={RouterLink} color="inherit" to="/profile" sx={styles.menuButton}>
-                                    <Typography variant="h6" sx={styles.menuitemText}>
-                                        Profile
-                                    </Typography>
-                                    
-                                </Button>
-                                </MenuItem>
+                                {
+                                    user.role=="user"?(
+                                        <MenuItem onClick={handleAvatarMenuClose}>
+                                            <Button component={RouterLink} color="inherit" to="/profile" sx={styles.menuButton}>
+                                                <Typography variant="h6" sx={styles.menuitemText}>
+                                                    Profile
+                                                </Typography>
+                                                
+                                            </Button>
+                                        </MenuItem>
+                                    ):null
+                                }
+                                
                                 <MenuItem onClick={handleAvatarMenuClose}>
                                 <Button color="inherit" sx={styles.menuButton} onClick={logout}>
                                     <Typography variant="h6" sx={styles.menuitemText}>

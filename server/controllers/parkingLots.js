@@ -13,9 +13,10 @@ exports.postParkingLot = async(req,res)=>{
     }
 
     console.log("In post parking lot")
+    console.log(req.body)
     const {error} = postParkingValidator.validate(req.body)
     if(error){
-        return res.status(400).json({msg:"Please fill in all the fields in proper format"})
+        return res.status(400).json({msg:error.details[0].message})
     }
     try{
         const reqUser = await User.findById(req.userId)
@@ -23,20 +24,26 @@ exports.postParkingLot = async(req,res)=>{
         if(reqUser.role!=="admin"){
             return res.status(401).json({msg:"Unauthorized"})
         }
-        var {parkName,noOfCarSlots,noOfBikeSlots,address,parkingChargesCar,parkingChargesBike,lat,lng} = req.body
-        console.log(parkName,noOfCarSlots,noOfBikeSlots,address,parkingChargesCar,parkingChargesBike,lat,lng)
+        var {parkName,noOfCarSlots,noOfBikeSlots,address,parkingChargesCar,parkingChargesBike,lat,lng,openTime,closeTime} = req.body
+        console.log(parkName,noOfCarSlots,noOfBikeSlots,address,parkingChargesCar,parkingChargesBike,lat,lng,openTime,closeTime)
+        
         noOfBikeSlots = parseInt(noOfBikeSlots)
         console.log(noOfBikeSlots)
         noOfCarSlots = parseInt(noOfCarSlots)
         parkingChargesBike = parseInt(parkingChargesBike)
         parkingChargesCar = parseInt(parkingChargesCar)
+
+        openTime = Number(openTime)
+        closeTime = Number(closeTime)
+        console.log(openTime,closeTime)
+        // return res.status(400).json({msg:"arking Lot Added"})
         console.log("Here")
         const loc = []
         loc.push(parseFloat(lat))
         loc.push(parseFloat(lng))
         const locPoint = {type:'Point',coordinates:loc}
         const newParkingLot = await ParkingLot.create({
-            name:parkName,noOfCarSlots,noOfBikeSlots,address,parkingChargesCar,parkingChargesBike,location:locPoint
+            name:parkName,noOfCarSlots,noOfBikeSlots,address,parkingChargesCar,parkingChargesBike,location:locPoint,openTime:openTime,closeTime:closeTime
         })
         console.log(newParkingLot)
         const carParkingSlotsIDs = []
@@ -76,11 +83,12 @@ exports.getParkingLots = async(req,res)=>{
         }
         console.log(req.query)
         var {lat,lng,startTime,endTime,vehicleType} = req.query;
-
+        console.log(startTime,endTime)
         lat = parseFloat(lat)
         lng = parseFloat(lng)
         
-        console.log("here")
+        hrs1 = new Date(startTime).getHours()
+        hrs2 = new Date(endTime).getHours()
         const parkingLots = await ParkingLot.aggregate([
         
             {
@@ -93,8 +101,18 @@ exports.getParkingLots = async(req,res)=>{
                     "spherical":true,
                     "maxDistance":2000
                 },
-            }
+                
+            },
+            {$match:{
+                openTime:{
+                    $lte:hrs1
+                },
+                closeTime:{
+                    $gte:hrs2
+                }
+            }}
         ])
+        // return res.status(400).json({msg:"Free parking lots returned"})
         // let url = "https://nominatim.openstreetmap.org/reverse?format=jsonv2"+"&lat="+lat+"&lon="+lng;
         // const response = await axios.get(url,{headers:{'Access-Control-Allow-Origin':'https://o2cj2q.csb.app',mode:'cors'}})
 
@@ -169,10 +187,14 @@ exports.bookSlot = async(req,res)=>{
         if(error){
             return res.status(400).json({msg:error.details[0].message})
         }
-
         
-        const {lotId,slotId,startTime,endTime,vehicleType} = req.body
-        console.log(lotId,slotId,startTime,endTime,vehicleType)
+        
+        const {lotId,slotId,startTime,endTime,vehicleType,carImg,vehicleNo} = req.body
+        console.log(lotId,slotId,startTime,endTime,vehicleType,vehicleNo)
+        const user = await User.findById(req.userId)
+        if(!user.profilePic){
+            return res.status(400).json({msg:"Please Upload a profile photo first for verification"})
+        }
         const storebookingStart = new Date(startTime).getTime()
         const storebookingEnd = new Date(endTime).getTime()
         const date = new Date()
@@ -192,17 +214,26 @@ exports.bookSlot = async(req,res)=>{
             endTime:{
                 $gte:Date.now()
             },
-            vehicleType:vehicleType
+            vehicleType:vehicleType,
+            booker:req.userId
         })
 
-        const myBooked = futureBookedParkingSlots.filter(slot=>slot.booker==req.userId)
-
-        if(myBooked.length>0){
+        if(futureBookedParkingSlots.length>0){
             return res.status(400).json({msg:"You have already booked a slot"})
         }
 
+        const vehicleBookedSlots = await BookedTimeSlot.find({
+            vehicleNo:vehicleNo
+        })
+        if(vehicleBookedSlots.length>0){
+            return res.status(400).json({msg:"This car already has an active slot booked"})
+        }
+
+
         const bookedSlot = await BookedTimeSlot.create({
-            startTime:storebookingStart,endTime:storebookingEnd,parkingSlot:mongoose.Types.ObjectId(slotId),parkingLot:mongoose.Types.ObjectId(lotId),booker:req.userId,vehicleType:vehicleType
+            startTime:storebookingStart,endTime:storebookingEnd,parkingSlot:mongoose.Types.ObjectId(slotId),
+            parkingLot:mongoose.Types.ObjectId(lotId),booker:req.userId,vehicleType:vehicleType,
+            carImage:carImg,vehicleNo:vehicleNo
         })
          
         return res.status(200).json({msg:"Slot Booked"})
@@ -243,6 +274,7 @@ exports.getBookedTimeSlots = async(req,res)=>{
         
         console.log(bookedTimeSlots)
         bookedTimeSlots = bookedTimeSlots.map(timeSlot=>{
+            delete timeSlot._doc.carImage
             // {...timeSlot,charges:((timeSlot.endTime-timeSlot.startTime)/1000*60*60)*timeSlot.parkingLot.}
             if(timeSlot.vehicleType=="Bike"){
                 const charges= ((timeSlot.endTime-timeSlot.startTime)/(1000*60*60))*parkingLotMap[timeSlot.parkingLot].parkingChargesBike

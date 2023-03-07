@@ -4,6 +4,7 @@ const { generateOTP } = require("../Utils/generateOTP")
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const sendEmail = require('../Utils/sendEmail')
+const webpush = require('web-push')
 
 const createUser = async (formData) => {
 
@@ -21,10 +22,12 @@ const createUser = async (formData) => {
         console.log("otp generated", otpGenerated)
         //save the user in database
 
+        
         const newUser = await User.create({
             email: formData.email, password: hashedPassword,
             firstName: formData.firstName, lastName: formData.lastName,
             userName: formData.userName, mobileNo: formData.mobileNo,
+            profilePic: formData.selectedImg,
             createdAt: new Date().toISOString(),
             otp: otpGenerated
         })
@@ -57,10 +60,6 @@ const createUser = async (formData) => {
         return { badMsg: "Failed to create" }
     }
 
-}
-exports.signUp = async (req, res) => {
-    console.log("request received")
-    return res.status(200).send({ msg: "Success" })
 }
 
 exports.sendOTP = async (req, res) => {
@@ -190,7 +189,7 @@ exports.getCurrentUser = async (req, res) => {
 
         const user = await User.findById(req.userId)
         console.log("User->", user)
-        return res.status(200).json({ firstName: user.firstName, lastName: user.lastName, userName: user.userName, _id: user._id, email: user.email, role: user.role })
+        return res.status(200).json({ firstName: user.firstName, lastName: user.lastName, userName: user.userName, _id: user._id, email: user.email, mobileNo:user.mobileNo, role: user.role,profilePic:user.profilePic })
     } catch (err) {
         return res.status(500).json({ msg: "Something went wrong.." })
     }
@@ -217,4 +216,50 @@ exports.sendFeedback = async (req, res) => {
     } catch (err) {
         return res.status(500).json({ msg: "Something went wrong.." })
     }
+}
+
+exports.setProfilePic = async(req,res)=>{
+    if(!req.userId)
+        return res.status(401).json({msg:"Unauthorized"})
+    
+    try{
+
+        if(!req.body.selectedImg){
+            return res.status(400).json({msg:"Please upload a picture first"})
+        }
+
+
+        const {selectedImg} = req.body
+
+        
+        const updatedUser = await User.findOneAndUpdate({_id:req.userId},{profilePic:selectedImg},{new:true})
+        return res.status(200).json({msg:"Profile image updated succesfully"})
+    }catch(err){
+        return res.status(500).json({msg:"Something went wrong.."})
+    }
+}
+
+exports.sendSubcription = async(req,res)=>{
+    if(!req.userId){
+        return res.status(201).json({msg:"Unauthorized"})
+    }
+    try{
+        console.log(req.body)
+        const subcriptionData = req.body;
+        console.log(subcriptionData)
+        // const payload = JSON.stringify({
+        //     title:'Helo',
+        //     body:"It's working now"
+        // })
+        const updatedUser = await User.findOneAndUpdate({_id:req.userId},{subscription:subcriptionData},{new:true})
+        // const result = await webpush.sendNotification(subcription,payload)
+
+        // console.log(result)
+        return res.status(200).json({'success':true})
+    }catch(e){
+        return res.status(500).json({msg:"Something went wrong.."})
+    }
+    
+
+    
 }

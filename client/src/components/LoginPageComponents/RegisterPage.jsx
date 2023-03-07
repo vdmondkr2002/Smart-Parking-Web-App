@@ -9,13 +9,17 @@ import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } 
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useTheme } from "@emotion/react";
-import { asyncsendOTP, asyncsignUp, asyncverifyEmail } from '../../state/index'
+import * as faceapi from 'face-api.js'
+import canvas from 'canvas'
+import { asyncsendOTP, asyncsignUp, asyncverifyEmail, setAlert } from '../../state/index'
 import signUpImg from '../../images/secure_signup.svg'
 import enterOtpImg from '../../images/enter_otp.svg'
 import Alert from "../../Utils/Alert";
+import Compress from 'compress.js'
+import PhotoCamera from "@mui/icons-material/PhotoCamera";
 
 const initialState = {
-    userName: '', email: '', mobileNo: '', confirmPassword: '', password: '', firstName: '', lastName: '', otp: ''
+    userName: '', email: '', mobileNo: '', confirmPassword: '', password: '', firstName: '', lastName: '', otp: '',selectedImg:''
 }
 
 
@@ -25,7 +29,7 @@ const RegisterPage = () => {
         formCont: {
             marginTop: "5em",
             width: "auto",
-            marginBottom:"5em"
+            marginBottom: "5em"
         },
         titlePaper: {
             display: "flex",
@@ -104,10 +108,11 @@ const RegisterPage = () => {
     const [otpSent, setOtpSent] = useState(false);
     const [alreadyotp, setAlreadyOTP] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
-
+    const [detected,setDetected] = useState(false)
+    const [imgFIleName, setImgFIlename] = useState('')
     const dispatch = useDispatch()
     const navigate = useNavigate()
-
+    const compress = new Compress()
     const alert = useSelector(state => state.auth.alert)
     const user = useSelector(state => state.auth.user)
 
@@ -132,7 +137,13 @@ const RegisterPage = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!otpSent) {
-            dispatch(asyncsendOTP(formData))
+            if(formData.selectedImg==''){
+                dispatch(asyncsendOTP({userName: formData.userName, email: formData.email, mobileNo: formData.mobileNo, confirmPassword: formData.confirmPassword, 
+                    password:formData.password, firstName:formData.firstName, lastName: formData.lastName, otp: formData.otp}))
+            }else{
+                dispatch(asyncsendOTP(formData))
+            }
+            
         } else {
             dispatch(asyncverifyEmail(formData))
         }
@@ -167,6 +178,37 @@ const RegisterPage = () => {
     const handleAlreadyOTP = () => {
         setOtpSent(true)
         setAlreadyOTP(true)
+    }
+
+    const handleUploadClick = async(e)=>{
+        console.log(e)
+        const imgFile = e.target.files[0]
+        console.log(imgFile)
+
+        if (!["image/png", "image/jpeg"].includes(imgFile.type)) {
+            dispatch(setAlert({ msg: "Only jpg/jpeg/png file allowed to upload", type: "error" }))
+            return
+        }
+        
+        const imageData = await compress.compress([imgFile],{size:0.2,quality:0.5})
+        const compressedImg = imageData[0].prefix + imageData[0].data;
+        const testImg = await canvas.loadImage(compressedImg)
+        const myCanvas = canvas.createCanvas(200,200)
+        const ctx = myCanvas.getContext('2d')
+        ctx.drawImage(testImg, 0, 0, 200, 200)
+        console.log(testImg)
+        // console.log(myCanvas instanceof HTMLCanvasElement)
+        console.log(myCanvas instanceof HTMLCanvasElement)
+        const detections = await faceapi.detectSingleFace(myCanvas).withFaceLandmarks()
+        console.log(detections)
+        if(detections===undefined){
+            dispatch(setAlert({ msg: "Please select a photo with face clearly visible", type: "error" }))
+            return
+        }
+        setImgFIlename(imgFile.name)
+        // console.log(compressedImg)
+        setFormData({...formData,selectedImg:compressedImg})
+        
     }
     return (
         <Grow in>
@@ -284,6 +326,7 @@ const RegisterPage = () => {
                                                                 <OutlinedInput
                                                                     id="password"
                                                                     name="password"
+                                                                    label="Password"
                                                                     type={showPassword1 ? 'text' : 'password'}
                                                                     value={formData.password}
                                                                     onChange={handleChange}
@@ -310,6 +353,7 @@ const RegisterPage = () => {
                                                                 <OutlinedInput
                                                                     id="confirmPassword"
                                                                     name="confirmPassword"
+                                                                    label="Confirm Your Password"
                                                                     type={showPassword2 ? 'text' : 'password'}
                                                                     value={formData.confirmPassword}
                                                                     onChange={handleChange}
@@ -333,7 +377,32 @@ const RegisterPage = () => {
                                                     </>
                                                 ) : null
                                             }
+                                            <Grid item sm={12} xs={12} sx={styles.ipFields}>
+                                                <Typography variant="h5" display="inline">Add a Photo of Yourself:</Typography>
+                                                <Button variant="contained" sx={{ marginLeft: "1em" }} component="label">
+                                                    Upload
+                                                    <input hidden accept="image/*" type="file" onChange={handleUploadClick} />
+                                                </Button>
+                                                <IconButton color="primary" aria-label="Upload picture" component="label">
+                                                    <input hidden accept="image/*" type="file" onChange={handleUploadClick} />
+                                                    <PhotoCamera />
+                                                </IconButton>
+                                                {
+                                                    imgFIleName !== '' ? (
+                                                        <>
+                                                            <Box border="1px solid black">
+                                                                <Typography>
+                                                                    {imgFIleName}
+                                                                </Typography>
+                                                            </Box>
+                                                            <img src={formData.selectedImg} width="50%" />
+                                                        </>
+                                                    ) : null
+                                                }
 
+
+                                                <FormHelperText required children="*Only jpg/jpeg/png file allowed to upload" />
+                                            </Grid>
                                             {
                                                 otpSent ? (
                                                     <Grid item sm={12} sx={styles.otpField}>
@@ -401,6 +470,7 @@ const RegisterPage = () => {
                                                 onClick={handleClickSignIn}>Sign In</Button>
                                         </Typography>
                                     </Box>
+
                                 </Grid>
                             </Grid>
 

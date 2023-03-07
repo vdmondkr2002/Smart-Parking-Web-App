@@ -19,6 +19,18 @@ const BookedTimeSlotSchema = mongoose.Schema({
     vehicleType:{
         type:String,
         required:true
+    },
+    vehicleNo:{
+        type:String,
+        required:true
+    },
+    carImage:{
+        type:String,
+        required:true
+    },
+    notified:{
+        type:Boolean,
+        default:false
     }
 })
 

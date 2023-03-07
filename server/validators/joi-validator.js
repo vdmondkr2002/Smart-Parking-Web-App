@@ -8,7 +8,8 @@ const sendOTPValidator = joi.object({
     email:joi.string().required().email(),
     password:joi.string().min(6).required(),
     confirmPassword:joi.string().min(6).required(),
-    otp:joi.string().optional()
+    otp:joi.string().optional(),
+    selectedImg:joi.string().optional()
 })
 
 const loginValidator = joi.object({
@@ -29,7 +30,9 @@ const postParkingValidator = joi.object({
     parkingChargesCar:joi.string().required(),
     parkingChargesBike:joi.string().required(),
     lat:joi.string().required(),
-    lng:joi.string().required()
+    lng:joi.string().required(),
+    openTime:joi.string().required(),
+    closeTime:joi.string().required()
 })
 
 const getParkingValidator = joi.object({
@@ -45,7 +48,9 @@ const bookSlotValidator = joi.object({
     lotId:joi.string().required(),
     startTime:joi.string().required(),
     endTime:joi.string().required(),
-    vehicleType:joi.string().required()
+    vehicleType:joi.string().required(),
+    vehicleNo:joi.string().required(),
+    carImg:joi.string().required()
 })
 
 const feedbackValidator = joi.object({

@@ -1,58 +1,70 @@
-import { Button, Card, CardActions, CardContent, CardMedia, Dialog, DialogTitle, Grid, Typography } from "@mui/material";
+import { Box, Button, Card, CardActions, CardContent, CardMedia, Dialog, DialogTitle, FormHelperText, Grid, IconButton, Stack, TextField, Typography } from "@mui/material";
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { useEffect, useState } from "react";
 import ParkingSlot from "./ParkingSlot";
-import { asyncBookSlot } from "../../state";
+import { asyncBookSlot, setAlert } from "../../state";
 import { useDispatch } from "react-redux";
-import { useMapEvents, MapContainer, Marker, Popup, TileLayer,Polyline,Polygon } from "react-leaflet"
+import PhotoCamera from '@mui/icons-material/PhotoCamera';
+import { useMapEvents, MapContainer, Marker, Popup, TileLayer, Polyline, Polygon } from "react-leaflet"
 import L from 'leaflet'
 import ForwardIcon from '@mui/icons-material/Forward';
 import 'leaflet-routing-machine'
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
-
+import Compress from 'compress.js'
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
-const ParkingLotCard = ({ vehicleType,startTime,endTime,name, noOfFreeSlots, charges, distance, id, freeSlots, engagedSlots, address, lat, lng ,currLoc}) => {
+const initialState = {
+    selectedImg:'',vehicleNo:''
+}
+const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, charges, distance, id, freeSlots, engagedSlots, address, lat, lng, currLoc }) => {
     const styles = {
-        dialog:{
-            padding:"2em"
-        }
+        dialog: {
+            padding: "2em"
+        },
+        ipFields: {
+            flexGrow: 1,
+            padding: "1em"
+        },
     }
     const [open, setOpen] = useState(false)
-    const [parkingSlots,setParkingSlots] = useState([...freeSlots,...engagedSlots])
-    const [engagedSllots,setEngagedSllots] = useState(engagedSlots)
-    const [changed,setChanged] = useState('')
-    const [prevChanged,setPrevChanged] = useState('')
-    const [position,setPosition] = useState([(currLoc[0]+lat)/2,(currLoc[1]+lng)/2])
-    const [map,setMap] = useState()
-    const [zoomLvl,setZoomLvl] = useState(13)
-
+    const [open2, setOpen2] = useState(false)
+    const [parkingSlots, setParkingSlots] = useState([...freeSlots, ...engagedSlots])
+    const [formData,setFormData] = useState(initialState)
+    const [engagedSllots, setEngagedSllots] = useState(engagedSlots)
+    const [changed, setChanged] = useState('')
+    const [imgFIleName, setImgFIlename] = useState('')
+    const [prevChanged, setPrevChanged] = useState('')
+    const [position, setPosition] = useState([(currLoc[0] + lat) / 2, (currLoc[1] + lng) / 2])
+    const [map, setMap] = useState()
+    const [vehicleNumber, setVehicleNumber] = useState('')
+    const [zoomLvl, setZoomLvl] = useState(13)
+    const compress = new Compress()
 
     const dispatch = useDispatch()
-    useEffect(()=>{
-        setParkingSlots([...freeSlots,...engagedSlots])
+    useEffect(() => {
+        setParkingSlots([...freeSlots, ...engagedSlots])
         setParkingSlots(parkingSlots.sort())
         console.log(freeSlots)
-    },[open])
-
-    
+    }, [open])
 
 
-    const MyMapComponent = ()=>{
+
+
+    const MyMapComponent = () => {
         const map = useMapEvents({
 
         })
 
-        useEffect(()=>{
+        useEffect(() => {
             L.Routing.control({
-                waypoints:[
-                    L.latLng(currLoc[0],currLoc[1]),
-                    L.latLng(lat,lng)
-                ],createMarker:()=>null
-                
+                waypoints: [
+                    L.latLng(currLoc[0], currLoc[1]),
+                    L.latLng(lat, lng)
+                ], createMarker: () => null
+
             }).addTo(map)
-            
-        },[map])
+
+        }, [map])
     }
 
     const handleShowDetails = () => {
@@ -61,6 +73,14 @@ const ParkingLotCard = ({ vehicleType,startTime,endTime,name, noOfFreeSlots, cha
 
         console.log(parkingSlots)
         setOpen(true)
+    }
+
+    const handleOpenDialog2 = () => {
+        setOpen2(true)
+    }
+
+    const handleCloseDialog2 = () => {
+        setOpen2(false)
     }
 
     const handleClose = () => {
@@ -87,9 +107,40 @@ const ParkingLotCard = ({ vehicleType,startTime,endTime,name, noOfFreeSlots, cha
         shadowSize: [41, 41]
     });
 
-    const handleBookSlot = ()=>{
+    const handleBookSlot = () => {
+        console.log(changed, id, startTime, endTime, vehicleType)
+        const data = { startTime: startTime.format('YYYY-MM-DD HH:00'), endTime: endTime.format('YYYY-MM-DD HH:00'), lotId: id, slotId: changed, vehicleType: vehicleType }
+        console.log(data)
+        dispatch(asyncBookSlot(data))
+    }
+    const handleChangeForm = (e) => {
+        setFormData({...formData,[e.target.name]:e.target.value})
+    }
+
+    const handleUploadClick = async(e) => {
+        console.log(e)
+        const imgFile = e.target.files[0]
+        console.log(imgFile)
+
+        if (!["image/png", "image/jpeg"].includes(imgFile.type)) {
+            dispatch(setAlert({ msg: "Only jpg/jpeg/png file allowed to upload", type: "error" }))
+            return
+        }
+        setImgFIlename(imgFile.name)
+        const imageData = await compress.compress([imgFile],{size:0.2,quality:0.5})
+        const compressedImg = imageData[0].prefix + imageData[0].data;
+        console.log(compressedImg)
+        setFormData({...formData,selectedImg:compressedImg})
+    }
+
+    const handleConfirmSlot = (e)=>{
+        e.preventDefault()
+        console.log("slot confirming...")
+        console.log(formData)
         console.log(changed,id,startTime,endTime,vehicleType)
-        const data = {startTime:startTime.format('YYYY-MM-DD HH:00'), endTime: endTime.format('YYYY-MM-DD HH:00'), lotId:id,slotId:changed,vehicleType:vehicleType}
+        const data = { startTime: startTime.format('YYYY-MM-DD HH:00'), endTime: endTime.format('YYYY-MM-DD HH:00'), 
+                        lotId: id, slotId: changed, vehicleType: vehicleType,
+                       vehicleNo:formData.vehicleNo,carImg: formData.selectedImg}
         console.log(data)
         dispatch(asyncBookSlot(data))
     }
@@ -126,18 +177,6 @@ const ParkingLotCard = ({ vehicleType,startTime,endTime,name, noOfFreeSlots, cha
                             {distance} m
                         </Grid>
                     </Grid>
-
-                    {/* <Typography variant="h5">
-                    <PaidIcon />
-                     {charges}
-                </Typography>
-
-                <Typography variant="h5">
-                    : {noOfFreeBikeSlots}
-                </Typography>
-                <Typography variant="h5">
-                    Distance: {distance}
-                </Typography> */}
                 </CardContent>
                 <CardActions>
                     <Button variant="contained" onClick={handleShowDetails} fullWidth>Show Details</Button>
@@ -147,94 +186,151 @@ const ParkingLotCard = ({ vehicleType,startTime,endTime,name, noOfFreeSlots, cha
 
                 <Grid container>
                     <Grid item sm={5}>
-                    <Grid sx={styles.dialog} container spacing={2} alignItems="center" >
-                    <Grid item xs={2}>
-                        <LocationOnIcon fontSize="large" />
-                    </Grid>
-                    <Grid item xs={10}>
-                        <Typography variant="h4" component="div" fontWeight="bold" gutterBottom>
-                            {name}
-                        </Typography>
-                    </Grid>
-                    <Grid item xs={4} sx={{ fontWeight: "bold" }}>
-                        Time Slot For Booking:
-                    </Grid>
-                    <Grid item xs={8}>
-                        <Grid container>
+                        <Grid sx={styles.dialog} container spacing={2} alignItems="center" >
                             <Grid item xs={2}>
-                                <AccessTimeIcon fontSize="large"/> 
+                                <LocationOnIcon fontSize="large" />
                             </Grid>
                             <Grid item xs={10}>
-                                <Typography variant="h6">
-                                    {startTime.format('DD MMM hh:00 A')} - {endTime.format('DD MMM hh:00 A')}
+                                <Typography variant="h4" component="div" fontWeight="bold" gutterBottom>
+                                    {name}
                                 </Typography>
-                                
+                            </Grid>
+                            <Grid item xs={4} sx={{ fontWeight: "bold" }}>
+                                Time Slot For Booking:
+                            </Grid>
+                            <Grid item xs={8}>
+                                <Grid container>
+                                    <Grid item xs={2}>
+                                        <AccessTimeIcon fontSize="large" />
+                                    </Grid>
+                                    <Grid item xs={10}>
+                                        <Typography variant="h6">
+                                            {startTime.format('DD MMM hh:00 A')} - {endTime.format('DD MMM hh:00 A')}
+                                        </Typography>
+
+                                    </Grid>
+                                </Grid>
+
+                            </Grid>
+                            <Grid item xs={8} sm={4} sx={{ fontWeight: "bold" }}>
+                                Total Charges:
+                            </Grid>
+                            <Grid item xs={4} sm={2}>
+                                {charges}
+                            </Grid>
+                            <Grid item xs={8} sm={4} sx={{ fontWeight: "bold" }}>
+                                Free Slots:
+                            </Grid>
+                            <Grid item xs={4} sm={2}>
+                                {noOfFreeSlots}
+                            </Grid>
+                            <Grid item xs={8} sm={4} sx={{ fontWeight: "bold" }}>
+                                Expected Distance:
+                            </Grid>
+                            <Grid item xs={4} sm={2}>
+                                {distance} m
+                            </Grid>
+                            <Grid item xs={6}>
+
+                            </Grid>
+                            {
+                                [...freeSlots, ...engagedSlots].sort().map((slot) => (
+                                    <Grid item xs={2}>
+
+                                        {engagedSllots.includes(slot) ? <ParkingSlot prevChanged={prevChanged} setPrevChanged={setPrevChanged} setChanged={setChanged} changed={changed} id={slot} booked={true} /> : <ParkingSlot prevChanged={prevChanged} setPrevChanged={setPrevChanged} setChanged={setChanged} changed={changed} id={slot} booked={false} />}
+
+                                    </Grid>
+                                ))
+                            }
+                            <Grid item xs={12}>
+                                <Button fullWidth onClick={handleOpenDialog2} variant="contained">Book Slot</Button>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <Typography variant="body">
+                                    * You can take a screenshot of the map on right for reference
+                                </Typography>
                             </Grid>
                         </Grid>
-                        
-                    </Grid>
-                    <Grid item xs={8} sm={4} sx={{ fontWeight: "bold" }}>
-                        Total Charges:
-                    </Grid>
-                    <Grid item xs={4} sm={2}>
-                        {charges}
-                    </Grid>
-                    <Grid item xs={8} sm={4} sx={{ fontWeight: "bold" }}>
-                        Free Slots:
-                    </Grid>
-                    <Grid item xs={4} sm={2}>
-                        {noOfFreeSlots}
-                    </Grid>
-                    <Grid item xs={8} sm={4} sx={{ fontWeight: "bold" }}>
-                        Expected Distance:
-                    </Grid>
-                    <Grid item xs={4} sm={2}>
-                        {distance} m
-                    </Grid>
-                    <Grid item xs={6}>
-
-                    </Grid>
-                    {
-                        [...freeSlots,...engagedSlots].sort().map((slot)=>(
-                            <Grid item xs={2}>
-                                
-                                    {engagedSllots.includes(slot)?<ParkingSlot prevChanged={prevChanged} setPrevChanged={setPrevChanged} setChanged={setChanged}  changed={changed} id={slot} booked={true}/>:<ParkingSlot prevChanged={prevChanged} setPrevChanged={setPrevChanged}  setChanged={setChanged}  changed={changed} id={slot} booked={false}/>}
-                                
-                            </Grid>
-                        ))
-                    }
-                    <Grid item xs={12}>
-                        <Button fullWidth onClick={handleBookSlot} variant="contained">Book Slot</Button>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Typography variant="body">
-                            * You can take a screenshot of the map on right for reference 
-                        </Typography>
-                    </Grid>
-                </Grid>
                     </Grid>
                     <Grid item sm={7}>
-                        <MapContainer style={{ height: "400px",width:"100%" }} center={position} zoom={zoomLvl} >
-                            
+                        <MapContainer style={{ height: "400px", width: "100%" }} center={position} zoom={zoomLvl} >
+
                             <TileLayer
-                                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                        />
+                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            />
                             <Marker icon={redIcon} position={currLoc}>
-                                            <Popup>
-                                                You selected location
-                                            </Popup>
-                                        </Marker>
-                                        <Marker icon={greenIcon} position={[lat,lng]}>
-                                            <Popup>
-                                                {name}
-                                            </Popup>
-                                        </Marker>
-                            <MyMapComponent/>
+                                <Popup>
+                                    You selected location
+                                </Popup>
+                            </Marker>
+                            <Marker icon={greenIcon} position={[lat, lng]}>
+                                <Popup>
+                                    {name}
+                                </Popup>
+                            </Marker>
+                            <MyMapComponent />
                         </MapContainer>
                     </Grid>
                 </Grid>
-                
+
+            </Dialog>
+
+            <Dialog fullWidth onClose={handleCloseDialog2} open={open2}>
+                <form autoComplete="off" noValidate sx={styles.form} onSubmit={handleConfirmSlot}>
+                    <Grid container sx={styles.dialog} justifyContent="center">
+                        <Grid item xs={12} textAlign="center">
+                            <Typography variant="h4" fontWeight="bold">
+                                Just one more step before you confirm your slot
+                            </Typography>
+                        </Grid>
+
+                        <Grid item sm={12} xs={12} sx={styles.ipFields}>
+                            <TextField
+                                name="vehicleNo"
+                                type="text"
+                                variant="outlined"
+                                required
+                                fullWidth
+                                label={`Enter The Number on ${vehicleType}`}
+                                onChange={handleChangeForm}
+                                value={formData.vehicleNo}
+                            />
+                            <FormHelperText required variant="outlined" children="Check the number plate on your vehicle and then enter" />
+                        </Grid>
+
+                        <Grid item sm={12} xs={12} sx={styles.ipFields}>
+                            <Typography variant="h5" display="inline">Add a Photo of your Car:</Typography>
+                            <Button variant="contained" sx={{ marginLeft: "1em" }} component="label">
+                                Upload
+                                <input hidden accept="image/*" type="file" onChange={handleUploadClick} />
+                            </Button>
+                            <IconButton color="primary" aria-label="Upload picture" component="label">
+                                <input hidden accept="image/*" type="file" onChange={handleUploadClick} />
+                                <PhotoCamera />
+                            </IconButton>
+                            {
+                                imgFIleName !== '' ? (
+                                    <>
+                                    <Box border="1px solid black">
+                                        <Typography>
+                                            {imgFIleName}
+                                        </Typography>
+                                    </Box>
+                                    <img src={formData.selectedImg} width="50%"/>
+                                    </>
+                                ) : null
+                            }
+
+
+                            <FormHelperText required children="*Only jpg/jpeg/png file allowed to upload" />
+                        </Grid>
+                        <Grid item xs={12} sx={styles.ipFields}>
+                            <Button fullWidth type="submit" variant="contained">Confirm Slot</Button>
+                        </Grid>
+                    </Grid>
+                </form>
+
             </Dialog>
         </>
     )

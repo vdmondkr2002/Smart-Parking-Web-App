@@ -1,15 +1,15 @@
 import AccessTimeIcon from "@mui/icons-material/AccessTime"
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import { Button, Card, CardActions, CardContent, Dialog, Grid, Paper, Typography,useTheme } from "@mui/material"
+import { Button, Card, CardActions, CardContent, Dialog, Grid, Paper, Typography, useTheme } from "@mui/material"
 import { useMapEvents, MapContainer, Marker, Popup, TileLayer, Polyline, Polygon } from "react-leaflet"
 import { useEffect, useState } from "react"
 import L from 'leaflet'
 
-const BookedSlotCard = ({ name, charges, startTime, endTime, vehicleType, bookerName, lat, lng, currLoc,address }) => {
+const BookedSlotCard = ({ name, charges, startTime, endTime, vehicleType, bookerName, lat, lng, currLoc, address, vehicleNo }) => {
     const theme = useTheme()
     const styles = {
-        dialog:{
-            padding:"2em"
+        dialog: {
+            padding: "2em"
         }
     }
     const [open, setOpen] = useState(false)
@@ -42,9 +42,6 @@ const BookedSlotCard = ({ name, charges, startTime, endTime, vehicleType, booker
         shadowSize: [41, 41]
     });
 
-    useEffect(() => {
-        console.log(currLoc, lat, lng)
-    }, [open])
     const MyMapComponent = () => {
         const map = useMapEvents({
 
@@ -67,7 +64,7 @@ const BookedSlotCard = ({ name, charges, startTime, endTime, vehicleType, booker
         <>
             <Card sx={{ maxWidth: 320, minHeight: 300 }}>
                 <CardContent >
-                    <Grid container spacing={2} alignItems="center" justifyContent="end">
+                    <Grid container spacing={2} alignItems="center" justifyContent="end" sx={{ padding: "0.3em" }}>
                         {name ? (
                             <>
                                 <Grid item xs={2}>
@@ -80,7 +77,7 @@ const BookedSlotCard = ({ name, charges, startTime, endTime, vehicleType, booker
                                 </Grid>
                             </>
                         ) : null}
-                        
+
                         <Grid item xs={8} sx={{ fontWeight: "bold" }}>
                             Total Charges:
                         </Grid>
@@ -93,6 +90,27 @@ const BookedSlotCard = ({ name, charges, startTime, endTime, vehicleType, booker
                         <Grid item xs={4}>
                             {vehicleType}
                         </Grid>
+                        <Grid item xs={8} sx={{ fontWeight: "bold" }}>
+                            Vehicle Number:
+                        </Grid>
+                        {
+                            vehicleNo ? (
+                                <>
+
+                                    <Grid item xs={4}>
+                                        {vehicleNo}
+                                    </Grid>
+                                </>
+                            ) : (
+                                <>
+
+                                    <Grid item xs={4}>
+
+                                    </Grid>
+                                </>
+                            )
+                        }
+
                         {
                             bookerName ? (
                                 <>
@@ -128,80 +146,98 @@ const BookedSlotCard = ({ name, charges, startTime, endTime, vehicleType, booker
             <Dialog maxWidth='lg' fullWidth onClose={handleClose} open={open} sx={styles.dialog}>
                 <Grid container alignItems="center" justifyContent="center">
                     <Grid item sm={5}>
-                        <Paper sx={{backgroundColor:theme.palette.primary.dark,color:"white",borderRadius:"10px",width:"80%",margin:"auto",boxShadow:"10px 5px 5px gray"}}>
-                        <Grid sx={styles.dialog} container spacing={2} alignItems="center" >
-                            <Grid item xs={2}>
-                                <LocationOnIcon fontSize="large" />
-                            </Grid>
-                            <Grid item xs={10}>
-                                <Typography variant="h4" component="div" fontWeight="bold" gutterBottom>
-                                    {name}
-                                </Typography>
-                            </Grid>
-                            <Grid item >
-                                {address}
-                            </Grid>
-                            <Grid item xs={4} sx={{ fontWeight: "bold" }}>
-                                Time Slot For Booking:
-                            </Grid>
-                            <Grid item xs={8}>
-                                <Grid container>
-                                    <Grid item xs={2}>
-                                        <AccessTimeIcon fontSize="large" />
-                                    </Grid>
-                                    <Grid item xs={10}>
-                                        <Typography variant="h6">
-                                            {startTime.format('DD MMM hh:00 A')} - {endTime.format('DD MMM hh:00 A')}
-                                        </Typography>
-
-                                    </Grid>
+                        <Paper sx={{ backgroundColor: theme.palette.primary.dark, color: "white", borderRadius: "10px", width: "80%", margin: "auto", boxShadow: "10px 5px 5px gray" }}>
+                            <Grid sx={styles.dialog} container spacing={2} alignItems="center" >
+                                <Grid item xs={2}>
+                                    <LocationOnIcon fontSize="large" />
                                 </Grid>
+                                <Grid item xs={10}>
+                                    <Typography variant="h4" component="div" fontWeight="bold" gutterBottom>
+                                        {name}
+                                    </Typography>
+                                </Grid>
+                                <Grid item >
+                                    {address}
+                                </Grid>
+                                <Grid item xs={4} sx={{ fontWeight: "bold" }}>
+                                    Time Slot For Booking:
+                                </Grid>
+                                <Grid item xs={8}>
+                                    <Grid container>
+                                        <Grid item xs={2}>
+                                            <AccessTimeIcon fontSize="large" />
+                                        </Grid>
+                                        <Grid item xs={10}>
+                                            <Typography variant="h6">
+                                                {startTime.format('DD MMM hh:00 A')} - {endTime.format('DD MMM hh:00 A')}
+                                            </Typography>
+
+                                        </Grid>
+                                    </Grid>
+
+                                </Grid>
+                                <Grid item xs={4} sx={{ fontWeight: "bold" }}>
+                                    Total Charges:
+                                </Grid>
+                                <Grid item xs={2} >
+                                    {charges}
+                                </Grid>
+                                {/* <Grid item xs={6}></Grid> */}
+                                <Grid item xs={4} sx={{ fontWeight: "bold" }}>
+                                    Vehicle Type:
+                                </Grid>
+                                <Grid item xs={2}>
+                                    {vehicleType}
+                                </Grid>
+                                {/* <Grid item xs={6}></Grid> */}
+                                <Grid item xs={8} sx={{ fontWeight: "bold" }}>
+                                    Vehicle Number:
+                                </Grid>
+                                {
+                                    vehicleNo ? (
+                                        <>
+
+                                            <Grid item xs={4}>
+                                                {vehicleNo}
+                                            </Grid>
+                                        </>
+                                    ) : (
+                                        <>
+
+                                            <Grid item xs={4}>
+
+                                            </Grid>
+                                        </>
+                                    )
+                                }
 
                             </Grid>
-                            <Grid item xs={4} sx={{ fontWeight: "bold" }}>
-                                Total Charges:
-                            </Grid>
-                            <Grid item xs={2} >
-                                {charges}
-                            </Grid>
-                            {/* <Grid item xs={6}></Grid> */}
-                            <Grid item xs={4} sx={{ fontWeight: "bold" }}>
-                                Vehicle Type:
-                            </Grid>
-                            <Grid item xs={2}>
-                                {vehicleType}
-                            </Grid>
-                            {/* <Grid item xs={6}></Grid> */}
-
-
+                        </Paper>
 
                     </Grid>
-                        </Paper>
-                        
-                </Grid>
-                <Grid item sm={7}>
-                    <MapContainer style={{ height: "400px", width: "100%" }} center={position} zoom={zoomLvl} >
+                    <Grid item sm={7}>
+                        <MapContainer style={{ height: "400px", width: "100%" }} center={position} zoom={zoomLvl} >
 
-                        <TileLayer
-                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        />
-                        <Marker icon={redIcon} position={currLoc}>
-                            <Popup>
-                                You selected location
-                            </Popup>
-                        </Marker>
-                        <Marker icon={greenIcon} position={[lat, lng]}>
-                            <Popup>
-                                {name}
-                            </Popup>
-                        </Marker>
-                        <MyMapComponent />
-                    </MapContainer>
+                            <TileLayer
+                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            />
+                            <Marker icon={redIcon} position={currLoc}>
+                                <Popup>
+                                    You selected location
+                                </Popup>
+                            </Marker>
+                            <Marker icon={greenIcon} position={[lat, lng]}>
+                                <Popup>
+                                    {name}
+                                </Popup>
+                            </Marker>
+                            <MyMapComponent />
+                        </MapContainer>
+                    </Grid>
                 </Grid>
-            </Grid>
 
-        </Dialog>
+            </Dialog>
         </>
     )
 }

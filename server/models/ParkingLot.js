@@ -26,14 +26,12 @@ const ParkingLotSchema = mongoose.Schema({
         type:Number,
         required:true
     },
-    // latitude:{
-    //     type:String,
-    //     required:true
-    // },
-    // longitude:{
-    //     type:String,
-    //     requried:true
-    // },
+    openTime:{
+        type:Number
+    },
+    closeTime:{
+        type:Number
+    },
     carParkingSlots:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:'ParkingSlot'

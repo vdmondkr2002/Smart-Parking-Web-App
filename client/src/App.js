@@ -1,6 +1,7 @@
-import React, { useMemo,useEffect } from 'react';
+import React, { useMemo,useEffect, useState } from 'react';
 import { BrowserRouter as Router,Routes,Route } from 'react-router-dom';
-
+import * as faceapi from 'face-api.js'
+import * as canvas from 'canvas'
 import {Container,AppBar,} from '@mui/material'
 import Navbar from './components/Navbar/Navbar';
 import AboutUs from './components/AboutUsComponents/About';
@@ -20,10 +21,13 @@ import AddParkingLot from './components/AdminDashboardComponents/AddParkingLot';
 import ContactUs from './components/ContactUsComponents/ContactUs';
 import News from './components/NewsComponents/News';
 import AnalyzeHistory from './components/AdminDashboardComponents/AnalyzeHistory';
+import Footer1 from './components/Footer/Footer1';
+
 
 
 const App = ()=>{
     const theme = useMemo(()=>createTheme(themeSettings()));
+    const [modelsIsLoaded,setModelisLoaded] = useState(false)
     const styles ={
         root:{
           padding:0,
@@ -35,7 +39,30 @@ const App = ()=>{
 
     useEffect(()=>{
         dispatch(asyncloadUser())
+        loadModels()
     })
+
+    const loadModels = async()=>{
+        const MODEL_URL = process.env.PUBLIC_URL+ '/models'
+        Promise.all([
+            faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+            faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
+            faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL)
+        ]).then(()=>{
+            setModelisLoaded(true)
+            const { Canvas, Image, ImageData } = canvas;
+            faceapi.env.monkeyPatch({
+                fetch: fetch,
+                Canvas: window.HTMLCanvasElement,
+                Image: window.HTMLImageElement,
+                ImageData: ImageData,
+                createCanvasElement: () => document.createElement('canvas'),
+                createImageElement: () => document.createElement('img')
+            });
+        }
+            
+        )
+    }
     return (
         <Router>
             <ThemeProvider theme={theme}>
@@ -57,7 +84,7 @@ const App = ()=>{
                     </Routes>
                     
                 </Container>
-                <Footer/>
+                <Footer1/>
             </ThemeProvider>
         </Router>
        

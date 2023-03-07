@@ -9,6 +9,7 @@ import { asyncgetBookedSlots, clearFreeParkingLots } from "../../state";
 import BookedSlotCard from "./BookedSlotCard";
 import dayjs from 'dayjs'
 import { MapContainer, useMapEvents } from "react-leaflet";
+import { useNavigate } from "react-router-dom";
 
 const ProfilePage = () => {
     const theme = useTheme()
@@ -64,13 +65,23 @@ const ProfilePage = () => {
     }
 
     const user = useSelector(state => state.auth.user)
+    const navigate = useNavigate()
     const bookedTimeSlots = useSelector(state => state.auth.bookedTimeSlots)
     const dispatch = useDispatch()
     const [position, setPosition] = useState([19.2,73.2])
     const [tabValue, setTabValue] = useState(0)
     const [foundCurrLoc, setFoundCurrLoc] = useState(false)
 
-   
+    useEffect(() => {
+        if (!user._id) {
+            navigate("/login")
+        } else {
+            if (user.role === "admin") {
+                navigate("/admindb")
+            }
+        }
+    }, [user])
+
     useEffect(() => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition((position) => {
@@ -129,7 +140,7 @@ const ProfilePage = () => {
                                         {
                                             bookedTimeSlots.filter(slot => slot.endTime.valueOf() >= Date.now()).map(slot => (
                                                 <Grid item xs={12} sm={4}>
-                                                    <BookedSlotCard startTime={dayjs(slot.startTime)} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} currLoc={position} />
+                                                    <BookedSlotCard startTime={dayjs(slot.startTime)} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} address={slot.parkingLot.address} currLoc={position} vehicleNo={slot.vehicleNo}/>
                                                 </Grid>
 
                                             ))
@@ -143,7 +154,7 @@ const ProfilePage = () => {
                                     {
                                         bookedTimeSlots.filter(slot => slot.endTime.valueOf() < Date.now()).map(slot => (
                                             <Grid item xs={12} sm={4}>
-                                                <BookedSlotCard startTime={dayjs(slot.startTime)} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} currLoc={position} address={slot.parkingLot.address}/>
+                                                <BookedSlotCard startTime={dayjs(slot.startTime)} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} currLoc={position} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo}/>
                                             </Grid>
                                         ))
                                     }

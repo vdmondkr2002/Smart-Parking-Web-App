@@ -21,8 +21,10 @@
     "joi": "^17.8.3",
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^6.10.0",
+    "node-cron": "^3.0.2",
     "nodemailer": "^6.9.1",
     "nodemon": "^2.0.20",
-    "otp-generator": "^4.0.1"
+    "otp-generator": "^4.0.1",
+    "web-push": "^3.5.0"
   }
 }

@@ -3,6 +3,9 @@ const cors = require('cors')
 const dotenv = require('dotenv')
 const connectDB = require('./config/db')
 const helmet = require('helmet')
+const webpush = require('web-push')
+const { sendNotifs } = require('./Utils/sendNotifs')
+
 
 dotenv.config({path:'./config/config.env'})
 
@@ -10,6 +13,8 @@ const app = express()
 
 //connect to database
 connectDB()
+
+webpush.setVapidDetails(process.env.WEB_PUSH_CONTACT,process.env.PUBLIC_VAPID_KEY,process.env.PRIVATE_VAPID_KEY)
 
 app.get('/',(req,res)=>{
     res.send("Smart parking API running")
@@ -21,10 +26,13 @@ app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({policy:"cross-origin"}));
 app.use(cors())
 
+// sendNotifs()
+
 
 app.use('/api/v1/users',require('./routes/users'))
 app.use('/api/v1/parkingLots',require('./routes/parkingLots'))
 app.use('/api/v1/admin',require('./routes/admin'))
+
 
 const PORT = process.env.PORT || 5000
 

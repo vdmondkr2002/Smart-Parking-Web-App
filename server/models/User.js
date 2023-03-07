@@ -33,9 +33,16 @@ const UserSchema = mongoose.Schema({
         required:true,
         min:6
     },
+    profilePic:{
+        type:String,
+    },
     verified:{
         type:Boolean,
         default:false
+    },
+    //attributes:  endpoint expirationTime keys
+    subscription:{
+        type:Object,
     },
     // quizesTaken:{
     //     type:Number,

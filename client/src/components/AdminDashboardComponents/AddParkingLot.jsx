@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import {styled} from '@mui/material/styles'
+import dayjs from 'dayjs'
+import { format } from 'date-fns'
 import Alert from '../../Utils/Alert'
 import { useTheme } from "@emotion/react"
 import { MapContainer, TileLayer, useMap,Marker,Popup,useMapEvents,MapConsumer } from 'react-leaflet'
@@ -11,10 +13,12 @@ import 'leaflet/dist/leaflet.css';
 
 import { asyncpostParkingLot } from "../../state"
 import AddBox from "@mui/icons-material/AddBox"
+import { DateTimePicker, LocalizationProvider, StaticTimePicker } from "@mui/x-date-pickers"
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs"
 
 const initialState = {
-    parkName:'',noOfCarSlots:0,noOfBikeSlots:0,address:'',parkingChargesCar:0,parkingChargesBike:0,lat:'19.1485',lng:'73.133'
-}
+    parkName:'',noOfCarSlots:0,noOfBikeSlots:0,address:'',parkingChargesCar:0,parkingChargesBike:0,lat:'19.1485',lng:'73.133',openTime:dayjs('2022-04-17T15:30'),closeTime:dayjs('2022-04-17T15:30')
+}   
 
 const AddParkingLot = () => {
     const theme = useTheme()
@@ -128,6 +132,8 @@ const AddParkingLot = () => {
     const user = useSelector(state => state.auth.user)
     const alert = useSelector(state => state.auth.alert)
     const [foundCurrLoc,setFoundCurrLoc] = useState(false)
+    // const [openTime, setOpenTime] = useState()
+    // const [closeTime, setCloseTime] = useState();
     const dispatch = useDispatch()
     const [zoomLvl,setZoomLvl] = useState(13);
     const [position,setPosition]= useState([19.1485, 73.133])
@@ -159,15 +165,25 @@ const AddParkingLot = () => {
     },[position])
     const handleSubmit = (e) => {
         e.preventDefault()
-        dispatch(asyncpostParkingLot(formData))
-        
+        console.log(formData)
+        const data ={...formData,openTime:formData.openTime.format('HH').toString(),closeTime:formData.closeTime.format('HH').toString()}
+        console.log(data)
+        dispatch(asyncpostParkingLot(data))
     }
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value })
     }
 
-    
+    const handleChangeOpen = (newValue) => {
+        console.log(newValue)
+        setFormData({...formData,openTime:newValue})
+    }
+
+    const handleChangeClose = (newValue)=>{
+        console.log(newValue)
+        setFormData({...formData,closeTime:newValue})
+    }
       
     return (
         <Grow in>
@@ -181,7 +197,6 @@ const AddParkingLot = () => {
                                         Add a New Parking Lot
                                     </Typography>
                                 </Button>
-                                
                         </Grid>
                         <Grid item sm={12} xs={12} sx={styles.ipFields}>
                             <TextField
@@ -279,6 +294,25 @@ const AddParkingLot = () => {
                             </Grid>
                             
                         </Grid>
+                        <Grid item xs={12} sm={12}>
+                            <Paper sx={styles.titlePaper}>
+                                <Typography variant="h3" sx={styles.tit}>
+                                    Set Open and Close Time
+                                </Typography>
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={0} sm={2}></Grid>
+                        <Grid item xs={6} sm={4}>
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                <StaticTimePicker label="Select Open Time"  value={formData.openTime} renderInput={(params)=><TextField {...params} />}  views={['hours']} onChange={handleChangeOpen} defaultValue={dayjs('2022-04-17T15:30')} />
+                            </LocalizationProvider>
+                        </Grid>
+                        <Grid item xs={6} sm={4}>
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                <StaticTimePicker minTime={formData.openTime} label="Select Close Time"  value={formData.closeTime}  renderInput={(params)=><TextField {...params} />} views={['hours']} onChange={handleChangeClose} defaultValue={dayjs('2022-04-17T15:30')} />
+                            </LocalizationProvider>
+                        </Grid>
+                        <Grid item xs={0} sm={2}></Grid>
                         <Grid item xs={12} sx={styles.ipFields}>
                             <TextField
                                 name="address"

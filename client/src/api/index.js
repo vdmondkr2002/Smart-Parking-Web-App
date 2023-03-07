@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API = axios.create({baseURL:"http://localhost:5000/"})
+const API = axios.create({baseURL:process.env.BACKEND_URL || "http://localhost:5000/"})
 
 API.interceptors.request.use((req)=>{
     if(localStorage.getItem('authToken')){
@@ -26,6 +26,9 @@ export const getCurrentUser = ()=>API.get(`${urlUser}`)
 
 export const postFeedback = (formData)=>API.post(`${urlUser}/feedback`,formData)
 
+export const setProfilePic = (formData)=>API.post(`${urlUser}/profilePic`,formData)
+
+export const sendSubscription = (subscription)=>API.post(`${urlUser}/notifications/subscribe`,subscription)
 const urlParkingLot = '/api/v1/parkingLots'
 
 export const postParkingLot = (formData)=>API.post(`${urlParkingLot}`,formData)
@@ -49,3 +52,4 @@ export const getParkingLotsNear = (formData)=>API.get(`${urlAdmin}/parkingLotsNe
 export const getParkingLots = ()=>API.get(`${urlAdmin}/parkingLots`)
 
 export const getParkingLotHistory = (formData)=>API.get(`${urlAdmin}/parkingLotHistory`,{params:formData})
+

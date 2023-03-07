@@ -1,4 +1,4 @@
-import { Button, FormControl, FormHelperText, Grid, Grow, InputLabel, List, ListItem, ListItemText, MenuItem, Paper, Select, TextField, Typography } from "@mui/material"
+import { Button, FormControl, FormHelperText, Grid, Grow, InputLabel, List, ListItem, ListItemText, MenuItem, Paper, Select, TextField, Typography, useTheme } from "@mui/material"
 import { Container } from "@mui/system"
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
@@ -13,12 +13,16 @@ import Alert from '../../Utils/Alert'
 import { useMapEvents, MapContainer, Marker, Popup, TileLayer,Polyline,Polygon } from "react-leaflet"
 import { asyncgetParkingLot, clearFreeParkingLots } from "../../state"
 import ParkingLotCard from "./ParkingLotCard"
+import carImg from '../../images/car_cartoon_img.svg'
+import bikeImg from '../../images/bike_cartoon_img2.svg'
 import L from 'leaflet'
 import 'leaflet-routing-machine'
 // import L from 'leaflet-routing-machine/dist/leaflet-routing-machine.js'
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
+import LocationOn from "@mui/icons-material/LocationOn"
 
 const HomePage = () => {
+    const theme = useTheme()
     const styles = {
         formCont: {
             marginTop: "5em",
@@ -41,6 +45,19 @@ const HomePage = () => {
         slotsCont: {
             marginTop: "2em",
             width: "auto"
+        },
+        titlePaper:{
+            // display: "flex",
+            // flexDirection: "column",
+            textAlign: "center",
+            alignItems: "center",
+            position: "relative",
+            // height: "auto",
+            backgroundColor: theme.palette.primary.dark,
+            
+            padding: "0.5em 0 0.5em 0",
+            color: "#ffc",
+            fontWeight: 600
         }
     }
     const user = useSelector(state => state.auth.user)
@@ -75,6 +92,11 @@ const HomePage = () => {
         popupAnchor: [1, -34],
         shadowSize: [41, 41]
     })
+
+
+    useEffect(()=>{
+        console.log(vehicleType)
+    },[vehicleType])
     useEffect(()=>{
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition((position) => {
@@ -234,29 +256,74 @@ const HomePage = () => {
         <Grow in>
             <Container sx={styles.formCont}>
                 <Alert />
+                <Grid container alignItems="center" justifyContent="center">
+                <Grid item xs={12} sm={12}>
+                            <Paper sx={{...styles.titlePaper,color:"yellow"}}>
+                                <Typography variant="h3" sx={styles.tit}>
+                                    Search & Book a Slot
+
+                                </Typography>
+                            </Paper>
+                        </Grid>
+                        </Grid>
                 <form autoComplete="off" noValidate sx={styles.form} onSubmit={handleSubmit}>
 
                     <Grid container sx={styles.formContainer} spacing={3}>
-                        <Grid item xs={12} sm={8}>
-                            <FormControl fullWidth>
-                                <InputLabel id="demo-simple-select-label">Type Of vehicle</InputLabel>
-                                <Select
-                                    labelId="demo-simple-select-label"
-                                    id="demo-simple-select"
-                                    value={vehicleType}
-                                    defaultValue={"Bike"}
-                                    label="Type Of Vehicle"
-                                    onChange={handleChangeVehicleTp}
-                                >
-                                    <MenuItem value={"Bike"}>Bike</MenuItem>
-                                    <MenuItem value={"Car"}>Car</MenuItem>
-                                </Select>
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={12} sm={4}>
-                            <Button fullWidth sx={{ padding: "1em" }} variant="contained"> Choose vehicle Type</Button>
-                        </Grid>
+                        <Grid item xs={12} sm={12}>
+                            <Paper sx={styles.titlePaper}>
+                                <Typography variant="h3" sx={styles.tit}>
+                                    Choose Vehicle Type
 
+                                </Typography>
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={2}></Grid>
+                        <Grid item xs={3}>
+                            {
+                                vehicleType==="Car"?(
+                                    <Button onClick={()=>setVehicleType("")}>
+                                    <Paper sx={{bgcolor:theme.palette.primary.dark}}>
+                                        <img src={carImg} width="60%"  alt="car Image"/>
+                                    </Paper>
+                                    </Button>
+                                ):(
+                                    <Button onClick={()=>setVehicleType("Car")}>
+                                    <Paper >
+                                        <img src={carImg} width="60%" alt="car Image"/>
+                                    </Paper>
+                                    </Button>
+                                )
+                            }
+                            
+                            
+                        </Grid>
+                        <Grid item xs={2}></Grid>
+                        <Grid item xs={3}>
+                        {
+                                vehicleType==="Bike"?(
+                                    <Button onClick={()=>setVehicleType("")}>
+                                    <Paper sx={{bgcolor:theme.palette.primary.dark}}>
+                                        <img src={bikeImg} width="94%" alt="car Image"/>
+                                    </Paper>
+                                    </Button>
+                                ):(
+                                    <Button onClick={()=>setVehicleType("Bike")}>
+                                    <Paper >
+                                        <img src={bikeImg} width="94%" alt="car Image"/>
+                                    </Paper>
+                                    </Button>
+                                )
+                            }
+                        </Grid>
+                        <Grid item xs={2}></Grid>
+                        <Grid item xs={12} sm={12}>
+                            <Paper sx={styles.titlePaper}>
+                                <Typography variant="h3" sx={styles.tit}>
+                                    Select a Time Slot to Park
+                                </Typography>
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={0} sm={2}></Grid>
                         <Grid item xs={6} sm={4}>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DateTimePicker
@@ -286,36 +353,39 @@ const HomePage = () => {
                                 />
                             </LocalizationProvider>
                         </Grid>
-                        <Grid item xs={12} sm={4}>
-                            <Button sx={{ padding: "1em" }} variant="contained" fullWidth>Choose a slot</Button>
-                        </Grid>
-                        <Grid item xs={12}>
-                            <Typography sx={{ mt: 4, mb: 2 }} variant="h6" component="div">
+                        <Grid item xs={0} sm={2}></Grid>
+                        <Grid item xs={12} >
+                            <Typography align="center" sx={{  mb: 2 }} variant="h6" component="div">
                                 Instructions
                             </Typography>
-                            <Paper>
+                            <Paper sx={{padding:"0.5em"}}>
                                 <List>
-                                    <ListItem>
+                                    <ListItem disablePadding>
                                         <ListItemText
-                                            primary="You are allowed to book a time slot of minimum 1 hour and maximum 3 hours"
+                                            primary="* You are allowed to book a time slot of minimum 1 hour and maximum 3 hours"
                                         />
                                     </ListItem>
-                                    <ListItem>
+                                    <ListItem disablePadding>
                                         <ListItemText
-                                            primary="You can only book a time slot for future 2 days"
+                                            primary="* You can only book a time slot for future 2 days"
                                         />
                                     </ListItem>
                                 </List>
                             </Paper>
                         </Grid>
-                        <Grid item xs={12} sx={styles.ipFields}>
-                            <Grid container spacing={1}>
-
-                                <Grid item xs={12} sm={4}>
-                                    <Grid container>
-                                        <Grid item sm={5}>
-                                            <div>{"Latitude"}</div>
-                                        </Grid>
+                        <Grid item xs={12} sm={12}>
+                            <Paper sx={styles.titlePaper}>
+                                <Typography sx={{display:'inline'}} variant="h3">
+                                    Pick a location
+                                </Typography>
+                                <LocationOn  fontSize="large"/>
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={0} sm={2}></Grid>
+                        <Grid item xs={8} sx={styles.ipFields}>
+                            <Grid container spacing={1} >
+                                <Grid item xs={12} sm={6}>
+                                    <Grid container justifyContent="center">
                                         <Grid item sm={6}>
                                             <TextField
                                                 name="lat"
@@ -332,11 +402,8 @@ const HomePage = () => {
                                         </Grid>
                                     </Grid>
                                 </Grid>
-                                <Grid item xs={12} sm={4}>
-                                    <Grid container>
-                                        <Grid item sm={5}>
-                                            <div>{"Longitude"}</div>
-                                        </Grid>
+                                <Grid item xs={12} sm={6}>
+                                    <Grid container justifyContent="center">
                                         <Grid item sm={6}>
                                             <TextField
                                                 name="lng"
@@ -353,10 +420,7 @@ const HomePage = () => {
                                         </Grid>
                                     </Grid>
                                 </Grid>
-                                <Grid item xs={12} sm={4}>
-
-                                    <Button fullWidth sx={{ padding: "1em" }} variant="contained">Pick a location</Button>
-                                </Grid>
+                                <Grid item xs={0} sm={2}></Grid>
                                 <Grid item xs={12}>
                                     <MapContainer style={{ height: "400px" }} center={position} zoom={zoomLvl} >
                                         <TileLayer

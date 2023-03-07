@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import {signUp,sendOTP,verifyEmail, signIn, getCurrentUser,postParkingLot, getFreeParkingLots, bookSlot, getBookedSlots, postFeedback, getUsersName, getUserHistory, getParkingLots, getParkingLotsNear, getParkingLotHistory} from '../api/index.js'
+import {signUp,sendOTP,verifyEmail, signIn, getCurrentUser,postParkingLot, getFreeParkingLots, bookSlot, getBookedSlots, postFeedback, getUsersName, getUserHistory, getParkingLots, getParkingLotsNear, getParkingLotHistory, setProfilePic} from '../api/index.js'
 import decode from 'jwt-decode'
 
 const initialStore = {
@@ -149,6 +149,8 @@ export const asyncBookSlot = createAsyncThunk('parkings/bookSlot',async(formData
     }
 })
 
+
+
 export const asyncpostFeedback = createAsyncThunk('users/postFeedback',async(formData)=>{
     console.log("Post feedback form")
     try{
@@ -258,6 +260,21 @@ export const asyncgetParkingLotHistory = createAsyncThunk('admin/getParkingLotHi
     }
 })
 
+export const asyncsetProfilePic = createAsyncThunk('users/profilePic',async(formData)=>{
+    try{
+        const {data} = await setProfilePic(formData);
+        console.log(data)
+        return {msg:data.msg,type:'success'}
+    }catch(err){
+        if(err.response){
+            const data = err.response.data
+            console.log(data)
+            return {...data,type:"error"};
+        }else{
+            console.log("Error",err);
+        }
+    }
+})
 const authSlice = createSlice({
     name:"auth",
     initialState:initialStore,
@@ -274,6 +291,9 @@ const authSlice = createSlice({
         clearAlert:(state)=>{
             state.alert = {}
         },
+        setAlert:(state,action)=>{
+            state.alert = action.payload
+        },
         clearFreeParkingLots:(state)=>{
             state.freeParkingLots = []
         },
@@ -282,6 +302,9 @@ const authSlice = createSlice({
         },
         clearParkingLotDetails:(state)=>{
             state.parkingLotDetails = {}
+        },
+        setUserProfilePic:(state,action)=>{
+            state.user = {...state.user,profilePic:action.payload}
         }
     },
     extraReducers(builder){
@@ -388,6 +411,9 @@ const authSlice = createSlice({
                     state.parkingLotDetails = action.payload.parkingLotDetails;
                 }
             }
+        }).addCase(asyncsetProfilePic.fulfilled,(state,action)=>{
+            state.alert = action.payload
+            console.log("In set profilepic reducer")
         })
 
     }
@@ -395,5 +421,5 @@ const authSlice = createSlice({
 
 
 
-export const {setUser,setLogout,clearAlert,clearFreeParkingLots,clearBookedTimeSlots,clearParkingLotDetails} = authSlice.actions
+export const {setUser,setLogout,clearAlert,clearFreeParkingLots,clearBookedTimeSlots,clearParkingLotDetails,setAlert,setUserProfilePic} = authSlice.actions
 export default authSlice.reducer;
