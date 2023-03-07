@@ -158,7 +158,7 @@ const AddParkingLot = () => {
     },[alert])
     useEffect(()=>{
         if(position!==undefined){
-            console.log(position)
+            // console.log(position)
             setFormData({...formData,lat:position[0].toString(),lng:position[1].toString()})
         }
         
