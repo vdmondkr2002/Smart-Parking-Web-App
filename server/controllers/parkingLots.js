@@ -134,7 +134,8 @@ exports.getParkingLots = async(req,res)=>{
             endTime:{
                 $gte:storebookingStart
             },
-            vehicleType:vehicleType
+            vehicleType:vehicleType,
+            cancelled:false
         })
         console.log("Found booked")
         console.log(bookedParkingSlots)
@@ -208,7 +209,8 @@ exports.bookSlot = async(req,res)=>{
                 $gte:Date.now()
             },
             vehicleType:vehicleType,
-            booker:req.userId
+            booker:req.userId,
+            cancelled:false
         })
 
         if(futureBookedParkingSlots.length>0){
@@ -216,7 +218,8 @@ exports.bookSlot = async(req,res)=>{
         }
 
         const vehicleBookedSlots = await BookedTimeSlot.find({
-            vehicleNo:vehicleNo
+            vehicleNo:vehicleNo,
+            cancelled:false
         })
         if(vehicleBookedSlots.length>0){
             return res.status(400).json({msg:"This car already has an active slot booked"})
@@ -309,7 +312,7 @@ exports.cancelBookedSlot = async(req,res)=>{
         if(!bookedSlot.cancellable){
             return res.status(200).json({msg:"You cannot cancell this booked slot"})
         }
-        await BookedTimeSlot.findByIdAndDelete(req.body.id)
+        await BookedTimeSlot.findByIdAndUpdate(req.body.id,{cancelled:true})
         return res.status(200).json({msg:"Your Booked Slot Cancelled successfully"})
     }catch(err){
         return res.status(500).json({msg:"Something went wrong.."})

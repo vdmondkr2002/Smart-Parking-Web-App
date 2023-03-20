@@ -454,11 +454,14 @@ const authSlice = createSlice({
             console.log("In set profilepic reducer")
         }).addCase(asyncCancelParkingSlot.fulfilled,(state,action)=>{
             state.alert = action.payload.alertData
-            state.bookedTimeSlots = state.bookedTimeSlots.filter(slot=>slot._id!=action.payload.id)
+            state.bookedTimeSlots = state.bookedTimeSlots.map(slot=>slot._id!=action.payload.id?slot:{...slot,cancelled:true})
             console.log("In cancel booked slot reducer")
         }).addCase(asyncDeleteParkingLot.fulfilled,(state,action)=>{
             state.alert = action.payload
             console.log("delete parking lot reducer")
+        }).addCase(asyncDeleteParkingLot.pending,(state,action)=>{
+            state.alert = {msg:"Processing",type:"info"}
+            console.log("deleet pending parking lot reducer")
         })
 
     }

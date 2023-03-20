@@ -133,12 +133,13 @@ const ProfilePage = () => {
                                     variant="fullWidth" aria-label="full width tabs">
                                     <Tab style={{ overflow: "visible" }} label="Active Bookings" {...a11yProps} />
                                     <Tab style={{ overflow: "visible" }} label="Past Bookings" {...a11yProps} />
+                                    <Tab style={{overflow:"visible"}} label="Cancelled Bookings" {...a11yProps}/>
                                 </Tabs>
                             </AppBar>
                             <TabPanel value={tabValue} index={0} dir={theme.direction}>
                                 <Grid container sx={styles.slotsCont} spacing={3}>
                                     {
-                                        bookedTimeSlots.filter(slot => slot.endTime.valueOf() >= Date.now()).map(slot => (
+                                        bookedTimeSlots.filter(slot => slot.endTime.valueOf() >= Date.now() && !slot.cancelled).map(slot => (
                                             <Grid item xs={12} sm={4}>
                                                 <BookedSlotCard startTime={dayjs(slot.startTime)} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} address={slot.parkingLot.address} currLoc={position} vehicleNo={slot.vehicleNo} cancellable={slot.cancellable} id={slot._id} />
                                             </Grid>
@@ -152,7 +153,19 @@ const ProfilePage = () => {
 
                                 <Grid container sx={styles.slotsCont} spacing={3}>
                                     {
-                                        bookedTimeSlots.filter(slot => slot.endTime.valueOf() < Date.now()).map(slot => (
+                                        bookedTimeSlots.filter(slot => slot.endTime.valueOf() < Date.now() && !slot.cancelled).map(slot => (
+                                            <Grid item xs={12} sm={4}>
+                                                <BookedSlotCard startTime={dayjs(slot.startTime)} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} currLoc={position} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} id={slot._id} />
+                                            </Grid>
+                                        ))
+                                    }
+                                </Grid>
+                            </TabPanel>
+                            <TabPanel value={tabValue} index={2} dir={theme.direction} >
+
+                                <Grid container sx={styles.slotsCont} spacing={3}>
+                                    {
+                                        bookedTimeSlots.filter(slot => slot.cancelled?true:false).map(slot => (
                                             <Grid item xs={12} sm={4}>
                                                 <BookedSlotCard startTime={dayjs(slot.startTime)} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} currLoc={position} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} id={slot._id} />
                                             </Grid>

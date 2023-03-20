@@ -49,7 +49,8 @@ const ParkingLotSchema = mongoose.Schema({
     },
     isActive:{
         type:Boolean,
-        default:true
+        default:true,
+        required:true
     }
 })
 

@@ -25,6 +25,11 @@ const BookedTimeSlotSchema = mongoose.Schema({
         default:false,
         required:true
     },
+    cancelled:{
+        type:Boolean,
+        default:false,
+        required:true
+    },
     vehicleNo:{
         type:String,
         required:true
