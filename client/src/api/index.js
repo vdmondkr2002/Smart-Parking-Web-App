@@ -14,6 +14,20 @@ API.interceptors.request.use((req)=>{
 
 const urlUser = '/api/v1/users'
 
+export const getLocByAddress = async(formData)=>{
+    let url = `https://nominatim.openstreetmap.org/search?
+        city=${formData.city}
+        &state=${formData.state}
+        &country=${formData.country}
+        &postalcode=${formData.postalCode}&format=json`;
+    const {data} = await axios.get(url,{headers:{'Access-Control-Allow-Origin':'https://o2cj2q.csb.app',mode:'cors'}})
+    console.log(data)
+    if(data.length==0){
+        return {msg:"No Location Found for the address entered"}
+    }
+    return {lat:data[0].lat,lng:data[0].lon}
+}
+
 export const signUp = ()=>API.post(`${urlUser}/signUp`);
 
 export const sendOTP = (formData)=>API.post(`${urlUser}/sendOTP`,formData)
@@ -41,6 +55,10 @@ export const bookSlot = (formData)=>API.post(`${urlParkingLot}/book`,formData)
 
 export const getBookedSlots = ()=>API.get(`${urlParkingLot}/bookedSlots`)
 
+export const cancelBookedSlot = (id)=>API.delete(`${urlParkingLot}/cancelSlot`,{data:{id:id}})
+
+
+
 const urlAdmin = '/api/v1/admin'
 
 export const getUsersName = ()=>API.get(`${urlAdmin}/users`)
@@ -52,4 +70,6 @@ export const getParkingLotsNear = (formData)=>API.get(`${urlAdmin}/parkingLotsNe
 export const getParkingLots = ()=>API.get(`${urlAdmin}/parkingLots`)
 
 export const getParkingLotHistory = (formData)=>API.get(`${urlAdmin}/parkingLotHistory`,{params:formData})
+
+export const deleteParkingLot = (id)=>API.delete(`${urlAdmin}/removeParkingLot`,{data:{id:id}})
 

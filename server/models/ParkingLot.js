@@ -46,6 +46,10 @@ const ParkingLotSchema = mongoose.Schema({
     },
     lotImages:{
         type:[String]
+    },
+    isActive:{
+        type:Boolean,
+        default:true
     }
 })
 

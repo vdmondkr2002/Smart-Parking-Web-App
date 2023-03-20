@@ -432,7 +432,7 @@ const AddParkingLot = () => {
                         <Grid item xs={12} sm={12}>
                             <Paper sx={styles.titlePaper}>
                                 <Typography variant="h3" sx={styles.tit}>
-                                    Add some photos of parking lot
+                                    Add some photos of parking lot (Add upto 3 photos)
                                 </Typography>
                             </Paper>
                         </Grid>

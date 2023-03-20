@@ -1,27 +1,41 @@
 import AccessTimeIcon from "@mui/icons-material/AccessTime"
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import { Button, Card, CardActions, CardContent, Dialog, Grid, Paper, Typography, useTheme } from "@mui/material"
+import { Button, Card, CardActions, CardContent, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, Paper, Typography, useTheme } from "@mui/material"
 import { useMapEvents, MapContainer, Marker, Popup, TileLayer, Polyline, Polygon } from "react-leaflet"
 import { useEffect, useState } from "react"
 import L from 'leaflet'
+import { useDispatch } from "react-redux";
+import { asyncCancelParkingSlot } from "../../state";
 
-const BookedSlotCard = ({ name, charges, startTime, endTime, vehicleType, bookerName, lat, lng, currLoc, address, vehicleNo }) => {
+const BookedSlotCard = ({ id,name, charges, startTime, endTime, vehicleType, bookerName, lat, lng, currLoc, address, vehicleNo,cancellable }) => {
     const theme = useTheme()
     const styles = {
         dialog: {
             padding: "2em"
         }
     }
+
     const [open, setOpen] = useState(false)
+    const [open2,setOpen2] = useState(false)
     const [position, setPosition] = useState([19.2, 73.2])
     const [zoomLvl, setZoomLvl] = useState(13)
+    const dispatch = useDispatch()
 
     const handleClose = () => {
         console.log("dialog closed")
         setOpen(false)
     }
+    
     const handleShowDetails = () => {
         setOpen(true)
+    }
+    const handleYesCancelDialog = ()=>{
+        setOpen2(false)
+        console.log("Slot cancelled",id)
+        dispatch(asyncCancelParkingSlot(id))
+    }
+    const handleNoCancelDialog = ()=>{
+        setOpen2(false)
     }
 
     const redIcon = new L.Icon({
@@ -140,7 +154,21 @@ const BookedSlotCard = ({ name, charges, startTime, endTime, vehicleType, booker
                     </Grid>
                 </CardContent>
                 <CardActions>
-                    <Button variant="contained" onClick={handleShowDetails} fullWidth>Show Details</Button>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                        <Button variant="contained" onClick={handleShowDetails} fullWidth>Show Details</Button>
+                        </Grid>
+                        {
+                            cancellable?(
+                                <Grid item xs={12}>
+                                <Button variant="contained" color="warning" onClick={()=>setOpen2(true)} fullWidth>Cancel Booking</Button>
+                                </Grid>
+                            ):null
+                        }
+                        
+                    </Grid>
+                    
+                    
                 </CardActions>
             </Card>
             <Dialog maxWidth='lg' fullWidth onClose={handleClose} open={open} sx={styles.dialog}>
@@ -210,10 +238,10 @@ const BookedSlotCard = ({ name, charges, startTime, endTime, vehicleType, booker
                                         </>
                                     )
                                 }
-
                             </Grid>
+                            
                         </Paper>
-
+                        
                     </Grid>
                     <Grid item sm={7}>
                         <MapContainer style={{ height: "400px", width: "100%" }} center={position} zoom={zoomLvl} >
@@ -237,6 +265,18 @@ const BookedSlotCard = ({ name, charges, startTime, endTime, vehicleType, booker
                     </Grid>
                 </Grid>
 
+            </Dialog>
+            <Dialog maxWidth='lg' onClose={handleNoCancelDialog} open={open2} sx={styles.dialog}>
+                <DialogTitle color="black" fontWeight="bold">Cancel Booking</DialogTitle>
+                <DialogContent>
+                    <DialogContentText fontWeight="bold" color="Highlight">
+                        Cancelling an active Booking will cause 70% of your parking charge refunded, Confirm Cancellation?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button color="primary" variant="contained" onClick={handleNoCancelDialog}>No</Button>
+                    <Button color="warning" variant="contained" onClick={handleYesCancelDialog}>Cancel</Button>
+                </DialogActions>
             </Dialog>
         </>
     )

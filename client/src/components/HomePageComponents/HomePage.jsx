@@ -1,5 +1,6 @@
 import { Button, FormControl, FormHelperText, Grid, Grow, InputLabel, List, ListItem, ListItemText, MenuItem, Paper, Select, TextField, Typography, useTheme } from "@mui/material"
 import { Container } from "@mui/system"
+import {Link as RouterLink} from 'react-router-dom'
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
@@ -9,18 +10,24 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
 import { format } from 'date-fns'
 
+import SearchIcon from '@mui/icons-material/Search';
 import Alert from '../../Utils/Alert'
-import { useMapEvents, MapContainer, Marker, Popup, TileLayer,Polyline,Polygon } from "react-leaflet"
-import { asyncgetParkingLot, clearFreeParkingLots } from "../../state"
+import { useMapEvents, MapContainer, Marker, Popup, TileLayer, Polyline, Polygon } from "react-leaflet"
+import { asyncgetParkingLot, clearFreeParkingLots, setAlert } from "../../state"
 import ParkingLotCard from "./ParkingLotCard"
 import carImg from '../../images/car_cartoon_img.svg'
 import bikeImg from '../../images/bike_cartoon_img2.svg'
+
 import L from 'leaflet'
 import 'leaflet-routing-machine'
 // import L from 'leaflet-routing-machine/dist/leaflet-routing-machine.js'
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
 import LocationOn from "@mui/icons-material/LocationOn"
+import { getLocByAddress } from "../../api"
 
+const initialState = {
+    city:'',state:'',country:'',postalCode:''
+}
 const HomePage = () => {
     const theme = useTheme()
     const styles = {
@@ -46,7 +53,7 @@ const HomePage = () => {
             marginTop: "2em",
             width: "auto"
         },
-        titlePaper:{
+        titlePaper: {
             // display: "flex",
             // flexDirection: "column",
             textAlign: "center",
@@ -54,7 +61,7 @@ const HomePage = () => {
             position: "relative",
             // height: "auto",
             backgroundColor: theme.palette.primary.dark,
-            
+
             padding: "0.5em 0 0.5em 0",
             color: "#ffc",
             fontWeight: 600
@@ -67,9 +74,10 @@ const HomePage = () => {
     const [endTime, setEndTime] = useState(dayjs(format(Date.now() + 1000 * 60 * 60 * 2, 'yyyy-MM-dd hh:00 a')));
     const [vehicleType, setVehicleType] = useState('')
     const [position, setPosition] = useState([19.1485, 73.133]);
-    const [polyline,setPolyline] = useState([ [19.2735184,73.1183625], [19.2735184,73.1724625],[19.2159482, 73.1724625],[19.2159482, 73.1183625],[19.2735184,73.1183625] ])
-    const [distances,setDistances] = useState([])
-    const [times,setTimes] = useState([])
+    const [formData,setFormData] = useState(initialState)
+    const [polyline, setPolyline] = useState([[19.2735184, 73.1183625], [19.2735184, 73.1724625], [19.2159482, 73.1724625], [19.2159482, 73.1183625], [19.2735184, 73.1183625]])
+    const [distances, setDistances] = useState([])
+    const [times, setTimes] = useState([])
     const [foundCurrLoc, setFoundCurrLoc] = useState(false)
     const [sortBy, setSortBy] = useState('distance')
     const [zoomLvl, setZoomLvl] = useState(13)
@@ -94,9 +102,9 @@ const HomePage = () => {
     })
 
 
-    useEffect(()=>{
+    useEffect(() => {
         console.log(vehicleType)
-    },[vehicleType])
+    }, [vehicleType])
     useEffect(() => {
         if (alert.msg == "Slot Booked") {
             navigate("/profile")
@@ -112,7 +120,7 @@ const HomePage = () => {
         }
     }, [user])
 
-    
+
 
     const MyMapComponent = () => {
         const map = useMapEvents({
@@ -142,7 +150,7 @@ const HomePage = () => {
             },
         })
         useEffect(() => {
-            if(!foundCurrLoc){
+            if (!foundCurrLoc) {
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition((position) => {
                         const loc = [position.coords.latitude, position.coords.longitude]
@@ -154,8 +162,13 @@ const HomePage = () => {
                 }
                 setFoundCurrLoc(true)
             }
-            
+
         }, [map])
+
+        useEffect(()=>{
+            map.flyTo({ 'lat': position[0], 'lng': position[1] },zoomLvl)
+        },[position])
+        
         // useEffect(() => {
         //     if (!foundCurrLoc) {
         //         map.locate().on("locationfound",(e)=>{
@@ -167,14 +180,14 @@ const HomePage = () => {
         //             setPosition(loc)
         //             map.flyTo(e.latlng, zoomLvl);
         //             setFoundCurrLoc(true)
-    
+
         //         })
         //     }
 
         // }, [map])
 
         // useEffect(()=>{
-            
+
         //     var myRoute = L.Routing.osrmv1()
         //     for(let pk of freeParkingLots){
         //         var w1 = L.latLng(position[0],position[1])
@@ -189,7 +202,7 @@ const HomePage = () => {
         //             setDistances([...distances,dist])    
         //         })
         //     }
-            
+
         // },[freeParkingLots])
 
     }
@@ -221,6 +234,16 @@ const HomePage = () => {
         console.log(newValue)
         setEndTime(newValue)
     }
+    const handleSearchLoc = async()=>{
+        const loc = await getLocByAddress(formData)
+        console.log(loc)
+        if(loc.msg){
+            dispatch(setAlert({msg:loc.msg,type:'info'}))
+            return;
+        }
+        setPosition([parseFloat(loc['lat']),parseFloat(loc['lng'])])
+        
+    }
 
     const handleChangePos = (e) => {
         if (e.target.name == "lat")
@@ -230,6 +253,8 @@ const HomePage = () => {
         dispatch(clearFreeParkingLots())
     }
 
+     
+
     const handleChangeVehicleTp = (e) => {
         setVehicleType(e.target.value)
         dispatch(clearFreeParkingLots())
@@ -238,6 +263,13 @@ const HomePage = () => {
     const handleChangeSortBy = (e) => {
         setSortBy(e.target.value)
     }
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value })
+    }
+
+
+    
 
     const compByCharges = (a, b) => {
         if (a.charges < b.charges) {
@@ -249,7 +281,7 @@ const HomePage = () => {
         return 0;
     }
 
-    
+
 
 
     return (
@@ -257,18 +289,18 @@ const HomePage = () => {
             <Container sx={styles.formCont}>
                 <Alert />
                 <Grid container alignItems="center" justifyContent="center">
-                <Grid item xs={12} sm={12}>
-                            <Paper sx={{...styles.titlePaper,color:"yellow"}}>
-                                <Typography variant="h3" sx={styles.tit}>
-                                    Search & Book a Slot
+                    <Grid item xs={12} sm={12}>
+                        <Paper sx={{ ...styles.titlePaper, color: "yellow" }}>
+                            <Typography variant="h3" sx={styles.tit}>
+                                Search & Book a Slot
 
-                                </Typography>
-                            </Paper>
-                        </Grid>
-                        </Grid>
+                            </Typography>
+                        </Paper>
+                    </Grid>
+                </Grid>
                 <form autoComplete="off" noValidate sx={styles.form} onSubmit={handleSubmit}>
 
-                    <Grid container sx={styles.formContainer} spacing={3}>
+                    <Grid container sx={styles.formContainer} spacing={3} justifyContent="center">
                         <Grid item xs={12} sm={12}>
                             <Paper sx={styles.titlePaper}>
                                 <Typography variant="h3" sx={styles.tit}>
@@ -280,37 +312,37 @@ const HomePage = () => {
                         <Grid item xs={2}></Grid>
                         <Grid item xs={3}>
                             {
-                                vehicleType==="Car"?(
-                                    <Button onClick={()=>setVehicleType("")}>
-                                    <Paper sx={{bgcolor:theme.palette.primary.dark}}>
-                                        <img src={carImg} width="60%"  alt="car Image"/>
-                                    </Paper>
+                                vehicleType === "Car" ? (
+                                    <Button onClick={() => setVehicleType("")}>
+                                        <Paper sx={{ bgcolor: theme.palette.primary.dark }}>
+                                            <img src={carImg} width="60%" alt="car Image" />
+                                        </Paper>
                                     </Button>
-                                ):(
-                                    <Button onClick={()=>setVehicleType("Car")}>
-                                    <Paper >
-                                        <img src={carImg} width="60%" alt="car Image"/>
-                                    </Paper>
+                                ) : (
+                                    <Button onClick={() => setVehicleType("Car")}>
+                                        <Paper >
+                                            <img src={carImg} width="60%" alt="car Image" />
+                                        </Paper>
                                     </Button>
                                 )
                             }
-                            
-                            
+
+
                         </Grid>
                         <Grid item xs={2}></Grid>
                         <Grid item xs={3}>
-                        {
-                                vehicleType==="Bike"?(
-                                    <Button onClick={()=>setVehicleType("")}>
-                                    <Paper sx={{bgcolor:theme.palette.primary.dark}}>
-                                        <img src={bikeImg} width="94%" alt="car Image"/>
-                                    </Paper>
+                            {
+                                vehicleType === "Bike" ? (
+                                    <Button onClick={() => setVehicleType("")}>
+                                        <Paper sx={{ bgcolor: theme.palette.primary.dark }}>
+                                            <img src={bikeImg} width="94%" alt="car Image" />
+                                        </Paper>
                                     </Button>
-                                ):(
-                                    <Button onClick={()=>setVehicleType("Bike")}>
-                                    <Paper >
-                                        <img src={bikeImg} width="94%" alt="car Image"/>
-                                    </Paper>
+                                ) : (
+                                    <Button onClick={() => setVehicleType("Bike")}>
+                                        <Paper >
+                                            <img src={bikeImg} width="94%" alt="car Image" />
+                                        </Paper>
                                     </Button>
                                 )
                             }
@@ -328,7 +360,7 @@ const HomePage = () => {
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DateTimePicker
                                     disablePast
-                                    minDateTime={dayjs(format(Date.now(),'yyyy-MM-dd hh:00 a..aa'))}
+                                    minDateTime={dayjs(format(Date.now(), 'yyyy-MM-dd hh:00 a..aa'))}
                                     maxDate={dayjs(format(Date.now(), 'yyyy-MM-dd hh:00 a..aa')).add(1, 'day')}
                                     label="pick a start time"
                                     value={startTime}
@@ -355,10 +387,10 @@ const HomePage = () => {
                         </Grid>
                         <Grid item xs={0} sm={2}></Grid>
                         <Grid item xs={12} >
-                            <Typography align="center" sx={{  mb: 2 }} variant="h6" component="div">
+                            <Typography align="center" sx={{ mb: 2 }} variant="h6" component="div">
                                 Instructions
                             </Typography>
-                            <Paper sx={{padding:"0.5em"}}>
+                            <Paper sx={{ padding: "0.5em" }}>
                                 <List>
                                     <ListItem disablePadding>
                                         <ListItemText
@@ -375,10 +407,10 @@ const HomePage = () => {
                         </Grid>
                         <Grid item xs={12} sm={12}>
                             <Paper sx={styles.titlePaper}>
-                                <Typography sx={{display:'inline'}} variant="h3">
+                                <Typography sx={{ display: 'inline' }} variant="h3">
                                     Pick a location
                                 </Typography>
-                                <LocationOn  fontSize="large"/>
+                                <LocationOn fontSize="large" />
                             </Paper>
                         </Grid>
                         <Grid item xs={0} sm={2}></Grid>
@@ -421,36 +453,100 @@ const HomePage = () => {
                                     </Grid>
                                 </Grid>
                                 <Grid item xs={0} sm={2}></Grid>
-                                <Grid item xs={12}>
-                                    <MapContainer style={{ height: "400px" }} center={position} zoom={zoomLvl} >
-                                        <TileLayer
-                                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                        />
-                                        {
-                                            freeParkingLots.length > 0 ? (
-                                                freeParkingLots.map(freeLot => (
-                                                    <Marker icon={greenIcon} position={[freeLot.location[0], freeLot.location[1]]}>
-                                                        <Popup>
-                                                            {freeLot.name}
-                                                        </Popup>
-                                                    </Marker>
-                                                ))
 
-                                            ) : null
-                                        }
-                                        <Marker icon={redIcon} position={position}>
-                                            <Popup>
-                                                You selected location
-                                            </Popup>
-                                        </Marker>
-                                        <MyMapComponent />
-                                    </MapContainer>
-                                </Grid>
+
+
 
                             </Grid>
 
 
+                        </Grid>
+                        <Grid item xs={12} sx={{ textAlign: "center" }}>
+                            <Typography variant="h2" component="h2">OR</Typography>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Paper sx={styles.titlePaper}>
+                                <Typography sx={{ display: 'inline' }} variant="h3">
+                                    Search By Address
+                                </Typography>
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={6} sm={3}>
+                            <TextField
+                                name="city"
+                                type="text"
+                                variant="outlined"
+                                required
+                                fullWidth
+                                label="City"
+                                onChange={handleChange}
+                                value={formData.firstName}
+                            />
+                        </Grid>
+                        <Grid item xs={6} sm={3}>
+                            <TextField
+                                name="state"
+                                type="text"
+                                variant="outlined"
+                                required
+                                fullWidth
+                                label="State"
+                                onChange={handleChange}
+                                value={formData.firstName}
+                            />
+                        </Grid>
+                        <Grid item xs={6} sm={3}>
+                            <TextField
+                                name="country"
+                                type="text"
+                                variant="outlined"
+                                required
+                                fullWidth
+                                label="Country"
+                                onChange={handleChange}
+                                value={formData.firstName}
+                            />
+                        </Grid>
+                        <Grid item xs={6} sm={3}>
+                            <TextField
+                                name="postalCode"
+                                type="text"
+                                variant="outlined"
+                                required
+                                fullWidth
+                                label="Postal Code"
+                                onChange={handleChange}
+                                value={formData.firstName}
+                            />
+                        </Grid>
+                        <Grid item xs={5}>
+                            <Button fullWidth color="secondary" sx={{ margin: "auto", paddingX: "2em", paddingY: "1em" }} variant="contained" endIcon={<SearchIcon />} onClick={handleSearchLoc}>Search</Button>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <MapContainer style={{ height: "400px" }} center={position} zoom={zoomLvl} >
+                                <TileLayer
+                                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                />
+                                {
+                                    freeParkingLots.length > 0 ? (
+                                        freeParkingLots.map(freeLot => (
+                                            <Marker icon={greenIcon} position={[freeLot.location[0], freeLot.location[1]]}>
+                                                <Popup>
+                                                    {freeLot.name}
+                                                </Popup>
+                                            </Marker>
+                                        ))
+
+                                    ) : null
+                                }
+                                <Marker icon={redIcon} position={position}>
+                                    <Popup>
+                                        You selected location
+                                    </Popup>
+                                </Marker>
+                                <MyMapComponent />
+                            </MapContainer>
                         </Grid>
                         <Grid item xs={12}>
                             <Button fullWidth sx={{ padding: "1em" }} variant="contained" type="submit">Find Parking Lots</Button>
@@ -491,12 +587,11 @@ const HomePage = () => {
                                             <Grid item xs={12} sm={4}>
                                                 <ParkingLotCard startTime={startTime} endTime={endTime} vehicleType={vehicleType} lotImages={freeLot.lotImages} key={freeLot.id} id={freeLot.id} freeSlots={freeLot.freeSlots} engagedSlots={freeLot.engagedSlots} address={freeLot.address} lat={freeLot.location[0]} lng={freeLot.location[1]} currLoc={position} charges={freeLot.charges} name={freeLot.name} noOfFreeSlots={freeLot.freeSlots.length} distance={parseInt(freeLot.distance)} />
                                             </Grid>
-
                                         ))
                                     ) : (
                                         [...freeParkingLots].sort((a, b) => a.charges - b.charges).map((freeLot) => (
                                             <Grid item xs={12} sm={4}>
-                                                <ParkingLotCard startTime={startTime} endTime={endTime} vehicleType={vehicleType} lotImages={freeLot.lotImages}  key={freeLot.id} id={freeLot.id} freeSlots={freeLot.freeSlots} engagedSlots={freeLot.engagedSlots} address={freeLot.address} lat={freeLot.location[0]} lng={freeLot.location[1]} currLoc={position} charges={freeLot.charges} name={freeLot.name} noOfFreeSlots={freeLot.freeSlots.length} distance={parseInt(freeLot.distance)} />
+                                                <ParkingLotCard startTime={startTime} endTime={endTime} vehicleType={vehicleType} lotImages={freeLot.lotImages} key={freeLot.id} id={freeLot.id} freeSlots={freeLot.freeSlots} engagedSlots={freeLot.engagedSlots} address={freeLot.address} lat={freeLot.location[0]} lng={freeLot.location[1]} currLoc={position} charges={freeLot.charges} name={freeLot.name} noOfFreeSlots={freeLot.freeSlots.length} distance={parseInt(freeLot.distance)} />
                                             </Grid>
 
                                         ))

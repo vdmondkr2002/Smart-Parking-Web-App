@@ -13,6 +13,8 @@ import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
 import Compress from 'compress.js'
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CancelIcon from "@mui/icons-material/Cancel";
+import DoneIcon from '@mui/icons-material/Done';
+import CloseIcon from '@mui/icons-material/Close';
 
 const initialState = {
     selectedImg:'',vehicleNo:''
@@ -30,12 +32,14 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
     const [open, setOpen] = useState(false)
     const [open2, setOpen2] = useState(false)
     const [open3, setOpen3] = useState(false)
+    const [open4, setOpen4] = useState(false)
     const [parkingSlots, setParkingSlots] = useState([...freeSlots, ...engagedSlots])
     const [formData,setFormData] = useState(initialState)
     const [engagedSllots, setEngagedSllots] = useState(engagedSlots)
     const [changed, setChanged] = useState('')
     const [imgFIleName, setImgFIlename] = useState('')
     const [prevChanged, setPrevChanged] = useState('')
+    const [cancellable,setCancellable] = useState(false)
     const [position, setPosition] = useState([(currLoc[0] + lat) / 2, (currLoc[1] + lng) / 2])
     const [map, setMap] = useState()
     const [vehicleNumber, setVehicleNumber] = useState('')
@@ -99,7 +103,7 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
         setOpen3(true)
     }
 
-    const handelClickCloseDialog3 = ()=>{
+    const handleClickCloseDialog3 = ()=>{
         setOpen3(false)
     }
 
@@ -156,7 +160,7 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
         console.log(changed,id,startTime,endTime,vehicleType)
         const data = { startTime: startTime.format('YYYY-MM-DD HH:00'), endTime: endTime.format('YYYY-MM-DD HH:00'), 
                         lotId: id, slotId: changed, vehicleType: vehicleType,
-                       vehicleNo:formData.vehicleNo,carImg: formData.selectedImg}
+                       vehicleNo:formData.vehicleNo,carImg: formData.selectedImg,cancellable}
         console.log(data)
         dispatch(asyncBookSlot(data))
     }
@@ -350,6 +354,15 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
 
                             <FormHelperText required children="*Only jpg/jpeg/png file allowed to upload" />
                         </Grid>
+                        <Grid item sm={8} xs={12} sx={styles.ipFields}>
+                            <Typography variant="h5" display="inline">Do you want the Slot to be cancellable:</Typography>
+                            
+                            <FormHelperText sx={{color:"red"}} required children="*Cancelling a slot will refund 70% of your parking charge on cancellation"/>
+                        </Grid>
+                        <Grid item sm={4} xs={12} sx={styles.ipFields}>
+                            <Button variant={cancellable?"contained":"outlined"} color={cancellable?"success":"inherit"} startIcon={<DoneIcon/>} onClick={()=>setCancellable(true)}>Yes</Button>
+                            <Button variant={!cancellable?"contained":"outlined"} color={!cancellable?"warning":"inherit"} startIcon={<CloseIcon/>} onClick={()=>setCancellable(false)}>No</Button>
+                        </Grid>
                         <Grid item xs={12} sx={styles.ipFields}>
                             <Button fullWidth type="submit" variant="contained">Confirm Slot</Button>
                         </Grid>
@@ -357,7 +370,7 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
                 </form>
 
             </Dialog>
-            <Dialog fullWidth onClose={handelClickCloseDialog3} open={open3}>
+            <Dialog fullWidth onClose={handleClickCloseDialog3} open={open3}>
                 <Grid container sx={styles.dialog} justifyContent="center">
                     <Grid item xs={12}>
                         {
@@ -380,7 +393,6 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
                     </Grid>
                 </Grid>
             </Dialog>
-            
         </>
     )
 }

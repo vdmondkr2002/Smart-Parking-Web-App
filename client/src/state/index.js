@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import {signUp,sendOTP,verifyEmail, signIn, getCurrentUser,postParkingLot, getFreeParkingLots, bookSlot, getBookedSlots, postFeedback, getUsersName, getUserHistory, getParkingLots, getParkingLotsNear, getParkingLotHistory, setProfilePic} from '../api/index.js'
+import {signUp,sendOTP,verifyEmail, signIn, getCurrentUser,postParkingLot, getFreeParkingLots, bookSlot, getBookedSlots, postFeedback, getUsersName, getUserHistory, getParkingLots, getParkingLotsNear, getParkingLotHistory, setProfilePic, cancelBookedSlot, deleteParkingLot} from '../api/index.js'
 import decode from 'jwt-decode'
 
 const initialStore = {
@@ -183,6 +183,23 @@ export const asyncgetBookedSlots = createAsyncThunk('parkings/getBookedSlots',as
     }
 })
 
+
+export const asyncCancelParkingSlot = createAsyncThunk('parkings/cancelParkingSlot',async(id)=>{
+    try{
+        console.log(id)
+        const {data} = await cancelBookedSlot(id);
+        return {alertData:{msg:data.msg,type:'success'},id:id}
+    }catch(err){
+        if(err.response){
+            const data = err.response.data
+            console.log(data)
+            return {...data,type:"error"};
+        }else{
+            console.log("Error",err);
+        }
+    }
+})
+
 export const asyncgetUsersName = createAsyncThunk('admin/getUsersName',async()=>{
     try{
         const {data} = await getUsersName();
@@ -260,6 +277,22 @@ export const asyncgetParkingLotHistory = createAsyncThunk('admin/getParkingLotHi
     }
 })
 
+export const asyncDeleteParkingLot = createAsyncThunk('admin/removeParkingLot',async(formData)=>{
+    try{
+        const {data} = await deleteParkingLot(formData);
+        console.log(data)
+        return {msg:data.msg,type:'success'}
+    }catch(err){
+        if(err.response){
+            const data = err.response.data
+            console.log(data)
+            return {...data,type:"error"};
+        }else{
+            console.log("Error",err);
+        }
+    }
+})
+
 export const asyncsetProfilePic = createAsyncThunk('users/profilePic',async(formData)=>{
     try{
         const {data} = await setProfilePic(formData);
@@ -275,6 +308,7 @@ export const asyncsetProfilePic = createAsyncThunk('users/profilePic',async(form
         }
     }
 })
+
 const authSlice = createSlice({
     name:"auth",
     initialState:initialStore,
@@ -285,8 +319,11 @@ const authSlice = createSlice({
         setLogout:(state)=>{
             localStorage.removeItem('authToken')
             state.user = {};
-            state.bookedTimeSlots = {}
-            state.freeParkingLots = {}
+            state.bookedTimeSlots = []
+            state.freeParkingLots = []
+            state.usersName = []
+            state.parkingLotNames = []
+            state.parkingLotDetails = {}
         },
         clearAlert:(state)=>{
             state.alert = {}
@@ -415,6 +452,13 @@ const authSlice = createSlice({
         }).addCase(asyncsetProfilePic.fulfilled,(state,action)=>{
             state.alert = action.payload
             console.log("In set profilepic reducer")
+        }).addCase(asyncCancelParkingSlot.fulfilled,(state,action)=>{
+            state.alert = action.payload.alertData
+            state.bookedTimeSlots = state.bookedTimeSlots.filter(slot=>slot._id!=action.payload.id)
+            console.log("In cancel booked slot reducer")
+        }).addCase(asyncDeleteParkingLot.fulfilled,(state,action)=>{
+            state.alert = action.payload
+            console.log("delete parking lot reducer")
         })
 
     }

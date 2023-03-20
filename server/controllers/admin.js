@@ -1,8 +1,23 @@
-const BookedTimeSlot = require('../models/bookedTimeSlot')
+const BookedTimeSlot = require('../models/BookedTimeSlot')
 const ParkingLot = require('../models/ParkingLot')
+const bcrypt = require('bcryptjs')
 const User = require('../models/User')
 const { latLonValidator } = require('../validators/joi-validator')
 
+exports.createAdmin = async(req,res)=>{
+    const salt = await bcrypt.genSalt(10)
+    const hashedPassword = await bcrypt.hash('admin123', salt)
+    const newUser = await User.create({
+        email: 'smartparking678@gmail.com', password: hashedPassword,
+        firstName: 'Smart', lastName: 'Parker',
+        userName: 'smparker', mobileNo: '9702063963',
+        createdAt: new Date().toISOString(),
+        verified:true,
+        otp: '123',
+        role:'admin'
+    })
+    return res.status(200).json({msg:"Admin created"})
+}
 exports.getUsersName = async(req,res)=>{
     if(!req.userId){
         return res.status(401).json({msg:"Unauthorized"})
@@ -205,3 +220,22 @@ exports.getParkingLotHistory = async(req,res)=>{
     }
 }
 
+
+exports.deleteParkingLot = async(req,res)=>{
+    if(!req.userId){
+        return res.status(401).json({msg:"Unauthorized"})
+    }
+    try{
+        console.log(req.body)
+        if(!req.body.id){
+            return res.status(400).json({msg:"Please pass Parking Lot ID"})
+        }
+        const parkingLot = await ParkingLot.findById(req.body.id)
+        console.log(parkingLot.name,parkingLot.parkingChargesBike)
+        const updatedLot = await ParkingLot.findByIdAndUpdate(req.body.id,{isActive:false},{new:true})
+        console.log(updatedLot)
+        return res.status(200).json({msg:"Deleted parking Lot"})
+    }catch(err){
+        return res.status(500).json({msg:"Something went wrong.."})
+    }
+}

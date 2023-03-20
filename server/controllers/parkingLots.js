@@ -1,4 +1,4 @@
-const BookedTimeSlot = require('../models/bookedTimeSlot')
+const BookedTimeSlot = require('../models/BookedTimeSlot.js')
 const ParkingLot = require('../models/ParkingLot')
 const ParkingSlot = require('../models/ParkingSlot')
 const User = require('../models/User')
@@ -109,24 +109,17 @@ exports.getParkingLots = async(req,res)=>{
                 },
                 closeTime:{
                     $gte:hrs2
-                }
-            }}
+                },
+                isActive:true
+            }},
+            
         ])
         // return res.status(400).json({msg:"Free parking lots returned"})
         // let url = "https://nominatim.openstreetmap.org/reverse?format=jsonv2"+"&lat="+lat+"&lon="+lng;
         // const response = await axios.get(url,{headers:{'Access-Control-Allow-Origin':'https://o2cj2q.csb.app',mode:'cors'}})
 
         // console.log(response.data)
-        const street = 'Shakar Pawshe Road'
-        const place = 'KDMC Kolsewadi Municipal Hospital'
-        let url = `https://nominatim.openstreetmap.org/search?
-        city=Kalyan
-        &state=Maharashtra
-        &country=India
-        &postalcode=421306&format=json`;
-        const response = await axios.get(url,{headers:{'Access-Control-Allow-Origin':'https://o2cj2q.csb.app',mode:'cors'}})
         
-        console.log(response.data)
         // console.log(parkingLots)
         const bookingStart = dayjs(startTime)
         const bookingEnd = dayjs(endTime)
@@ -189,8 +182,8 @@ exports.bookSlot = async(req,res)=>{
         }
         
         
-        const {lotId,slotId,startTime,endTime,vehicleType,carImg,vehicleNo} = req.body
-        console.log(lotId,slotId,startTime,endTime,vehicleType,vehicleNo)
+        const {lotId,slotId,startTime,endTime,vehicleType,carImg,vehicleNo,cancellable} = req.body
+        console.log(lotId,slotId,startTime,endTime,vehicleType,vehicleNo,cancellable)
         const user = await User.findById(req.userId)
         if(!user.profilePic){
             return res.status(400).json({msg:"Please Upload a profile photo first for verification"})
@@ -233,7 +226,7 @@ exports.bookSlot = async(req,res)=>{
         const bookedSlot = await BookedTimeSlot.create({
             startTime:storebookingStart,endTime:storebookingEnd,parkingSlot:mongoose.Types.ObjectId(slotId),
             parkingLot:mongoose.Types.ObjectId(lotId),booker:req.userId,vehicleType:vehicleType,
-            carImage:carImg,vehicleNo:vehicleNo
+            carImage:carImg,vehicleNo:vehicleNo,cancellable:cancellable
         })
          
         return res.status(200).json({msg:"Slot Booked"})
@@ -267,6 +260,7 @@ exports.getBookedTimeSlots = async(req,res)=>{
             parkingLotMap[lot._id]={_id:lot._id,name:lot.name,address:lot.address,location:lot.location.coordinates,parkingChargesBike:lot.parkingChargesBike,parkingChargesCar:lot.parkingChargesCar}
         }
         
+
         
         console.log(parkingLots)
         console.log(parkingLotMap)
@@ -285,8 +279,40 @@ exports.getBookedTimeSlots = async(req,res)=>{
             }
         })
         console.log(bookedTimeSlots)
+        // const street = 'Shakar Pawshe Road'
+        // const place = 'KDMC Kolsewadi Municipal Hospital'
+        let url = `https://nominatim.openstreetmap.org/search?
+        city=Dombivli
+        &state=Maharashtra
+        &country=India
+        &postalcode=421306&format=json`;
+        const response = await axios.get(url,{headers:{'Access-Control-Allow-Origin':'https://o2cj2q.csb.app',mode:'cors'}})
+        
+        console.log(response.data)
         return res.status(200).json({msg:"Booked slots returned for user",bookedTimeSlots:bookedTimeSlots})
     }catch(err){
         return res.status(500).json({msg:"Something went wrong.."})
     }
 }
+
+exports.cancelBookedSlot = async(req,res)=>{
+    if(!req.userId){
+        return res.status(401).json({msg:"Unauthorized"})
+    }
+    try{
+        console.log(req.body)
+        if(!req.body.id){
+            return res.status(400).json({msg:"Please pass bookedSlotId"})
+        }
+        const bookedSlot = await BookedTimeSlot.findById(req.body.id)
+        console.log(bookedSlot.startTime,bookedSlot.endTime,bookedSlot.vehicleType)
+        if(!bookedSlot.cancellable){
+            return res.status(200).json({msg:"You cannot cancell this booked slot"})
+        }
+        await BookedTimeSlot.findByIdAndDelete(req.body.id)
+        return res.status(200).json({msg:"Your Booked Slot Cancelled successfully"})
+    }catch(err){
+        return res.status(500).json({msg:"Something went wrong.."})
+    }
+}
+

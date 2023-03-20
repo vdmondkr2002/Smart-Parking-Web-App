@@ -68,7 +68,7 @@ const ProfilePage = () => {
     const navigate = useNavigate()
     const bookedTimeSlots = useSelector(state => state.auth.bookedTimeSlots)
     const dispatch = useDispatch()
-    const [position, setPosition] = useState([19.2,73.2])
+    const [position, setPosition] = useState([19.2, 73.2])
     const [tabValue, setTabValue] = useState(0)
     const [foundCurrLoc, setFoundCurrLoc] = useState(false)
 
@@ -86,7 +86,7 @@ const ProfilePage = () => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition((position) => {
                 console.log(position.coords.accuracy)
-                 setPosition([position.coords.latitude,position.coords.longitude])
+                setPosition([position.coords.latitude, position.coords.longitude])
             }, () => {
                 console.log("Not able to locate")
             });
@@ -137,24 +137,24 @@ const ProfilePage = () => {
                             </AppBar>
                             <TabPanel value={tabValue} index={0} dir={theme.direction}>
                                 <Grid container sx={styles.slotsCont} spacing={3}>
-                                        {
-                                            bookedTimeSlots.filter(slot => slot.endTime.valueOf() >= Date.now()).map(slot => (
-                                                <Grid item xs={12} sm={4}>
-                                                    <BookedSlotCard startTime={dayjs(slot.startTime)} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} address={slot.parkingLot.address} currLoc={position} vehicleNo={slot.vehicleNo}/>
-                                                </Grid>
+                                    {
+                                        bookedTimeSlots.filter(slot => slot.endTime.valueOf() >= Date.now()).map(slot => (
+                                            <Grid item xs={12} sm={4}>
+                                                <BookedSlotCard startTime={dayjs(slot.startTime)} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} address={slot.parkingLot.address} currLoc={position} vehicleNo={slot.vehicleNo} cancellable={slot.cancellable} id={slot._id} />
+                                            </Grid>
 
-                                            ))
-                                        }
-                                    </Grid>
-                                
+                                        ))
+                                    }
+                                </Grid>
+
                             </TabPanel>
                             <TabPanel value={tabValue} index={1} dir={theme.direction} >
-                                
+
                                 <Grid container sx={styles.slotsCont} spacing={3}>
                                     {
                                         bookedTimeSlots.filter(slot => slot.endTime.valueOf() < Date.now()).map(slot => (
                                             <Grid item xs={12} sm={4}>
-                                                <BookedSlotCard startTime={dayjs(slot.startTime)} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} currLoc={position} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo}/>
+                                                <BookedSlotCard startTime={dayjs(slot.startTime)} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} currLoc={position} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} id={slot._id} />
                                             </Grid>
                                         ))
                                     }
