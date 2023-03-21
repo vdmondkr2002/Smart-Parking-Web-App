@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import {signUp,sendOTP,verifyEmail, signIn, getCurrentUser,postParkingLot, getFreeParkingLots, bookSlot, getBookedSlots, postFeedback, getUsersName, getUserHistory, getParkingLots, getParkingLotsNear, getParkingLotHistory, setProfilePic, cancelBookedSlot, deleteParkingLot} from '../api/index.js'
+import {signUp,sendOTP,verifyEmail, signIn, getCurrentUser,postParkingLot, getFreeParkingLots, bookSlot, getBookedSlots, postFeedback, getUsersName, getUserHistory, getParkingLots, getParkingLotsNear, getParkingLotHistory, setProfilePic, cancelBookedSlot, deleteParkingLot, makeActiveParkingLot, getCancelledSlots} from '../api/index.js'
 import decode from 'jwt-decode'
 
 const initialStore = {
@@ -281,7 +281,39 @@ export const asyncDeleteParkingLot = createAsyncThunk('admin/removeParkingLot',a
     try{
         const {data} = await deleteParkingLot(formData);
         console.log(data)
-        return {msg:data.msg,type:'success'}
+        return {alertData:{msg:data.msg,type:'success'},id:formData}
+    }catch(err){
+        if(err.response){
+            const data = err.response.data
+            console.log(data)
+            return {...data,type:"error"};
+        }else{
+            console.log("Error",err);
+        }
+    }
+})
+
+export const asyncMakeActiveLot = createAsyncThunk('admin/makeActiveLot',async(formData)=>{
+    try{
+        const {data} = await makeActiveParkingLot(formData);
+        console.log(data)
+        return {alertData:{msg:data.msg,type:'success'},id:formData}
+    }catch(err){
+        if(err.response){
+            const data = err.response.data
+            console.log(data)
+            return {...data,type:"error"};
+        }else{
+            console.log("Error",err);
+        }
+    }
+})
+
+export const asyncgetCancelledSlots = createAsyncThunk('admin/cancelledSlots',async()=>{
+    try{
+        const {data} = await getCancelledSlots();
+        console.log(data)
+        return {alertData:{msg:data.msg,type:'success'},cancelledSlots:data.cancelledSlots}
     }catch(err){
         if(err.response){
             const data = err.response.data
@@ -454,14 +486,26 @@ const authSlice = createSlice({
             console.log("In set profilepic reducer")
         }).addCase(asyncCancelParkingSlot.fulfilled,(state,action)=>{
             state.alert = action.payload.alertData
-            state.bookedTimeSlots = state.bookedTimeSlots.map(slot=>slot._id!=action.payload.id?slot:{...slot,cancelled:true})
+            state.bookedTimeSlots = state.bookedTimeSlots.map(slot=>slot._id!==action.payload.id?slot:{...slot,cancelled:true})
             console.log("In cancel booked slot reducer")
         }).addCase(asyncDeleteParkingLot.fulfilled,(state,action)=>{
-            state.alert = action.payload
+            state.alert = action.payload.alertData
+            state.bookedTimeSlots = state.bookedTimeSlots.map(slot=>slot.parkingLot!==action.payload.id?slot:{...slot,cancelled:true,adminCancelled:true})
+            state.parkingLotDetails = {...state.parkingLotDetails,isActive:false}
+            state.parkingLotNames = state.parkingLotNames.map(lot=>lot._id!==action.payload.id?lot:{...lot,isActive:false})
             console.log("delete parking lot reducer")
         }).addCase(asyncDeleteParkingLot.pending,(state,action)=>{
             state.alert = {msg:"Processing",type:"info"}
             console.log("deleet pending parking lot reducer")
+        }).addCase(asyncMakeActiveLot.fulfilled,(state,action)=>{
+            state.alert = action.payload.alertData
+            state.parkingLotDetails = {...state.parkingLotDetails,isActive:true}
+            state.parkingLotNames = state.parkingLotNames.map(lot=>lot._id!==action.payload.id?lot:{...lot,isActive:true})
+            console.log("Make Active Parking Lot Reducer")
+        }).addCase(asyncgetCancelledSlots.fulfilled,(state,action)=>{
+            state.alert = action.payload.alertData
+            state.bookedTimeSlots = action.payload.cancelledSlots
+            console.log("Cancelled slots reducer")
         })
 
     }

@@ -7,7 +7,7 @@ import L from 'leaflet'
 import { useDispatch } from "react-redux";
 import { asyncCancelParkingSlot } from "../../state";
 
-const BookedSlotCardAdmin = ({ id, name, charges, startTime, endTime, vehicleType, bookerName, vehicleNo, cancellable, address, carImage }) => {
+const BookedSlotCardAdmin = ({ id, name, charges, refundAmount,startTime, endTime, vehicleType, bookerName, vehicleNo, cancellable, address, carImage }) => {
     const theme = useTheme()
     const styles = {
         dialog: {
@@ -28,6 +28,10 @@ const BookedSlotCardAdmin = ({ id, name, charges, startTime, endTime, vehicleTyp
 
     const handleShowDetails = () => {
         setOpen(true)
+    }
+
+    const handlePayRefund = ()=>{
+        console.log("Pay Refund")
     }
 
     const redIcon = new L.Icon({
@@ -84,6 +88,20 @@ const BookedSlotCardAdmin = ({ id, name, charges, startTime, endTime, vehicleTyp
                         <Grid item xs={4}>
                             {charges}
                         </Grid>
+                        
+                        {
+                            refundAmount?(
+                                <>
+                                <Grid item xs={8} sx={{ fontWeight: "bold" }}>
+                            Refund Amount:
+                        </Grid>
+                        <Grid item xs={4}>
+                            {refundAmount}
+                        </Grid>
+                        </>
+                            ):null
+                        }
+                        
                         <Grid item xs={8} sx={{ fontWeight: "bold" }}>
                             Vehicle Type:
                         </Grid>
@@ -129,19 +147,24 @@ const BookedSlotCardAdmin = ({ id, name, charges, startTime, endTime, vehicleTyp
                     </Grid>
                 </CardContent>
                 <CardActions>
+                    {
+                        refundAmount?(
                     <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <Button variant="contained" onClick={handlePayRefund} fullWidth>Pay Refund</Button>
+                        </Grid>
+
+                    </Grid>
+                        ):(
+                            <Grid container spacing={2}>
                         <Grid item xs={12}>
                             <Button variant="contained" onClick={handleShowDetails} fullWidth>Show Details</Button>
                         </Grid>
-                        {
-                            cancellable ? (
-                                <Grid item xs={12}>
-                                    <Button variant="contained" color="warning" onClick={() => setOpen2(true)} fullWidth>Cancel Booking</Button>
-                                </Grid>
-                            ) : null
-                        }
 
                     </Grid>
+                        )
+                    }
+                    
 
 
                 </CardActions>

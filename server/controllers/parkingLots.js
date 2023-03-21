@@ -6,6 +6,7 @@ const dayjs = require('dayjs')
 const { postParkingValidator, getParkingValidator, bookSlotValidator } = require('../validators/joi-validator')
 const mongoose = require('mongoose')
 const axios = require('axios')
+const sendEmail = require('../Utils/sendEmail.js')
 
 exports.postParkingLot = async(req,res)=>{
     if(!req.userId){
@@ -303,15 +304,47 @@ exports.cancelBookedSlot = async(req,res)=>{
         return res.status(401).json({msg:"Unauthorized"})
     }
     try{
+        const reqUser = await User.findById(req.userId)
         console.log(req.body)
         if(!req.body.id){
             return res.status(400).json({msg:"Please pass bookedSlotId"})
         }
         const bookedSlot = await BookedTimeSlot.findById(req.body.id)
         console.log(bookedSlot.startTime,bookedSlot.endTime,bookedSlot.vehicleType)
+        const parkingLot = await ParkingLot.findById(bookedSlot.parkingLot)
         if(!bookedSlot.cancellable){
             return res.status(200).json({msg:"You cannot cancell this booked slot"})
         }
+        
+        const subject = "[Smart Parker] You Cancelled a Booked Slot"
+        var html=''
+        if(bookedSlot.vehicleType=='Car'){
+            const charges = ((bookedSlot.endTime - bookedSlot.startTime) / (1000 * 60 * 60)) * parkingLot.parkingChargesCar
+            html = `
+            <div
+                    class="container"
+                    style="max-width: 90%; margin: auto; padding-top: 20px"
+                >
+                    Dear ${reqUser.firstName+" "+reqUser.lastName}, 
+                    You booking for a <b>Car</b> at <b>${parkingLot.name}</b> between <b>${dayjs(bookedSlot.startTime)}</b> and <b>${dayjs(bookedSlot.endTime)}</b> has been cancelled. 
+                    The charges for this parking you booked <b>${charges}</b>, will be refunded to your account within 2 days
+                </div>
+            `
+        }else{
+            const charges = ((bookedSlot.endTime - bookedSlot.startTime) / (1000 * 60 * 60)) * parkingLot.parkingChargesBike
+            var html=`
+            <div
+                class="container"
+                style="max-width: 90%; margin: auto; padding-top: 20px"
+            >
+                Dear ${reqUser.firstName+" "+reqUser.lastName}, 
+                You booking for a <b>Bike</b> at <b>${parkingLot.name}</b> between <b>${dayjs(bookedSlot.startTime)}</b> and <b>${dayjs(bookedSlot.endTime)}</b> has been cancelled. 
+                The charges for this parking you booked <b>${charges}</b>, will be refunded to your account within 2 days
+            </div>
+        `
+        }
+        const receiverMail = reqUser.email
+        sendEmail({html,subject,receiverMail})
         await BookedTimeSlot.findByIdAndUpdate(req.body.id,{cancelled:true})
         return res.status(200).json({msg:"Your Booked Slot Cancelled successfully"})
     }catch(err){

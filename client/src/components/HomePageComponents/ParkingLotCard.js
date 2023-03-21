@@ -40,6 +40,7 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
     const [imgFIleName, setImgFIlename] = useState('')
     const [prevChanged, setPrevChanged] = useState('')
     const [cancellable,setCancellable] = useState(false)
+    const [isDone,setIsDone] = useState(false)
     const [position, setPosition] = useState([(currLoc[0] + lat) / 2, (currLoc[1] + lng) / 2])
     const [map, setMap] = useState()
     const [vehicleNumber, setVehicleNumber] = useState('')
@@ -62,15 +63,19 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
         })
 
         useEffect(() => {
-            L.Routing.control({
-                waypoints: [
-                    L.latLng(currLoc[0], currLoc[1]),
-                    L.latLng(lat, lng)
-                ], createMarker: () => null
+            if(!isDone){
+                L.Routing.control({
+                    waypoints: [
+                        L.latLng(currLoc[0], currLoc[1]),
+                        L.latLng(lat, lng)
+                    ], createMarker: () => null
+    
+                }).addTo(map)
+                setIsDone(true)
+            }
+            
 
-            }).addTo(map)
-
-        }, [map])
+        }, [])
     }
 
     const handleShowDetails = () => {

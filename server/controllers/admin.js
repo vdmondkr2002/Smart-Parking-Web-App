@@ -31,7 +31,7 @@ exports.getUsersName = async (req, res) => {
             return res.status(401).json({ msg: "Unauthorized" })
         }
 
-        var users = await User.find({}, { firstName: 1, lastName: 1 })
+        var users = await User.find({role:"user"}, { firstName: 1, lastName: 1 })
         users = users.map(user => ({ _id: user._id, name: user.firstName + " " + user.lastName }))
         console.log(users)
         return res.status(200).json({ msg: "Users List returned", usersName: users })
@@ -151,7 +151,7 @@ exports.getParkingLots = async (req, res) => {
             return res.status(401).json({ msg: "Unauthorized" })
         }
 
-        var parkingLots = await ParkingLot.find({}, { name: 1 });
+        var parkingLots = await ParkingLot.find({}, { name: 1,isActive:1 });
 
         parkingLots = parkingLots.map(lot => lot._doc)
 
@@ -228,21 +228,27 @@ exports.deleteParkingLot = async (req, res) => {
         return res.status(401).json({ msg: "Unauthorized" })
     }
     try {
+        const reqUser = await User.findById(req.userId)
+        console.log(reqUser)
+        if (reqUser.role !== "admin") {
+            return res.status(401).json({ msg: "Unauthorized" })
+        }
         console.log(req.body)
         if (!req.body.id) {
             return res.status(400).json({ msg: "Please pass Parking Lot ID" })
         }
         const parkingLot = await ParkingLot.findById(req.body.id)
         console.log(parkingLot.name, parkingLot.parkingChargesBike)
-        // const updatedLot = await ParkingLot.findByIdAndUpdate(req.body.id,{isActive:false},{new:true})
-        // console.log(updatedLot)
+        const updatedLot = await ParkingLot.findByIdAndUpdate(req.body.id,{isActive:false},{new:true})
+        console.log(updatedLot)
 
         //finding the active timeslots booked
         const bookedTimeSlots = await BookedTimeSlot.find({
             parkingLot: req.body.id,
             startTime: {
                 $gte: Date.now()
-            }
+            },
+            cancelled:false
         }, {
             booker: 1, startTime: 1, endTime: 1, vehicleType: 1
         })
@@ -279,6 +285,7 @@ exports.deleteParkingLot = async (req, res) => {
                     </div>
                 `
                 sendEmail({html,subject,receiverMail})
+                await BookedTimeSlot.findByIdAndUpdate(ts._id,{cancelled:true,adminCancelled:true,cancelledAt:Date.now()})
                 // console.log(`Dear ${userMap[ts.booker].name}, We are sorry to inform you that due to some issues your parking booking for a Bike at ${parkingLot.name} between ${dayjs(ts.startTime)} and ${dayjs(ts.endTime)} has been cancelled. The charges for this parking you booked ${charges}, will be refunded to your account within 2 days`)
             } else {
                 const charges = ((ts.endTime - ts.startTime) / (1000 * 60 * 60)) * parkingLot.parkingChargesCar
@@ -293,14 +300,114 @@ exports.deleteParkingLot = async (req, res) => {
                     </div>
                 `
                 sendEmail({html,subject,receiverMail})
+                await BookedTimeSlot.findByIdAndUpdate(ts._id,{cancelled:true,adminCancelled:true,cancelledAt:Date.now()})
                 // console.log(`Dear ${userMap[ts.booker].name}, We are sorry to inform you that due to some issues your parking booking for a Car at ${parkingLot.name} between ${dayjs(ts.startTime)} and ${dayjs(ts.endTime)} has been cancelled. The charges for this parking you booked ${charges}, will be refunded to your account within 2 days`)
             }
 
         }
+        
         console.log(bookedTimeSlots)
 
-        return res.status(200).json({ msg: "Deleted parking Lot" })
+        return res.status(200).json({ msg: "Parking Lot Made Inactive" })
     } catch (err) {
+        return res.status(500).json({ msg: "Something went wrong.." })
+    }
+}
+
+exports.makeActiveParkingLot = async(req,res)=>{
+    if (!req.userId) {
+        return res.status(401).json({ msg: "Unauthorized" })
+    }
+    try{
+        const reqUser = await User.findById(req.userId)
+        console.log(reqUser)
+        if (reqUser.role !== "admin") {
+            return res.status(401).json({ msg: "Unauthorized" })
+        }
+        console.log(req.body)
+        await ParkingLot.findByIdAndUpdate(req.body.id,{isActive:true})
+        return res.status(200).json({msg: "Parking Lot Active Again"})
+    }catch(err){
+        return res.status(500).json({ msg: "Something went wrong.." })
+    }
+}
+
+exports.getCancelledSlots = async(req,res)=>{
+    if (!req.userId) {
+        return res.status(401).json({ msg: "Unauthorized" })
+    }
+    try{
+        const reqUser = await User.findById(req.userId)
+        console.log(reqUser)
+        if (reqUser.role !== "admin") {
+            return res.status(401).json({ msg: "Unauthorized" })
+        }
+        console.log(req.body)
+        
+        var cancelledTimeSlots = await BookedTimeSlot.find({
+            cancelled:true
+        })
+        console.log(cancelledTimeSlots)
+
+        const userIds = []
+        const lotIds = []
+        for (var slot of cancelledTimeSlots) {
+            if (!userIds.includes(slot.booker)) {
+                userIds.push(slot.booker)
+            }
+            if(!lotIds.includes(slot.parkingLot)){
+                lotIds.push(slot.parkingLot)
+            }
+        }
+
+        console.log(userIds)
+        console.log(lotIds)
+
+        var users = await User.find({
+            _id: {
+                $in: userIds
+            }
+
+        }, {
+            firstName: 1, lastName: 1,email:1
+        })
+
+        var parkingLots = await ParkingLot.find({
+            _id: {
+                $in: lotIds
+            }
+        },
+        {
+            name:1,parkingChargesBike:1,parkingChargesCar:1
+        })
+
+        console.log(parkingLots)
+
+        var userMap = {}
+        for (let user of users) {
+            userMap[user._id] = { _id: user._id,  name:user.firstName + " " + user.lastName, email: user.email }
+        }
+
+        var parkingLotMap = {}
+        for(let lot of parkingLots){
+            parkingLotMap[lot._id] = lot
+        }
+
+        console.log(userMap,parkingLotMap)
+        
+
+        cancelledTimeSlots= cancelledTimeSlots.map(slot=>(
+            slot.vehicleType==="Bike"?(
+                {...slot._doc,charges:((slot.endTime - slot.startTime) / (1000 * 60 * 60))*parkingLotMap[slot.parkingLot].parkingChargesBike,
+                booker:userMap[slot.booker],parkingLot:parkingLotMap[slot.parkingLot]}):
+            ({...slot._doc,charges:((slot.endTime - slot.startTime) / (1000 * 60 * 60))*parkingLotMap[slot.parkingLot].parkingChargesCar,
+            booker:userMap[slot.booker],parkingLot:parkingLotMap[slot.parkingLot]})
+        ))
+
+        console.log(cancelledTimeSlots)
+
+        return res.status(200).json({msg:"Cancelled slots returned",cancelledSlots:cancelledTimeSlots})
+    }catch(err){
         return res.status(500).json({ msg: "Something went wrong.." })
     }
 }

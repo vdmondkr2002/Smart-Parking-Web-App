@@ -103,7 +103,7 @@ const HomePage = () => {
 
 
     useEffect(() => {
-        console.log(vehicleType)
+        dispatch(clearFreeParkingLots())
     }, [vehicleType])
     useEffect(() => {
         if (alert.msg == "Slot Booked") {

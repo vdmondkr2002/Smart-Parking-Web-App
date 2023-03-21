@@ -3,11 +3,13 @@ import { Container } from "@mui/system"
 import { Link as RouterLink, useNavigate } from "react-router-dom"
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import EqualizerIcon from '@mui/icons-material/Equalizer';
+import PaymentIcon from '@mui/icons-material/Payment';
 import Alert from "../../Utils/Alert";
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import newParkingImg from '../../images/add_new_parking.svg'
 import analyzeParkingImg from '../../images/analyze_parkings_1.svg'
+import refundPayImg from '../../images/refund-rafiki.svg'
 
 const AdminDashboard = ()=>{
     const styles = {
@@ -63,6 +65,17 @@ const AdminDashboard = ()=>{
                                     Analyze History
                                 </Typography>
                             </Button>
+                        </Grid>
+                        
+                        <Grid item xs={6}>
+                            <Button fullWidth component={RouterLink} sx={{padding:"1em"}} startIcon={<PaymentIcon/>} variant="contained"  to="/refunds"> 
+                                <Typography variant="h6">
+                                    Pay Refunds
+                                </Typography>
+                            </Button>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <img src={refundPayImg} alt="view history" width="100%" sx={styles.image} loading="lazy"/>
                         </Grid>
                     </Grid>
                     

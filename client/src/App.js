@@ -22,6 +22,7 @@ import ContactUs from './components/ContactUsComponents/ContactUs';
 import News from './components/NewsComponents/News';
 import AnalyzeHistory from './components/AdminDashboardComponents/AnalyzeHistory';
 import Footer1 from './components/Footer/Footer1';
+import RefundAnalysis from './components/AdminDashboardComponents/RefundAnalysis';
 
 
 
@@ -81,6 +82,7 @@ const App = ()=>{
                         <Route exact path="/contactus" element={<ContactUs/>}/>
                         <Route exact path="/news" element={<News/>}/>
                         <Route exact path="/analysis" element={<AnalyzeHistory/>} />
+                        <Route exact path="/refunds" element={<RefundAnalysis/>}/>
                     </Routes>
                     
                 </Container>
