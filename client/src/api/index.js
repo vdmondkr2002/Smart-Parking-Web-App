@@ -32,6 +32,8 @@ export const signUp = ()=>API.post(`${urlUser}/signUp`);
 
 export const sendOTP = (formData)=>API.post(`${urlUser}/sendOTP`,formData)
 
+export const resendOTP = (formData)=>API.post(`${urlUser}/resendOTP`,formData)
+
 export const verifyEmail = (formData)=>API.post(`${urlUser}/verifyEmail`,formData)
 
 export const signIn = (formData)=>API.post(`${urlUser}/signIn`,formData)
@@ -43,6 +45,11 @@ export const postFeedback = (formData)=>API.post(`${urlUser}/feedback`,formData)
 export const setProfilePic = (formData)=>API.post(`${urlUser}/profilePic`,formData)
 
 export const sendSubscription = (subscription)=>API.post(`${urlUser}/notifications/subscribe`,subscription)
+
+export const sendResetEmail = (formData)=>API.post(`${urlUser}/resetEmail`,formData)
+
+export const resetPassword = (formData)=>API.post(`${urlUser}/resetPassword`,formData)
+
 const urlParkingLot = '/api/v1/parkingLots'
 
 export const postParkingLot = (formData)=>API.post(`${urlParkingLot}`,formData)

@@ -1,4 +1,4 @@
-const { sendOTPValidator, verifyEmailValidator, loginValidator, feedbackValidator } = require("../validators/joi-validator")
+const { sendOTPValidator, verifyEmailValidator, loginValidator, feedbackValidator, resetMailValidator, resetPassValidator } = require("../validators/joi-validator")
 const User = require('../models/User')
 const { generateOTP } = require("../Utils/generateOTP")
 const bcrypt = require('bcryptjs')
@@ -22,7 +22,7 @@ const createUser = async (formData) => {
         console.log("otp generated", otpGenerated)
         //save the user in database
 
-        
+
         const newUser = await User.create({
             email: formData.email, password: hashedPassword,
             firstName: formData.firstName, lastName: formData.lastName,
@@ -95,12 +95,63 @@ exports.sendOTP = async (req, res) => {
             return res.status(500).json({ msg: "Unable to sign up please try again later" })
         }
 
-        return res.status(200).json({ msg: "OTP Sent to your email id" })
+        return res.status(200).json({ msg: "Account Created, Verify OTP Sent to your email id to access your account" })
     } catch (err) {
         return res.status(500).json({ msg: "Something went wrong.." })
     }
 }
 
+exports.resendOTP = async(req,res)=>{
+    console.log(req.body)
+
+    try{
+        if(!req.body.email){
+            return res.status(200).json({msg:"Please enter email"})
+        }
+
+        const existingUser = await User.findOne({ email: req.body.email })
+
+        //if user already exists simply return
+        if (!existingUser) {
+            return res.status(400).json({ msg: "No account with this email ID, Create an Account first" })
+        }else if(existingUser.verified){
+            return res.status(200).json({msg: "You are already verified, you can login directly"})
+        }
+
+       //generate otp
+       const otpGenerated = generateOTP();
+
+       console.log("otp generated", otpGenerated)
+
+       if(!otpGenerated){
+        return res.status(400).json({msg:"Error in generating OTP"})
+       }
+
+       const subject = "[Smart Parking] Welcome smart parker"
+        const html = `
+        <div
+            class="container"
+            style="max-width: 90%; margin: auto; padding-top: 20px"
+        >
+            <h2>Welcome to the club</h2>
+            <h4> You are just one step away from becoming a smart parker</h4>
+            <p style="margin-bottom: 30px;">Pleas enter the sign up OTP to get started</p>
+            <h1 style="font-size: 40px; letter-spacing: 2px; text-align:center;">${otpGenerated}</h1>
+            <h5>If you haven't made this request. simply ignore the mail and no changes will be made</h5>
+        </div>`
+        const receiverMail = req.body.email
+
+        
+
+        sendEmail({html,subject,receiverMail})
+        await User.findByIdAndUpdate(existingUser._id,{otp:otpGenerated})
+        
+        return res.status(200).json({msg:"Vefiy OTP sent to your email To Access Your Account"})
+
+    }catch(err){
+        return res.status(500).json({ msg: "Something went wrong.." })
+    }
+}
 
 const validateUserSignUp = async (email, otp) => {
     const user = await User.findOne({ email })
@@ -189,7 +240,7 @@ exports.getCurrentUser = async (req, res) => {
 
         const user = await User.findById(req.userId)
         // console.log("User->", user)
-        return res.status(200).json({ firstName: user.firstName, lastName: user.lastName, userName: user.userName, _id: user._id, email: user.email, mobileNo:user.mobileNo, role: user.role,profilePic:user.profilePic })
+        return res.status(200).json({ firstName: user.firstName, lastName: user.lastName, userName: user.userName, _id: user._id, email: user.email, mobileNo: user.mobileNo, role: user.role, profilePic: user.profilePic })
     } catch (err) {
         return res.status(500).json({ msg: "Something went wrong.." })
     }
@@ -218,32 +269,32 @@ exports.sendFeedback = async (req, res) => {
     }
 }
 
-exports.setProfilePic = async(req,res)=>{
-    if(!req.userId)
-        return res.status(401).json({msg:"Unauthorized"})
-    
-    try{
+exports.setProfilePic = async (req, res) => {
+    if (!req.userId)
+        return res.status(401).json({ msg: "Unauthorized" })
 
-        if(!req.body.selectedImg){
-            return res.status(400).json({msg:"Please upload a picture first"})
+    try {
+
+        if (!req.body.selectedImg) {
+            return res.status(400).json({ msg: "Please upload a picture first" })
         }
 
 
-        const {selectedImg} = req.body
+        const { selectedImg } = req.body
 
-        
-        const updatedUser = await User.findOneAndUpdate({_id:req.userId},{profilePic:selectedImg},{new:true})
-        return res.status(200).json({msg:"Profile image updated succesfully"})
-    }catch(err){
-        return res.status(500).json({msg:"Something went wrong.."})
+
+        const updatedUser = await User.findOneAndUpdate({ _id: req.userId }, { profilePic: selectedImg }, { new: true })
+        return res.status(200).json({ msg: "Profile image updated succesfully" })
+    } catch (err) {
+        return res.status(500).json({ msg: "Something went wrong.." })
     }
 }
 
-exports.sendSubcription = async(req,res)=>{
-    if(!req.userId){
-        return res.status(201).json({msg:"Unauthorized"})
+exports.sendSubcription = async (req, res) => {
+    if (!req.userId) {
+        return res.status(201).json({ msg: "Unauthorized" })
     }
-    try{
+    try {
         console.log(req.body)
         const subcriptionData = req.body;
         console.log(subcriptionData)
@@ -251,15 +302,82 @@ exports.sendSubcription = async(req,res)=>{
         //     title:'Helo',
         //     body:"It's working now"
         // })
-        const updatedUser = await User.findOneAndUpdate({_id:req.userId},{subscription:subcriptionData},{new:true})
+        const updatedUser = await User.findOneAndUpdate({ _id: req.userId }, { subscription: subcriptionData }, { new: true })
         // const result = await webpush.sendNotification(subcription,payload)
 
         // console.log(result)
-        return res.status(200).json({'success':true})
-    }catch(e){
-        return res.status(500).json({msg:"Something went wrong.."})
+        return res.status(200).json({ 'success': true })
+    } catch (e) {
+        return res.status(500).json({ msg: "Something went wrong.." })
     }
-    
+}
 
-    
+exports.sendResetEmail = async (req, res) => {
+    const { error } = resetMailValidator.validate(req.body)
+    try {
+        if (error)
+            return res.status(400).json({ msg: error.details[0].message })
+
+        const currUser = await User.findOne({ email: req.body.email })
+        if (!currUser.email) {
+            return res.status(404).json({ msg: "No user exists with this email, create an account first" })
+        }
+
+        const payload = {
+            email: currUser.email,
+            id: currUser._id
+        }
+
+        const resetCode = jwt.sign(payload, process.env.TOKEN_SECRET, { expiresIn: "30m" })
+        const subject = "[Smart Parker] Link to Reset Your Password"
+
+        const html = `
+        <div
+                        class="container"
+                        style="max-width: 90%; margin: auto; padding-top: 20px"
+                    >
+                        <h3>To reset Your password follow the link below:</h3>
+                        <div>
+                            <a href="http://localhost:3000/resetPassword/${resetCode}">Reset Your password</a>
+                        </div>
+                        <h5>If you haven't made this request. simply ignore the mail and no changes will be made</h5>
+                    </div>
+        `
+        const receiverMail = req.body.email
+
+        console.log(receiverMail)
+        sendEmail({ html, subject, receiverMail })
+        return res.status(200).json({ msg: "Mail sent with link to reset Your password" })
+    } catch (err) {
+        return res.status(500).json({ msg: "Something went wrong.." })
+    }
+}
+
+exports.resetPassword = async (req, res) => {
+    const { error } = resetPassValidator.validate(req.body)
+    try {
+        if (error)
+            return res.status(400).json({ msg: error.details[0].message })
+
+        const {code,confirmPassword,password} = req.body
+        console.log(req.body)
+        if (password !== confirmPassword) {
+            console.log("No match")
+            return res.status(400).json({ msg: "Password don't match" })
+        }
+
+        const decodedData = jwt.decode(code)
+
+        if(decodedData.exp*1000<Date.now()){
+            return res.status(400).json({msg:"Expired code"})
+        }
+
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(password,salt)
+        await User.findByIdAndUpdate(decodedData.id,{password:hashedPassword})
+
+        return res.status(200).json({msg:"Password reset successfully, you can login now with new password!"})
+    } catch (err) {
+        return res.status(500).json({ msg: "Something went wrong.." })
+    }
 }

@@ -17,9 +17,16 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import { DateTimePicker, LocalizationProvider, StaticTimePicker } from "@mui/x-date-pickers"
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs"
 import PhotoCamera from "@mui/icons-material/PhotoCamera"
+import LocationOn from "@mui/icons-material/LocationOn"
+import Search from "@mui/icons-material/Search"
+import { getLocByAddress } from "../../api"
 
 const initialState = {
-    parkName: '', noOfCarSlots: 0, noOfBikeSlots: 0, address: '', parkingChargesCar: 0, parkingChargesBike: 0, lat: '19.1485', lng: '73.133', openTime: dayjs('2022-04-17T15:30'), closeTime: dayjs('2022-04-17T15:30'),imgFiles:[]
+    parkName: '', noOfCarSlots: 0, noOfBikeSlots: 0, address: '', parkingChargesCar: 0, parkingChargesBike: 0, lat: '19.1485', lng: '73.133', openTime: dayjs('2022-04-17T15:30'), closeTime: dayjs('2022-04-17T15:30'), imgFiles: []
+}
+
+const addressInState = {
+    city:'',state:'',country:'',postalCode:''
 }
 
 const AddParkingLot = () => {
@@ -48,12 +55,12 @@ const AddParkingLot = () => {
             flexGrow: 1,
         },
         titlePaper: {
-            display: "flex",
-            flexDirection: "column",
+            // display: "flex",
+            // flexDirection: "column",
             textAlign: "center",
             alignItems: "center",
             position: "relative",
-            height: "auto",
+            // height: "auto",
             backgroundColor: theme.palette.primary.dark,
             padding: "0.5em 0 0.5em 0",
             color: "#ffc",
@@ -94,7 +101,7 @@ const AddParkingLot = () => {
         })
 
         useEffect(() => {
-            if(!foundCurrLoc){
+            if (!foundCurrLoc) {
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition((position) => {
                         const loc = [position.coords.latitude, position.coords.longitude]
@@ -106,9 +113,12 @@ const AddParkingLot = () => {
                 }
                 setFoundCurrLoc(true)
             }
-            
+
         }, [map])
 
+        useEffect(()=>{
+            map.flyTo({ 'lat': position[0], 'lng': position[1] },zoomLvl)
+        },[position])
         // useEffect(()=>{
         //     if(!foundCurrLoc){
         //         map.locate().on("locationfound",(e)=>{
@@ -139,6 +149,7 @@ const AddParkingLot = () => {
 
 
     const [formData, setFormData] = useState(initialState)
+    const [addressData, setAddressData] = useState(addressInState)
     const user = useSelector(state => state.auth.user)
     const alert = useSelector(state => state.auth.alert)
     const [foundCurrLoc, setFoundCurrLoc] = useState(false)
@@ -203,7 +214,7 @@ const AddParkingLot = () => {
         console.log(e.target.files)
         const imgFile = e.target.files[0]
         console.log(imgFile)
-        if(formData.imgFiles.length==3){
+        if (formData.imgFiles.length == 3) {
             dispatch(setAlert({ msg: "Maximum 3 photos allowed to upload", type: "error" }))
             return
         }
@@ -214,12 +225,27 @@ const AddParkingLot = () => {
 
         const imageData = await compress.compress([imgFile], { size: 0.2, quality: 0.5 })
         const compressedImg = imageData[0].prefix + imageData[0].data;
-        setFormData({...formData,imgFiles:[...formData.imgFiles,compressedImg]})
+        setFormData({ ...formData, imgFiles: [...formData.imgFiles, compressedImg] })
 
     }
-                                
-    const handleRemove = (ind)=>{
-        setFormData({...formData,imgFiles:formData.imgFiles.filter((img,id)=>id!==ind)})
+
+    const handleRemove = (ind) => {
+        setFormData({ ...formData, imgFiles: formData.imgFiles.filter((img, id) => id !== ind) })
+    }
+
+    const handleChangeAddress = (e) => {
+        setAddressData({ ...addressData, [e.target.name]: e.target.value })
+    }
+
+    const handleSearchLoc = async()=>{
+        const loc = await getLocByAddress(addressData)
+        console.log(loc)
+        if(loc.msg){
+            dispatch(setAlert({msg:loc.msg,type:'info'}))
+            return;
+        }
+        setPosition([parseFloat(loc['lat']),parseFloat(loc['lng'])])
+        
     }
 
     return (
@@ -362,7 +388,133 @@ const AddParkingLot = () => {
                                 value={formData.address}
                             />
                         </Grid>
-                        <Grid item xs={12} sx={styles.ipFields}>
+                        <Grid item xs={12} sm={12}>
+                            <Paper sx={styles.titlePaper}>
+                                <Typography sx={{ display: 'inline' }} variant="h3">
+                                    Pick a location
+                                </Typography>
+                                <LocationOn fontSize="large" />
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={0} sm={2}></Grid>
+                        <Grid item xs={8} sm={8} sx={styles.ipFields}>
+                            <Grid container spacing={1} justifyContent="center">
+                                <Grid item xs={12} sm={6}>
+                                    <Grid container justifyContent="center">
+                                        <Grid item sm={6}>
+                                            <TextField
+                                                name="lat"
+                                                type="text"
+                                                InputLabelProps={{ shrink: true }}
+                                                variant="outlined"
+                                                required
+                                                fullWidth
+                                                label="Latitude"
+
+                                                onChange={handleChange}
+                                                value={formData.lat}
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                                <Grid item xs={12} sm={6}>
+                                    <Grid container justifyContent="center">
+                                        <Grid item sm={6}>
+                                            <TextField
+                                                name="lng"
+                                                type="text"
+                                                InputLabelProps={{ shrink: true }}
+                                                variant="outlined"
+                                                required
+                                                fullWidth
+                                                label="Longitude"
+
+                                                onChange={handleChange}
+                                                value={formData.lng}
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                        <Grid item xs={0} sm={2}></Grid>
+                        <Grid item xs={12} sx={{ textAlign: "center" }}>
+                            <Typography variant="h2" component="h2">OR</Typography>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Paper sx={styles.titlePaper}>
+                                <Typography sx={{ display: 'inline' }} variant="h3">
+                                    Search By Address
+                                </Typography>
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={6} sm={3}>
+                            <TextField
+                                name="city"
+                                type="text"
+                                variant="outlined"
+                                required
+                                fullWidth
+                                label="City"
+                                onChange={handleChangeAddress}
+                                value={addressData.city}
+                            />
+                        </Grid>
+                        <Grid item xs={6} sm={3}>
+                            <TextField
+                                name="state"
+                                type="text"
+                                variant="outlined"
+                                required
+                                fullWidth
+                                label="State"
+                                onChange={handleChangeAddress}
+                                value={addressData.state}
+                            />
+                        </Grid>
+                        <Grid item xs={6} sm={3}>
+                            <TextField
+                                name="country"
+                                type="text"
+                                variant="outlined"
+                                required
+                                fullWidth
+                                label="Country"
+                                onChange={handleChangeAddress}
+                                value={addressData.country}
+                            />
+                        </Grid>
+                        <Grid item xs={6} sm={3}>
+                            <TextField
+                                name="postalCode"
+                                type="text"
+                                variant="outlined"
+                                required
+                                fullWidth
+                                label="Postal Code"
+                                onChange={handleChangeAddress}
+                                value={addressData.postalCode}
+                            />
+                        </Grid>
+                        <Grid item xs={5}>
+                            <Button fullWidth color="secondary" sx={{ margin: "auto", paddingX: "2em", paddingY: "1em" }} variant="contained" endIcon={<Search />} onClick={handleSearchLoc}>Search</Button>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <MapContainer style={{ height: "400px" }} center={position} zoom={zoomLvl} >
+                                <TileLayer
+                                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                />
+                                <Marker position={position}>
+                                    <Popup>
+                                        You selected location
+                                    </Popup>
+                                </Marker>
+
+                                <LocationMarker />
+                            </MapContainer>
+                        </Grid>
+                        {/* <Grid item xs={12} sx={styles.ipFields}>
                             <Grid container>
                                 <Grid item xs={12} sm={4}>
 
@@ -428,7 +580,7 @@ const AddParkingLot = () => {
                             </Grid>
 
 
-                        </Grid>
+                        </Grid> */}
                         <Grid item xs={12} sm={12}>
                             <Paper sx={styles.titlePaper}>
                                 <Typography variant="h3" sx={styles.tit}>
@@ -440,7 +592,7 @@ const AddParkingLot = () => {
                         <Grid item xs={3} alignContent="center">
                             <Button variant="contained" sx={{ marginLeft: "1em" }} component="label">
                                 Upload
-                                <input  hidden accept="image/*" type="file" multiple onChange={handleUploadClick} />
+                                <input hidden accept="image/*" type="file" multiple onChange={handleUploadClick} />
                             </Button>
                             <IconButton color="primary" aria-label="Upload picture" component="label">
                                 <input hidden accept="image/*" type="file" multiple onChange={handleUploadClick} />
@@ -449,22 +601,22 @@ const AddParkingLot = () => {
                         </Grid>
                         <Grid item xs={12} sm={12}>
                             {
-                                formData.imgFiles.length>0?(
-                                    <ImageList sx={{ width: 500, height:170,margin:"auto" }} cols={3} rowHeight={160}>
-                                        {formData.imgFiles.map((img,index)=>(
-                                            <ImageListItem  key={index}>
-                                                <CancelIcon onClick={()=>handleRemove(index)}/>
+                                formData.imgFiles.length > 0 ? (
+                                    <ImageList sx={{ width: 500, height: 170, margin: "auto" }} cols={3} rowHeight={160}>
+                                        {formData.imgFiles.map((img, index) => (
+                                            <ImageListItem key={index}>
+                                                <CancelIcon onClick={() => handleRemove(index)} />
                                                 <img src={img}
-                                                srcSet={img}
-                                                alt="Image title"
-                                                loading="lazy"
+                                                    srcSet={img}
+                                                    alt="Image title"
+                                                    loading="lazy"
                                                 />
                                             </ImageListItem>
                                         ))}
                                     </ImageList>
-                                ):null
+                                ) : null
                             }
-                            
+
                         </Grid>
                         <Grid item xs={12}>
                             <Button sx={{ width: "100%", padding: "1em" }} variant="contained" type="submit">Submit</Button>

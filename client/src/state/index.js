@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import {signUp,sendOTP,verifyEmail, signIn, getCurrentUser,postParkingLot, getFreeParkingLots, bookSlot, getBookedSlots, postFeedback, getUsersName, getUserHistory, getParkingLots, getParkingLotsNear, getParkingLotHistory, setProfilePic, cancelBookedSlot, deleteParkingLot, makeActiveParkingLot, getCancelledSlots} from '../api/index.js'
+import {signUp,sendOTP,verifyEmail, signIn, getCurrentUser,postParkingLot, getFreeParkingLots, bookSlot, getBookedSlots, postFeedback, getUsersName, getUserHistory, getParkingLots, getParkingLotsNear, getParkingLotHistory, setProfilePic, cancelBookedSlot, deleteParkingLot, makeActiveParkingLot, getCancelledSlots,sendResetEmail, resetPassword, resendOTP} from '../api/index.js'
 import decode from 'jwt-decode'
 
 const initialStore = {
@@ -23,6 +23,25 @@ export const asyncsendOTP = createAsyncThunk('users/sendOTP',async(formData)=>{
     console.log(formData)
     try{
         const {data} = await sendOTP(formData);
+        console.log(data)
+        return {...data,type:'success'};
+    }catch(err){
+        if(err.response){
+            const data = err.response.data
+            console.log(data)
+            return {...data,type:"error"};
+        }else{
+            console.log(err);
+        }
+    }
+    
+    
+})
+
+export const asyncresendOtp = createAsyncThunk('users/resendOtp',async(formData)=>{
+    console.log(formData)
+    try{
+        const {data} = await resendOTP(formData);
         console.log(data)
         return {...data,type:'success'};
     }catch(err){
@@ -341,6 +360,39 @@ export const asyncsetProfilePic = createAsyncThunk('users/profilePic',async(form
     }
 })
 
+export const asyncSendResetEmail = createAsyncThunk('users/resetEmail',async(formData)=>{
+    try{
+        const {data} = await sendResetEmail(formData)
+        console.log(data)
+        return {msg:data.msg,type:'success'}
+    }catch(err){
+        if(err.response){
+            const data = err.response.data
+            console.log(data)
+            return {...data,type:"error"};
+        }else{
+            console.log("Error",err);
+        }
+    }
+})
+
+export const asyncresetPassword = createAsyncThunk('users/resetPassword',async(formData)=>{
+    try{
+        const {data} = await resetPassword(formData)
+        console.log(data)
+        return {msg:data.msg,type:'success'}
+    }catch(err){
+        if(err.response){
+            const data = err.response.data
+            console.log(data)
+            return {...data,type:"error"};
+        }else{
+            console.log("Error",err);
+        }
+    }
+})
+
+
 const authSlice = createSlice({
     name:"auth",
     initialState:initialStore,
@@ -383,6 +435,9 @@ const authSlice = createSlice({
         }).addCase(asyncsendOTP.fulfilled,(state,action)=>{
             state.alert = action.payload
             console.log("In otp reducer")
+        }).addCase(asyncresendOtp.fulfilled,(state,action)=>{
+            state.alert = action.payload
+            console.log("In resend otp reducer")
         }).addCase(asyncverifyEmail.fulfilled,(state,action)=>{
             state.alert = action.payload
             console.log("In verifyotp reducer")
@@ -506,6 +561,12 @@ const authSlice = createSlice({
             state.alert = action.payload.alertData
             state.bookedTimeSlots = action.payload.cancelledSlots
             console.log("Cancelled slots reducer")
+        }).addCase(asyncSendResetEmail.fulfilled,(state,action)=>{
+            state.alert = action.payload
+            console.log("Reset Email reducer")
+        }).addCase(asyncresetPassword.fulfilled,(state,action)=>{
+            state.alert = action.payload
+            console.log("Reset password reducer")
         })
 
     }

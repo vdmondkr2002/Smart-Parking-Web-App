@@ -101,6 +101,7 @@ const HomePage = () => {
         shadowSize: [41, 41]
     })
 
+    
 
     useEffect(() => {
         dispatch(clearFreeParkingLots())
@@ -291,7 +292,7 @@ const HomePage = () => {
                 <Grid container alignItems="center" justifyContent="center">
                     <Grid item xs={12} sm={12}>
                         <Paper sx={{ ...styles.titlePaper, color: "yellow" }}>
-                            <Typography variant="h3" sx={styles.tit}>
+                            <Typography variant="h3" >
                                 Search & Book a Slot
 
                             </Typography>
@@ -303,7 +304,7 @@ const HomePage = () => {
                     <Grid container sx={styles.formContainer} spacing={3} justifyContent="center">
                         <Grid item xs={12} sm={12}>
                             <Paper sx={styles.titlePaper}>
-                                <Typography variant="h3" sx={styles.tit}>
+                                <Typography variant="h3" >
                                     Choose Vehicle Type
 
                                 </Typography>
@@ -350,7 +351,7 @@ const HomePage = () => {
                         <Grid item xs={2}></Grid>
                         <Grid item xs={12} sm={12}>
                             <Paper sx={styles.titlePaper}>
-                                <Typography variant="h3" sx={styles.tit}>
+                                <Typography variant="h3" >
                                     Select a Time Slot to Park
                                 </Typography>
                             </Paper>
@@ -480,7 +481,7 @@ const HomePage = () => {
                                 fullWidth
                                 label="City"
                                 onChange={handleChange}
-                                value={formData.firstName}
+                                value={formData.city}
                             />
                         </Grid>
                         <Grid item xs={6} sm={3}>
@@ -492,7 +493,7 @@ const HomePage = () => {
                                 fullWidth
                                 label="State"
                                 onChange={handleChange}
-                                value={formData.firstName}
+                                value={formData.state}
                             />
                         </Grid>
                         <Grid item xs={6} sm={3}>
@@ -504,7 +505,7 @@ const HomePage = () => {
                                 fullWidth
                                 label="Country"
                                 onChange={handleChange}
-                                value={formData.firstName}
+                                value={formData.country}
                             />
                         </Grid>
                         <Grid item xs={6} sm={3}>
@@ -516,7 +517,7 @@ const HomePage = () => {
                                 fullWidth
                                 label="Postal Code"
                                 onChange={handleChange}
-                                value={formData.firstName}
+                                value={formData.postalCode}
                             />
                         </Grid>
                         <Grid item xs={5}>

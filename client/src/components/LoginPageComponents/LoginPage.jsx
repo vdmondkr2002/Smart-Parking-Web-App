@@ -9,7 +9,7 @@ import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } 
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useTheme } from "@emotion/react";
-import { asyncsignIn, asyncsignUp } from '../../state/index'
+import { asyncSendResetEmail, asyncsignIn, asyncsignUp } from '../../state/index'
 import loginImg from '../../images/secure_login.svg'
 import Alert from "../../Utils/Alert";
 
@@ -24,7 +24,7 @@ const LoginPage = () => {
         formCont: {
             marginTop: "5em",
             width: "auto",
-            marginBottom:"5em"
+            marginBottom: "5em"
         },
         titlePaper: {
             display: "flex",
@@ -51,7 +51,7 @@ const LoginPage = () => {
             position: "relative",
             height: "auto",
             paddingBottom: "1em",
-            padding:"1em"
+            padding: "1em"
         },
         form: {
             display: "flex",
@@ -92,7 +92,9 @@ const LoginPage = () => {
     const [formData, setFormData] = useState(initialState)
     const [showPassword1, setshowPassword1] = useState(false);
     const [showPassword2, setshowPassword2] = useState(false);
+    const [resetEmail,setResetEmail] = useState('')
     const [openDialog, setOpenDialog] = useState(false);
+    const alert = useSelector(state => state.auth.alert)
     const user = useSelector(state => state.auth.user)
 
     const dispatch = useDispatch()
@@ -107,6 +109,14 @@ const LoginPage = () => {
                 navigate("/home")
         }
     }, [user])
+
+    useEffect(()=>{
+        if(alert.msg){
+            if(alert.msg=="Mail sent with link to reset Your password"){
+                setOpenDialog(false)
+            }
+        }
+    },[alert])
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -132,18 +142,22 @@ const LoginPage = () => {
 
     const handleCloseDialog = () => {
         setOpenDialog(false);
+        setResetEmail("")
     }
 
-    const handleClickOpenDialog = () => {
-        setOpenDialog(true)
-    }
 
     const handleResetEmail = () => {
         console.log("Reset email sent..")
+        console.log(resetEmail)
+        dispatch(asyncSendResetEmail({email:resetEmail}))
     }
 
     const handleClickSignUp = () => {
         navigate("/register")
+    }
+
+    const handleClickOpenDialog = () => {
+        setOpenDialog(true)
     }
     return (
         <Grow in>
@@ -160,8 +174,8 @@ const LoginPage = () => {
                         </Grid>
                         <Grid item xs={12} sm={12}>
                             <Grid container spacing={2}>
-                                <Grid item xs={12} sm={5} sx={{padding:"1em"}}>
-                                    <img src={loginImg} alt="login" width="100%"/>
+                                <Grid item xs={12} sm={5} sx={{ padding: "1em" }}>
+                                    <img src={loginImg} alt="login" width="100%" />
                                 </Grid>
                                 <Grid item xs={12} sm={7}>
                                     <Paper sx={styles.title}>
@@ -222,7 +236,9 @@ const LoginPage = () => {
                                                     <Typography>Login</Typography>
                                                 </Button>
                                             </Grid>
-
+                                            <Grid item sm={12}>
+                                                <Button variant="outlined" onClick={handleClickOpenDialog}>Forgot Password?</Button>
+                                            </Grid>
                                         </Grid>
                                     </form>
                                     <Box fontWeight="fontWeightMedium" m={2}>
@@ -236,6 +252,33 @@ const LoginPage = () => {
                         </Grid>
                     </Grid>
                 </Paper>
+                <Dialog fullWidth open={openDialog} onClose={handleCloseDialog} aria-labelledby="dialog-title">
+                    <DialogTitle fontWeight="bold" id="dialog-title">Reset Your Account Password</DialogTitle>
+                    <DialogContent>
+                        <Grid container sx={{paddingTop:"1em"}} spacing={2}>
+                            <Grid item sm={12}>
+                                <TextField
+                                    name="email"
+                                    type="email"
+                                    variant="outlined"
+                                    fullWidth
+                                    label="Enter Your email to reset password link"
+                                    onChange={(e) => setResetEmail(e.target.value)}
+                                    value={resetEmail}
+                                    sx={styles.ipFields}
+                                />
+                            </Grid>
+                        </Grid>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseDialog} color="primary">
+                            Cancel
+                        </Button>
+                        <Button onClick={handleResetEmail} color="primary">
+                            Send
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </Container>
         </Grow>
     )

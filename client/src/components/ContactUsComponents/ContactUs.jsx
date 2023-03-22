@@ -69,7 +69,7 @@ const ContactUs = () => {
                             <ListItem >
                                 <Typography variant="h5" sx={styles.listItemText}>Email ID: </Typography>
                                 <Link
-                                    href="#"
+                                    href="mailto:smartparking678@gmail.com"
                                     target="_blank"
                                     color="#012dfe"
                                 >

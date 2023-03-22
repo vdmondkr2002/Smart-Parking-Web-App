@@ -1,8 +1,8 @@
 const nodemailer = require('nodemailer')
 const sendEmail = async(mailData)=>{
     const {subject,receiverMail} = mailData
-    console.log(process.env.ADMIN1_EMAIL,
-        process.env.ADMIN1_PASS )
+    // console.log(process.env.ADMIN1_EMAIL,
+    //     process.env.ADMIN1_PASS )
     const transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
         port: 25,

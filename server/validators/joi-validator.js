@@ -66,4 +66,15 @@ const latLonValidator = joi.object({
     lat:joi.string().required(),
     lng:joi.string().required()
 })
-module.exports = {sendOTPValidator,loginValidator,verifyEmailValidator,postParkingValidator,getParkingValidator,bookSlotValidator,feedbackValidator,latLonValidator}
+
+const resetMailValidator = joi.object({
+    email:joi.string().required().email()
+})
+
+const resetPassValidator = joi.object({
+    password:joi.string().min(6).required(),
+    confirmPassword:joi.string().min(6).required(),
+    code:joi.string().required()
+})
+
+module.exports = {sendOTPValidator,loginValidator,verifyEmailValidator,postParkingValidator,getParkingValidator,bookSlotValidator,feedbackValidator,latLonValidator,resetMailValidator,resetPassValidator}

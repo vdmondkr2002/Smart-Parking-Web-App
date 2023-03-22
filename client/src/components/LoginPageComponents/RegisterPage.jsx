@@ -11,7 +11,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useTheme } from "@emotion/react";
 import * as faceapi from 'face-api.js'
 import canvas from 'canvas'
-import { asyncsendOTP, asyncsignUp, asyncverifyEmail, setAlert } from '../../state/index'
+import { asyncresendOtp, asyncsendOTP, asyncsignUp, asyncverifyEmail, setAlert } from '../../state/index'
 import signUpImg from '../../images/secure_signup.svg'
 import enterOtpImg from '../../images/enter_otp.svg'
 import Alert from "../../Utils/Alert";
@@ -19,7 +19,7 @@ import Compress from 'compress.js'
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
 
 const initialState = {
-    userName: '', email: '', mobileNo: '', confirmPassword: '', password: '', firstName: '', lastName: '', otp: '',selectedImg:''
+    userName: '', email: '', mobileNo: '', confirmPassword: '', password: '', firstName: '', lastName: '', otp: '', selectedImg: ''
 }
 
 
@@ -108,7 +108,8 @@ const RegisterPage = () => {
     const [otpSent, setOtpSent] = useState(false);
     const [alreadyotp, setAlreadyOTP] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
-    const [detected,setDetected] = useState(false)
+    const [detected, setDetected] = useState(false)
+    const [resendOtp, setResendOtp] = useState(false)
     const [imgFIleName, setImgFIlename] = useState('')
     const dispatch = useDispatch()
     const navigate = useNavigate()
@@ -127,23 +128,39 @@ const RegisterPage = () => {
     }, [user])
 
     useEffect(() => {
-        if (alert.msg == "OTP Sent to your email id") {
+        if (alert.msg === "Vefiy OTP sent to your email To Access Your Account" || alert.msg==="Account Created, Verify OTP Sent to your email id to access your account") {
             setOtpSent(true);
-        } else if (alert.msg == "You're Registered Successfully, Login Now") {
+            setResendOtp(false)
+            setAlreadyOTP(true)
+        }else if(alert.msg==="No account with this email ID, Create an Account first"){
+            setOtpSent(false)
+            setAlreadyOTP(false)
+            setResendOtp(false)
+            setFormData(initialState)
+        } else if(alert.msg=="You are already verified, you can login directly"|| alert.msg == "You're Registered Successfully, Login Now") {
             navigate("/login")
         }
     }, [alert])
 
+
+
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!otpSent) {
-            if(formData.selectedImg==''){
-                dispatch(asyncsendOTP({userName: formData.userName, email: formData.email, mobileNo: formData.mobileNo, confirmPassword: formData.confirmPassword, 
-                    password:formData.password, firstName:formData.firstName, lastName: formData.lastName, otp: formData.otp}))
+            if(resendOtp){
+                dispatch(asyncresendOtp({email:formData.email}))
             }else{
-                dispatch(asyncsendOTP(formData))
+                if (formData.selectedImg == '') {
+                    dispatch(asyncsendOTP({
+                        userName: formData.userName, email: formData.email, mobileNo: formData.mobileNo, confirmPassword: formData.confirmPassword,
+                        password: formData.password, firstName: formData.firstName, lastName: formData.lastName, otp: formData.otp
+                    }))
+                } else {
+                    dispatch(asyncsendOTP(formData))
+                }
             }
             
+
         } else {
             dispatch(asyncverifyEmail(formData))
         }
@@ -154,6 +171,11 @@ const RegisterPage = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value })
     }
 
+    const handleAlreadyOTP = () => {
+        setOtpSent(true)
+        setAlreadyOTP(true)
+        setResendOtp(false)
+    }
 
     const handleClickShowPassword1 = () => {
         setshowPassword1(prevState => !prevState)
@@ -175,12 +197,8 @@ const RegisterPage = () => {
         navigate("/login")
     }
 
-    const handleAlreadyOTP = () => {
-        setOtpSent(true)
-        setAlreadyOTP(true)
-    }
 
-    const handleUploadClick = async(e)=>{
+    const handleUploadClick = async (e) => {
         console.log(e)
         const imgFile = e.target.files[0]
         console.log(imgFile)
@@ -189,11 +207,11 @@ const RegisterPage = () => {
             dispatch(setAlert({ msg: "Only jpg/jpeg/png file allowed to upload", type: "error" }))
             return
         }
-        
-        const imageData = await compress.compress([imgFile],{size:0.2,quality:0.5})
+
+        const imageData = await compress.compress([imgFile], { size: 0.2, quality: 0.5 })
         const compressedImg = imageData[0].prefix + imageData[0].data;
         const testImg = await canvas.loadImage(compressedImg)
-        const myCanvas = canvas.createCanvas(200,200)
+        const myCanvas = canvas.createCanvas(200, 200)
         const ctx = myCanvas.getContext('2d')
         ctx.drawImage(testImg, 0, 0, 200, 200)
         console.log(testImg)
@@ -201,15 +219,29 @@ const RegisterPage = () => {
         console.log(myCanvas instanceof HTMLCanvasElement)
         const detections = await faceapi.detectSingleFace(myCanvas).withFaceLandmarks()
         console.log(detections)
-        if(detections===undefined){
+        if (detections === undefined) {
             dispatch(setAlert({ msg: "Please select a photo with face clearly visible", type: "error" }))
             return
         }
         setImgFIlename(imgFile.name)
         // console.log(compressedImg)
-        setFormData({...formData,selectedImg:compressedImg})
-        
+        setFormData({ ...formData, selectedImg: compressedImg })
+
     }
+
+    const handleResendOTPClick = () => {
+        console.log("Resend OTP")
+        setResendOtp(true)
+        setAlreadyOTP(false)
+        setOtpSent(false)
+    }
+
+    const handleClickSignUp = ()=>{
+        setResendOtp(false)
+        setAlreadyOTP(false)
+        setOtpSent(false)
+    }
+
     return (
         <Grow in>
             <Container sx={styles.formCont}>
@@ -248,7 +280,7 @@ const RegisterPage = () => {
                                     <form autoComplete="off" noValidate sx={styles.form} onSubmit={handleSubmit}>
                                         <Grid container sx={styles.formContainer} spacing={2}>
                                             {
-                                                !alreadyotp ? (
+                                                (!alreadyotp && !resendOtp) ? (
                                                     <>
                                                         <Grid item sm={6} xs={12} sx={styles.ipFields}>
                                                             <TextField
@@ -292,7 +324,38 @@ const RegisterPage = () => {
                                                 />
                                             </Grid>
                                             {
-                                                !alreadyotp ? (
+                                                (!alreadyotp && !resendOtp) ? (
+                                                    <Grid item sm={12} xs={12} sx={styles.ipFields}>
+                                                        <Typography variant="h5" display="inline">Add a Photo of Yourself:</Typography>
+                                                        <Button variant="contained" sx={{ marginLeft: "1em" }} component="label">
+                                                            Upload
+                                                            <input hidden accept="image/*" type="file" onChange={handleUploadClick} />
+                                                        </Button>
+                                                        <IconButton color="primary" aria-label="Upload picture" component="label">
+                                                            <input hidden accept="image/*" type="file" onChange={handleUploadClick} />
+                                                            <PhotoCamera />
+                                                        </IconButton>
+                                                        {
+                                                            imgFIleName !== '' ? (
+                                                                <>
+                                                                    <Box border="1px solid black">
+                                                                        <Typography>
+                                                                            {imgFIleName}
+                                                                        </Typography>
+                                                                    </Box>
+                                                                    <img src={formData.selectedImg} width="50%" />
+                                                                </>
+                                                            ) : null
+                                                        }
+
+
+                                                        <FormHelperText required children="*Only jpg/jpeg/png file allowed to upload" />
+                                                    </Grid>
+                                                ) : null
+                                            }
+
+                                            {
+                                                (!alreadyotp && !resendOtp) ? (
                                                     <>
                                                         <Grid item xs={12} sm={6} sx={styles.ipFields}>
                                                             <TextField
@@ -377,34 +440,9 @@ const RegisterPage = () => {
                                                     </>
                                                 ) : null
                                             }
-                                            <Grid item sm={12} xs={12} sx={styles.ipFields}>
-                                                <Typography variant="h5" display="inline">Add a Photo of Yourself:</Typography>
-                                                <Button variant="contained" sx={{ marginLeft: "1em" }} component="label">
-                                                    Upload
-                                                    <input hidden accept="image/*" type="file" onChange={handleUploadClick} />
-                                                </Button>
-                                                <IconButton color="primary" aria-label="Upload picture" component="label">
-                                                    <input hidden accept="image/*" type="file" onChange={handleUploadClick} />
-                                                    <PhotoCamera />
-                                                </IconButton>
-                                                {
-                                                    imgFIleName !== '' ? (
-                                                        <>
-                                                            <Box border="1px solid black">
-                                                                <Typography>
-                                                                    {imgFIleName}
-                                                                </Typography>
-                                                            </Box>
-                                                            <img src={formData.selectedImg} width="50%" />
-                                                        </>
-                                                    ) : null
-                                                }
 
-
-                                                <FormHelperText required children="*Only jpg/jpeg/png file allowed to upload" />
-                                            </Grid>
                                             {
-                                                otpSent ? (
+                                                otpSent && !resendOtp ? (
                                                     <Grid item sm={12} sx={styles.otpField}>
                                                         <TextField
                                                             name="otp"
@@ -448,9 +486,9 @@ const RegisterPage = () => {
                                             }
                                             {
                                                 !otpSent ? (
-                                                    <Grid item sm={12} sx={styles.submitBtn}>
+                                                    <Grid item sm={!resendOtp?6:12} sx={styles.submitBtn}>
                                                         <Button
-                                                            variant="contained"
+                                                            variant="outlined"
                                                             type="submit"
                                                             sx={styles.button}
                                                             onClick={handleAlreadyOTP}
@@ -461,6 +499,21 @@ const RegisterPage = () => {
                                                     </Grid>
                                                 ) : null
                                             }
+                                            {
+                                                !resendOtp?(
+                                                    <Grid item sm={alreadyotp?12:6} sx={styles.submitBtn}>
+                                                <Button
+                                                    variant="outlined"
+                                                    sx={styles.button}
+                                                    onClick={handleResendOTPClick}
+                                                    color="primary"
+                                                >
+                                                    <Typography>Resend OTP</Typography>
+                                                </Button>
+                                            </Grid>
+                                                ):null
+                                            }
+                                            
 
                                         </Grid>
                                     </form>

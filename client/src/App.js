@@ -23,6 +23,7 @@ import News from './components/NewsComponents/News';
 import AnalyzeHistory from './components/AdminDashboardComponents/AnalyzeHistory';
 import Footer1 from './components/Footer/Footer1';
 import RefundAnalysis from './components/AdminDashboardComponents/RefundAnalysis';
+import ResetPassword from './components/LoginPageComponents/ResetPassword';
 
 
 
@@ -83,6 +84,7 @@ const App = ()=>{
                         <Route exact path="/news" element={<News/>}/>
                         <Route exact path="/analysis" element={<AnalyzeHistory/>} />
                         <Route exact path="/refunds" element={<RefundAnalysis/>}/>
+                        <Route exact path="/resetPassword/:code" element={<ResetPassword/>}/>
                     </Routes>
                     
                 </Container>

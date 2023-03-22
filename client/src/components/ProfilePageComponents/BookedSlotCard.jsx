@@ -270,12 +270,12 @@ const BookedSlotCard = ({ id,name, charges, startTime, endTime, vehicleType, boo
                 <DialogTitle color="black" fontWeight="bold">Cancel Booking</DialogTitle>
                 <DialogContent>
                     <DialogContentText fontWeight="bold" color="Highlight">
-                        Cancelling an active Booking will cause 70% of your parking charge refunded, Confirm Cancellation?
+                        Cancelling a slot will deduct 30% of your parking charge, Confirm Cancellation?
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     <Button color="primary" variant="contained" onClick={handleNoCancelDialog}>No</Button>
-                    <Button color="warning" variant="contained" onClick={handleYesCancelDialog}>Cancel</Button>
+                    <Button color="warning" variant="contained" onClick={handleYesCancelDialog}>Yes</Button>
                 </DialogActions>
             </Dialog>
         </>
