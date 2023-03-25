@@ -19,6 +19,7 @@ exports.sendOTP = async (req, res) => {
 
         const { email, password, confirmPassword } = req.body
 
+        //find existing user
         const existingUser = await User.findOne({ email: email })
 
         //if user already exists simply return
@@ -41,7 +42,7 @@ exports.sendOTP = async (req, res) => {
         console.log("otp generated", otpGenerated)
         //save the user in database
 
-
+        //User creation
         const newUser = await User.create({
             email: formData.email, password: hashedPassword,
             firstName: formData.firstName, lastName: formData.lastName,
@@ -69,7 +70,7 @@ exports.sendOTP = async (req, res) => {
         </div>`
         const receiverMail = formData.email
 
-        await sendEmail({ html, subject, receiverMail })
+        sendEmail({ html, subject, receiverMail })
         return res.status(200).json({ msg: "Account Created, Verify OTP Sent to your email id to access your account" })
     } catch (err) {
         return res.status(500).json({ msg: "Something went wrong.." })
