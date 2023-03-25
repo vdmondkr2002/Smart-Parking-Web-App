@@ -65,7 +65,6 @@ const createUser = async (formData) => {
 }
 
 exports.sendOTP = async (req, res) => {
-    console.log(req.body)
     req.body.otp = "1"
     const { error } = sendOTPValidator.validate(req.body);
     console.log(error)
