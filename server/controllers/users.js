@@ -34,8 +34,9 @@ exports.sendOTP = async (req, res) => {
             console.log("No match")
             return res.status(400).json({ msg: "Password don't match" })
         }
-
+        console.log(password)
         const hashedPassword = passwordHash.generate(formData.password)
+        console.log(hashedPassword)
         //generate otp
         const otpGenerated = generateOTP();
 
@@ -51,7 +52,7 @@ exports.sendOTP = async (req, res) => {
             createdAt: new Date().toISOString(),
             otp: otpGenerated
         })
-
+        console.log(newUser.email)
         if (!newUser) {
             return res.status(500).json({ msg: "Unable to sign up please try again later" })
         }
