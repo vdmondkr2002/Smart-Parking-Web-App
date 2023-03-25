@@ -17,7 +17,8 @@ exports.sendOTP = async (req, res) => {
         if (error)
             return res.status(400).json({ msg: error.details[0].message })
 
-        const { email, password, confirmPassword } = req.body
+        const { email, password, confirmPassword,firstName,lastName,userName,mobileNo,selectedImg } = req.body
+
 
         //find existing user
         const existingUser = await User.findOne({ email: email })
@@ -33,9 +34,9 @@ exports.sendOTP = async (req, res) => {
         if (password !== confirmPassword) {
             console.log("No match")
             return res.status(400).json({ msg: "Password don't match" })
-        }
+        }   
         console.log(password)
-        const hashedPassword = passwordHash.generate(formData.password)
+        const hashedPassword = passwordHash.generate(password)
         console.log(hashedPassword)
         //generate otp
         const otpGenerated = generateOTP();
@@ -45,10 +46,10 @@ exports.sendOTP = async (req, res) => {
 
         //User creation
         const newUser = await User.create({
-            email: formData.email, password: hashedPassword,
-            firstName: formData.firstName, lastName: formData.lastName,
-            userName: formData.userName, mobileNo: formData.mobileNo,
-            profilePic: formData.selectedImg,
+            email: email, password: hashedPassword,
+            firstName: firstName, lastName: lastName,
+            userName:userName, mobileNo: mobileNo,
+            profilePic: selectedImg,
             createdAt: new Date().toISOString(),
             otp: otpGenerated
         })
@@ -69,7 +70,7 @@ exports.sendOTP = async (req, res) => {
             <h1 style="font-size: 40px; letter-spacing: 2px; text-align:center;">${otpGenerated}</h1>
             <h5>If you haven't made this request. simply ignore the mail and no changes will be made</h5>
         </div>`
-        const receiverMail = formData.email
+        const receiverMail =email
 
         sendEmail({ html, subject, receiverMail })
         return res.status(200).json({ msg: "Account Created, Verify OTP Sent to your email id to access your account" })
