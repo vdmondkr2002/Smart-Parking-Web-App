@@ -1,6 +1,5 @@
 const BookedTimeSlot = require('../models/BookedTimeSlot')
 const ParkingLot = require('../models/ParkingLot')
-const bcrypt = require('bcryptjs')
 const User = require('../models/User')
 const dayjs = require('dayjs')
 const passwordHash = require('password-hash')
