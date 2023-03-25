@@ -341,7 +341,7 @@ exports.sendResetEmail = async (req, res) => {
                     >
                         <h3>To reset Your password follow the link below:</h3>
                         <div>
-                            <a href="http://localhost:3000/resetPassword/${resetCode}">Reset Your password</a>
+                            <a href="${process.env.REACT_APP_URL || "http://localhost:3000"}/resetPassword/${resetCode}">Reset Your password</a>
                         </div>
                         <h5>If you haven't made this request. simply ignore the mail and no changes will be made</h5>
                     </div>
