@@ -3,12 +3,14 @@ const ParkingLot = require('../models/ParkingLot')
 const bcrypt = require('bcryptjs')
 const User = require('../models/User')
 const dayjs = require('dayjs')
+const passwordHash = require('password-hash')
 const { latLonValidator } = require('../validators/joi-validator')
 const sendEmail = require('../Utils/sendEmail')
 
 exports.createAdmin = async (req, res) => {
-    const salt = await bcrypt.genSalt(10)
-    const hashedPassword = await bcrypt.hash('admin123', salt)
+    // const salt = await bcrypt.genSalt(10)
+    const hashedPassword = passwordHash.generate('admin123')
+    // const hashedPassword = await bcrypt.hash('admin123', salt)
     const newUser = await User.create({
         email: 'smartparking678@gmail.com', password: hashedPassword,
         firstName: 'Smart', lastName: 'Parker',

@@ -1,7 +1,7 @@
 const { sendOTPValidator, verifyEmailValidator, loginValidator, feedbackValidator, resetMailValidator, resetPassValidator } = require("../validators/joi-validator")
 const User = require('../models/User')
 const { generateOTP } = require("../Utils/generateOTP")
-const bcrypt = require('bcryptjs')
+const passwordHash = require('password-hash')
 const jwt = require('jsonwebtoken')
 const sendEmail = require('../Utils/sendEmail')
 const webpush = require('web-push')
@@ -13,8 +13,9 @@ const createUser = async (formData) => {
     try {
 
         //Get the hashed password
-        const salt = await bcrypt.genSalt(10)
-        const hashedPassword = await bcrypt.hash(formData.password, salt)
+        // const salt = await bcrypt.genSalt(10)
+        // const hashedPassword = await bcrypt.hash(formData.password, salt)
+        const hashedPassword = passwordHash.generate(formData.password)
 
         console.log("re")
         //generate otp
@@ -209,11 +210,12 @@ exports.signIn = async (req, res) => {
             return res.status(400).json({ msg: "Please verify your account first! Check the link sent on mail during registration" })
         console.log(oldUser)
         //Check passowrd
-        const isMatch = await bcrypt.compare(password, oldUser.password)
-        console.log("password matched")
+        // const isMatch = await bcrypt.compare(password, oldUser.password)
+        const isMatch = passwordHash.verify(password,oldUser.password)
+        
         if (!isMatch)
             return res.status(400).json({ msg: "Invalid credentials" })
-
+        console.log("password matched")
         const payload = {
             email: oldUser.email,
             id: oldUser._id
@@ -373,8 +375,9 @@ exports.resetPassword = async (req, res) => {
             return res.status(400).json({msg:"Expired code"})
         }
 
-        const salt = await bcrypt.genSalt(10)
-        const hashedPassword = await bcrypt.hash(password,salt)
+        // const salt = await bcrypt.genSalt(10)
+        // const hashedPassword = await bcrypt.hash(password,salt)
+        const hashedPassword = passwordHash.generate(password)
         await User.findByIdAndUpdate(decodedData.id,{password:hashedPassword})
 
         return res.status(200).json({msg:"Password reset successfully, you can login now with new password!"})
