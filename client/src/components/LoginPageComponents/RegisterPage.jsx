@@ -4,14 +4,14 @@ import { Navigate, useNavigate } from 'react-router-dom'
 
 //material ui
 import LockOpenIcon from '@mui/icons-material/LockOpen';
-import { Grid, Paper, Box, Grow, Container, TextField, CardMedia, FormHelperText, Snackbar, Typography, Button, FormControl, OutlinedInput, InputAdornment, InputLabel, IconButton } from '@mui/material'
+import { Grid, Paper, Box, Grow, Container, TextField, CardMedia, FormHelperText, Snackbar, Typography, Button, FormControl, OutlinedInput, InputAdornment, InputLabel, IconButton, CircularProgress } from '@mui/material'
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material'
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useTheme } from "@emotion/react";
 import * as faceapi from 'face-api.js'
 import canvas from 'canvas'
-import { asyncresendOtp, asyncsendOTP, asyncsignUp, asyncverifyEmail, setAlert } from '../../state/index'
+import { asyncresendOtp, asyncsendOTP, asyncsignUp, asyncverifyEmail, setAlert, setInProgress2 } from '../../state/index'
 import signUpImg from '../../images/secure_signup.svg'
 import enterOtpImg from '../../images/enter_otp.svg'
 import Alert from "../../Utils/Alert";
@@ -110,6 +110,8 @@ const RegisterPage = () => {
     const [openDialog, setOpenDialog] = useState(false);
     const [detected, setDetected] = useState(false)
     const [resendOtp, setResendOtp] = useState(false)
+    const inProgress2 = useSelector(state => state.auth.inProgress2)
+    const inProgress1 = useSelector(state => state.auth.inProgress1)
     const [imgFIleName, setImgFIlename] = useState('')
     const dispatch = useDispatch()
     const navigate = useNavigate()
@@ -123,21 +125,21 @@ const RegisterPage = () => {
             if (user.role === "admin") {
                 navigate("/admindb")
             } else
-                navigate("/home")
+                navigate("/profile")
         }
     }, [user])
 
     useEffect(() => {
-        if (alert.msg === "Vefiy OTP sent to your email To Access Your Account" || alert.msg==="Account Created, Verify OTP Sent to your email id to access your account") {
+        if (alert.msg === "Vefiy OTP sent to your email To Access Your Account" || alert.msg === "Account Created, Verify OTP Sent to your email id to access your account") {
             setOtpSent(true);
             setResendOtp(false)
             setAlreadyOTP(true)
-        }else if(alert.msg==="No account with this email ID, Create an Account first"){
+        } else if (alert.msg === "No account with this email ID, Create an Account first") {
             setOtpSent(false)
             setAlreadyOTP(false)
             setResendOtp(false)
             setFormData(initialState)
-        } else if(alert.msg=="You are already verified, you can login directly"|| alert.msg == "You're Registered Successfully, Login Now") {
+        } else if (alert.msg == "You are already verified, you can login directly" || alert.msg == "You're Registered Successfully, Login Now") {
             navigate("/login")
         }
     }, [alert])
@@ -147,9 +149,9 @@ const RegisterPage = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!otpSent) {
-            if(resendOtp){
-                dispatch(asyncresendOtp({email:formData.email}))
-            }else{
+            if (resendOtp) {
+                dispatch(asyncresendOtp({ email: formData.email }))
+            } else {
                 if (formData.selectedImg == '') {
                     dispatch(asyncsendOTP({
                         userName: formData.userName, email: formData.email, mobileNo: formData.mobileNo, confirmPassword: formData.confirmPassword,
@@ -159,7 +161,7 @@ const RegisterPage = () => {
                     dispatch(asyncsendOTP(formData))
                 }
             }
-            
+
 
         } else {
             dispatch(asyncverifyEmail(formData))
@@ -207,7 +209,7 @@ const RegisterPage = () => {
             dispatch(setAlert({ msg: "Only jpg/jpeg/png file allowed to upload", type: "error" }))
             return
         }
-
+        dispatch(setInProgress2(true))
         const imageData = await compress.compress([imgFile], { size: 0.2, quality: 0.5 })
         const compressedImg = imageData[0].prefix + imageData[0].data;
         const testImg = await canvas.loadImage(compressedImg)
@@ -215,10 +217,12 @@ const RegisterPage = () => {
         const ctx = myCanvas.getContext('2d')
         ctx.drawImage(testImg, 0, 0, 200, 200)
         console.log(testImg)
+
         // console.log(myCanvas instanceof HTMLCanvasElement)
         console.log(myCanvas instanceof HTMLCanvasElement)
         const detections = await faceapi.detectSingleFace(myCanvas).withFaceLandmarks()
         console.log(detections)
+        dispatch(setInProgress2(false))
         if (detections === undefined) {
             dispatch(setAlert({ msg: "Please select a photo with face clearly visible", type: "error" }))
             return
@@ -236,7 +240,7 @@ const RegisterPage = () => {
         setOtpSent(false)
     }
 
-    const handleClickSignUp = ()=>{
+    const handleClickSignUp = () => {
         setResendOtp(false)
         setAlreadyOTP(false)
         setOtpSent(false)
@@ -327,14 +331,20 @@ const RegisterPage = () => {
                                                 (!alreadyotp && !resendOtp) ? (
                                                     <Grid item sm={12} xs={12} sx={styles.ipFields}>
                                                         <Typography variant="h5" display="inline">Add a Photo of Yourself:</Typography>
-                                                        <Button variant="contained" sx={{ marginLeft: "1em" }} component="label">
-                                                            Upload
-                                                            <input hidden accept="image/*" type="file" onChange={handleUploadClick} />
-                                                        </Button>
-                                                        <IconButton color="primary" aria-label="Upload picture" component="label">
-                                                            <input hidden accept="image/*" type="file" onChange={handleUploadClick} />
-                                                            <PhotoCamera />
-                                                        </IconButton>
+                                                        {
+                                                            inProgress2 ? (
+                                                                <Button variant="contained" color="info" startIcon={<CircularProgress size={20} sx={{ color: "yellow" }} />} sx={{ marginLeft: "1em" }} component="label">
+                                                                    Uploading
+                                                                    <input hidden accept="image/*" type="file" />
+                                                                </Button>
+                                                            ) : (
+                                                                <Button variant="contained" sx={{ marginLeft: "1em" }} component="label">
+                                                                    Upload
+                                                                    <input hidden accept="image/*" type="file" onChange={handleUploadClick} />
+                                                                </Button>
+                                                            )
+                                                        }
+
                                                         {
                                                             imgFIleName !== '' ? (
                                                                 <>
@@ -343,7 +353,7 @@ const RegisterPage = () => {
                                                                             {imgFIleName}
                                                                         </Typography>
                                                                     </Box>
-                                                                    <img src={formData.selectedImg} width="50%" />
+                                                                    <img src={formData.selectedImg} width="30%" />
                                                                 </>
                                                             ) : null
                                                         }
@@ -462,31 +472,61 @@ const RegisterPage = () => {
                                             {
                                                 otpSent ? (
                                                     <Grid item sm={12} sx={styles.submitBtn}>
-                                                        <Button
-                                                            variant="contained"
-                                                            type="submit"
-                                                            sx={styles.button}
-                                                            color="primary"
-                                                        >
-                                                            <Typography>Verify OTP & Register</Typography>
-                                                        </Button>
+                                                        {
+                                                            inProgress1 ? (
+                                                                <Button
+                                                                    variant="contained"
+                                                                    sx={styles.button}
+                                                                    color="info"
+                                                                    startIcon={<CircularProgress size={20} sx={{color:"yellow"}}/>}
+                                                                >
+                                                                    <Typography>Verifying</Typography>
+                                                                </Button>
+                                                                
+                                                            ) : (
+                                                                <Button
+                                                                    variant="contained"
+                                                                    type="submit"
+                                                                    sx={styles.button}
+                                                                    color="primary"
+                                                                >
+                                                                    <Typography>Verify OTP & Register</Typography>
+                                                                </Button>
+                                                            )
+                                                        }
                                                     </Grid>
                                                 ) : (
                                                     <Grid item sm={12} sx={styles.submitBtn}>
-                                                        <Button
-                                                            variant="contained"
-                                                            type="submit"
-                                                            sx={styles.button}
-                                                            color="primary"
-                                                        >
-                                                            <Typography>Send OTP</Typography>
-                                                        </Button>
+                                                        {
+                                                            inProgress1 ? (
+
+                                                                <Button
+                                                                    variant="contained"
+                                                                    color="info"
+                                                                    startIcon={<CircularProgress size={20} sx={{ color: "yellow" }} />}
+                                                                    sx={styles.button}
+                                                                >
+                                                                    <Typography>Sending OTP</Typography>
+                                                                </Button>
+                                                            ) : (
+                                                                <Button
+                                                                    variant="contained"
+                                                                    type="submit"
+                                                                    sx={styles.button}
+                                                                    color="primary"
+                                                                >
+                                                                    <Typography>Send OTP</Typography>
+                                                                </Button>
+
+                                                            )
+                                                        }
+
                                                     </Grid>
                                                 )
                                             }
                                             {
                                                 !otpSent ? (
-                                                    <Grid item sm={!resendOtp?6:12} sx={styles.submitBtn}>
+                                                    <Grid item sm={!resendOtp ? 6 : 12} sx={styles.submitBtn}>
                                                         <Button
                                                             variant="outlined"
                                                             type="submit"
@@ -500,27 +540,27 @@ const RegisterPage = () => {
                                                 ) : null
                                             }
                                             {
-                                                !resendOtp?(
-                                                    <Grid item sm={alreadyotp?12:6} sx={styles.submitBtn}>
-                                                <Button
-                                                    variant="outlined"
-                                                    sx={styles.button}
-                                                    onClick={handleResendOTPClick}
-                                                    color="primary"
-                                                >
-                                                    <Typography>Resend OTP</Typography>
-                                                </Button>
-                                            </Grid>
-                                                ):null
+                                                !resendOtp ? (
+                                                    <Grid item sm={alreadyotp ? 12 : 6} sx={styles.submitBtn}>
+                                                        <Button
+                                                            variant="outlined"
+                                                            sx={styles.button}
+                                                            onClick={handleResendOTPClick}
+                                                            color="primary"
+                                                        >
+                                                            <Typography>Resend OTP</Typography>
+                                                        </Button>
+                                                    </Grid>
+                                                ) : null
                                             }
-                                            
+
 
                                         </Grid>
                                     </form>
                                     <Box fontWeight="fontWeightMedium" m={2}>
                                         <Typography variant="h6" >
                                             Already have an Account? <Button color="primary" variant="contained" sx={styles.signUpBtn}
-                                                onClick={handleClickSignIn}>Sign In</Button>
+                                                onClick={handleClickSignIn}><Typography>Sign In</Typography></Button>
                                         </Typography>
                                     </Box>
 

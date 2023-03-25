@@ -46,6 +46,24 @@ const BookedTimeSlotSchema = mongoose.Schema({
         type:String,
         required:true
     },
+    orderID:{
+        type:String,
+        required:true,
+    },
+    paymentDetails:{
+        type:Object
+    },
+    paid:{
+        type:Boolean,
+        required:true,
+        default:false
+    },
+    refunded:{
+        type:Boolean,
+    },
+    refundDetails:{
+        type:Object
+    },
     notified:{
         type:Boolean,
         default:false

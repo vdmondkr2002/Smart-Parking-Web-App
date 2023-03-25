@@ -1,10 +1,10 @@
 import AccessTimeIcon from "@mui/icons-material/AccessTime"
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import { Button, Card, CardActions, CardContent, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, Paper, Typography, useTheme } from "@mui/material"
+import { Button, Card, CardActions, CardContent, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, Paper, Typography, useTheme } from "@mui/material"
 import { useMapEvents, MapContainer, Marker, Popup, TileLayer, Polyline, Polygon } from "react-leaflet"
 import { useEffect, useState } from "react"
 import L from 'leaflet'
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { asyncCancelParkingSlot } from "../../state";
 
 const BookedSlotCard = ({ id,name, charges, startTime, endTime, vehicleType, bookerName, lat, lng, currLoc, address, vehicleNo,cancellable }) => {
@@ -17,6 +17,7 @@ const BookedSlotCard = ({ id,name, charges, startTime, endTime, vehicleType, boo
 
     const [open, setOpen] = useState(false)
     const [open2,setOpen2] = useState(false)
+    const inProgress2 = useSelector(state=>state.inProgress2)
     const [position, setPosition] = useState([19.2, 73.2])
     const [zoomLvl, setZoomLvl] = useState(13)
     const dispatch = useDispatch()
@@ -159,10 +160,18 @@ const BookedSlotCard = ({ id,name, charges, startTime, endTime, vehicleType, boo
                         <Button variant="contained" onClick={handleShowDetails} fullWidth>Show Details</Button>
                         </Grid>
                         {
-                            cancellable?(
-                                <Grid item xs={12}>
+                            cancellable && startTime>Date.now()?(
+                                inProgress2?(
+                                    <Grid item xs={12}>
+                                <Button variant="contained" color="warning" startIcon={<CircularProgress size={20} sx={{color:"yellow"}}/>} fullWidth>Cancel Booking</Button>
+                                </Grid>
+
+                                ):(
+<Grid item xs={12}>
                                 <Button variant="contained" color="warning" onClick={()=>setOpen2(true)} fullWidth>Cancel Booking</Button>
                                 </Grid>
+                                )
+                                
                             ):null
                         }
                         

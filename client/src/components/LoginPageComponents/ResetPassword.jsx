@@ -1,7 +1,7 @@
 import Visibility from "@mui/icons-material/Visibility"
-import {useNavigate, useParams, useSearchParams} from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import VisibilityOff from "@mui/icons-material/VisibilityOff"
-import { Button, Container, FormControl, FormHelperText, Grid, Grow, IconButton, InputAdornment, InputLabel, OutlinedInput, Paper, Typography, useTheme } from "@mui/material"
+import { Button, CircularProgress, Container, FormControl, FormHelperText, Grid, Grow, IconButton, InputAdornment, InputLabel, OutlinedInput, Paper, Typography, useTheme } from "@mui/material"
 import { Box } from "@mui/system"
 import { useEffect, useState } from "react"
 import ResetPasswordImg from '../../images/forgot_password.svg'
@@ -37,24 +37,25 @@ const ResetPassword = (match) => {
     const [showPassword1, setshowPassword1] = useState(false);
     const [showPassword2, setshowPassword2] = useState(false);
     const [formData, setFormData] = useState(initialState)
-    const alert = useSelector(state=>state.auth.alert)
+    const inProgress1 = useSelector(state => state.auth.inProgress1)
+    const alert = useSelector(state => state.auth.alert)
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
     // const location = useLocation()
     const params = useParams()
-    
-    useEffect(()=>{
-        if(alert.msg){
-            if(alert.msg==="Password reset successfully, you can close this page and login now with new password!"){
+
+    useEffect(() => {
+        if (alert.msg) {
+            if (alert.msg === "Password reset successfully, you can login now with new password!") {
                 navigate("/login")
             }
         }
-    },[alert])
+    }, [alert])
     const handleSubmit = (e) => {
         e.preventDefault()
-        console.log("Password reset",params.code)
-        dispatch(asyncresetPassword({code:params.code,...formData}))
+        console.log("Password reset", params.code)
+        dispatch(asyncresetPassword({ code: params.code, ...formData }))
     }
 
     const handleClickShowPassword1 = () => {
@@ -73,7 +74,7 @@ const ResetPassword = (match) => {
         setFormData({ ...formData, [e.target.name]: e.target.value })
     }
 
-    
+
 
     return (
         <Grow in>
@@ -94,7 +95,7 @@ const ResetPassword = (match) => {
                                     <img src={ResetPasswordImg} alt="Reset Password" width="70%" />
                                 </Grid>
                                 <Grid item xs={12} sm={7}>
-                                    <Grid container spacing={2} sx={{padding:"1em"}}>
+                                    <Grid container spacing={2} sx={{ padding: "1em" }}>
                                         <Grid item sm={12} sx={styles.ipFields}>
                                             <FormControl required fullWidth sx={styles.margin} variant="outlined">
                                                 <InputLabel htmlFor="password">Password</InputLabel>
@@ -149,11 +150,24 @@ const ResetPassword = (match) => {
                                                 <FormHelperText required variant="outlined" children="Must be same as password above" />
                                             </FormControl>
                                         </Grid>
-                                        <Grid item sm={12} sx={{ textAlign: "center" }}>
-                                            <Button type="submit" variant="contained" color="primary">
-                                                Reset Password
-                                            </Button>
-                                        </Grid>
+                                        {
+                                            inProgress1 ? (
+                                                <Grid item sm={12} sx={{ textAlign: "center" }}>
+                                                    <Button  variant="contained" startIcon={<CircularProgress size={20} sx={{color:"yellow"}}/>} color="info">
+                                                        Resettting Password
+                                                    </Button>
+                                                </Grid>
+                                                
+                                            ) : (
+                                                <Grid item sm={12} sx={{ textAlign: "center" }}>
+                                                    <Button type="submit" variant="contained" color="primary">
+                                                        Reset Password
+                                                    </Button>
+                                                </Grid>
+
+                                            )
+                                        }
+
                                     </Grid>
                                 </Grid>
 

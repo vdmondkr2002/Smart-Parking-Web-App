@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 
 //material ui
 import LockOpenIcon from '@mui/icons-material/LockOpen';
-import { Grid, Paper, Box, Grow, Container, TextField, CardMedia, FormHelperText, Snackbar, Typography, Button, FormControl, OutlinedInput, InputAdornment, InputLabel, IconButton } from '@mui/material'
+import { Grid, Paper, Box, Grow, Container, TextField, CardMedia, FormHelperText, Snackbar, Typography, Button, FormControl, OutlinedInput, InputAdornment, InputLabel, IconButton, CircularProgress } from '@mui/material'
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material'
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
@@ -92,7 +92,9 @@ const LoginPage = () => {
     const [formData, setFormData] = useState(initialState)
     const [showPassword1, setshowPassword1] = useState(false);
     const [showPassword2, setshowPassword2] = useState(false);
-    const [resetEmail,setResetEmail] = useState('')
+    const inProgress2 = useSelector(state => state.auth.inProgress2)
+    const inProgress1 = useSelector(state => state.auth.inProgress1)
+    const [resetEmail, setResetEmail] = useState('')
     const [openDialog, setOpenDialog] = useState(false);
     const alert = useSelector(state => state.auth.alert)
     const user = useSelector(state => state.auth.user)
@@ -106,17 +108,17 @@ const LoginPage = () => {
             if (user.role === "admin") {
                 navigate("/admindb")
             } else
-                navigate("/home")
+                navigate("/profile")
         }
     }, [user])
 
-    useEffect(()=>{
-        if(alert.msg){
-            if(alert.msg=="Mail sent with link to reset Your password"){
+    useEffect(() => {
+        if (alert.msg) {
+            if (alert.msg == "Mail sent with link to reset Your password") {
                 setOpenDialog(false)
             }
         }
-    },[alert])
+    }, [alert])
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -149,7 +151,7 @@ const LoginPage = () => {
     const handleResetEmail = () => {
         console.log("Reset email sent..")
         console.log(resetEmail)
-        dispatch(asyncSendResetEmail({email:resetEmail}))
+        dispatch(asyncSendResetEmail({ email: resetEmail }))
     }
 
     const handleClickSignUp = () => {
@@ -227,14 +229,29 @@ const LoginPage = () => {
                                                 </FormControl>
                                             </Grid>
                                             <Grid item sm={12} sx={styles.submitBtn}>
-                                                <Button
-                                                    variant="contained"
-                                                    type="submit"
-                                                    sx={styles.button}
-                                                    color="primary"
-                                                >
-                                                    <Typography>Login</Typography>
-                                                </Button>
+                                                {
+                                                    inProgress1 ? (
+                                                        <Button
+                                                            variant="contained"
+                                                            startIcon={<CircularProgress size={20} sx={{ color: "yellow" }} />}
+                                                            sx={styles.button}
+                                                            color="info"
+                                                        >
+                                                            <Typography>Logging In</Typography>
+                                                        </Button>
+                                                        
+                                                    ) : (
+                                                        <Button
+                                                            variant="contained"
+                                                            type="submit"
+                                                            sx={styles.button}
+                                                            color="primary"
+                                                        >
+                                                            <Typography>Login</Typography>
+                                                        </Button>
+                                                    )
+                                                }
+
                                             </Grid>
                                             <Grid item sm={12}>
                                                 <Button variant="outlined" onClick={handleClickOpenDialog}>Forgot Password?</Button>
@@ -243,7 +260,7 @@ const LoginPage = () => {
                                     </form>
                                     <Box fontWeight="fontWeightMedium" m={2}>
                                         <Typography variant="h6" >
-                                            Don't have an Account? <Button color="primary" variant="contained" sx={styles.signUpBtn} onClick={handleClickSignUp}>Create One</Button>
+                                            Don't have an Account? <Button color="primary" variant="contained" sx={styles.signUpBtn} onClick={handleClickSignUp}><Typography>Create One</Typography></Button>
                                         </Typography>
                                     </Box>
                                 </Grid>
@@ -255,7 +272,7 @@ const LoginPage = () => {
                 <Dialog fullWidth open={openDialog} onClose={handleCloseDialog} aria-labelledby="dialog-title">
                     <DialogTitle fontWeight="bold" id="dialog-title">Reset Your Account Password</DialogTitle>
                     <DialogContent>
-                        <Grid container sx={{paddingTop:"1em"}} spacing={2}>
+                        <Grid container sx={{ paddingTop: "1em" }} spacing={2}>
                             <Grid item sm={12}>
                                 <TextField
                                     name="email"
@@ -271,12 +288,22 @@ const LoginPage = () => {
                         </Grid>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={handleCloseDialog} color="primary">
+                        <Button variant="contained" color="warning" onClick={handleCloseDialog}>
                             Cancel
                         </Button>
-                        <Button onClick={handleResetEmail} color="primary">
-                            Send
-                        </Button>
+                        {
+                            inProgress2 ? (
+                                <Button variant="contained" color="success" startIcon={<CircularProgress size={20} sx={{ color: "yellow" }} />} >
+                                    Sending
+                                </Button>
+
+                            ) : (
+                                <Button variant="contained" color="success" onClick={handleResetEmail}>
+                                    Send
+                                </Button>
+                            )
+                        }
+
                     </DialogActions>
                 </Dialog>
             </Container>

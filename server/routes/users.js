@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const auth = require('../middleware/auth')
-const {signUp,sendOTP,verifyEmail,signIn,getCurrentUser, sendFeedback, setProfilePic, sendSubcription, sendResetEmail, resetPassword, resendOTP} = require('../controllers/users')
+const {sendOTP,verifyEmail,signIn,getCurrentUser, sendFeedback, setProfilePic, sendSubcription, sendResetEmail, resetPassword, resendOTP} = require('../controllers/users')
 
 router.get('',auth,getCurrentUser)
 router.post('/sendOTP',sendOTP)

@@ -1,9 +1,9 @@
-import { Box, Button, Card, CardActions, CardContent, CardMedia, Dialog, DialogTitle, FormHelperText, Grid, IconButton, ImageList, ImageListItem, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, Card, CardActions, CardContent, CardMedia, CircularProgress, Dialog, DialogTitle, FormHelperText, Grid, IconButton, ImageList, ImageListItem, Stack, TextField, Typography } from "@mui/material";
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { useEffect, useState } from "react";
 import ParkingSlot from "./ParkingSlot";
-import { asyncBookSlot, setAlert } from "../../state";
-import { useDispatch } from "react-redux";
+import { asyncBookSlot, asynccheckOut, asynccheckOutBookSlot, setAlert } from "../../state";
+import { useDispatch, useSelector } from "react-redux";
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import { useMapEvents, MapContainer, Marker, Popup, TileLayer, Polyline, Polygon } from "react-leaflet"
 import L from 'leaflet'
@@ -17,9 +17,9 @@ import DoneIcon from '@mui/icons-material/Done';
 import CloseIcon from '@mui/icons-material/Close';
 
 const initialState = {
-    selectedImg:'',vehicleNo:''
+    selectedImg: '', vehicleNo: ''
 }
-const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, charges, distance, id, freeSlots, engagedSlots, address, lat, lng, currLoc,lotImages }) => {
+const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, charges, distance, id, freeSlots, engagedSlots, address, lat, lng, currLoc, lotImages }) => {
     const styles = {
         dialog: {
             padding: "2em"
@@ -34,13 +34,15 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
     const [open3, setOpen3] = useState(false)
     const [open4, setOpen4] = useState(false)
     const [parkingSlots, setParkingSlots] = useState([...freeSlots, ...engagedSlots])
-    const [formData,setFormData] = useState(initialState)
+    const user = useSelector(state => state.auth.user)
+    const inProgress2 = useSelector(state => state.auth.inProgress2)
+    const [formData, setFormData] = useState(initialState)
     const [engagedSllots, setEngagedSllots] = useState(engagedSlots)
     const [changed, setChanged] = useState('')
     const [imgFIleName, setImgFIlename] = useState('')
     const [prevChanged, setPrevChanged] = useState('')
-    const [cancellable,setCancellable] = useState(false)
-    const [isDone,setIsDone] = useState(false)
+    const [cancellable, setCancellable] = useState(false)
+    const [isDone, setIsDone] = useState(false)
     const [position, setPosition] = useState([(currLoc[0] + lat) / 2, (currLoc[1] + lng) / 2])
     const [map, setMap] = useState()
     const [vehicleNumber, setVehicleNumber] = useState('')
@@ -63,17 +65,17 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
         })
 
         useEffect(() => {
-            if(!isDone){
+            if (!isDone) {
                 L.Routing.control({
                     waypoints: [
                         L.latLng(currLoc[0], currLoc[1]),
                         L.latLng(lat, lng)
                     ], createMarker: () => null
-    
+
                 }).addTo(map)
                 setIsDone(true)
             }
-            
+
 
         }, [])
     }
@@ -100,15 +102,15 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
         setOpen2(false)
     }
 
-    
 
-    
 
-    const handleClickOpenDialog3 = ()=>{
+
+
+    const handleClickOpenDialog3 = () => {
         setOpen3(true)
     }
 
-    const handleClickCloseDialog3 = ()=>{
+    const handleClickCloseDialog3 = () => {
         setOpen3(false)
     }
 
@@ -132,17 +134,11 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
         shadowSize: [41, 41]
     });
 
-    const handleBookSlot = () => {
-        console.log(changed, id, startTime, endTime, vehicleType)
-        const data = { startTime: startTime.format('YYYY-MM-DD HH:00'), endTime: endTime.format('YYYY-MM-DD HH:00'), lotId: id, slotId: changed, vehicleType: vehicleType }
-        console.log(data)
-        dispatch(asyncBookSlot(data))
-    }
     const handleChangeForm = (e) => {
-        setFormData({...formData,[e.target.name]:e.target.value})
+        setFormData({ ...formData, [e.target.name]: e.target.value })
     }
 
-    const handleUploadClick = async(e) => {
+    const handleUploadClick = async (e) => {
         console.log(e)
         const imgFile = e.target.files[0]
         console.log(imgFile)
@@ -152,22 +148,33 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
             return
         }
         setImgFIlename(imgFile.name)
-        const imageData = await compress.compress([imgFile],{size:0.2,quality:0.5})
+        const imageData = await compress.compress([imgFile], { size: 0.2, quality: 0.5 })
         const compressedImg = imageData[0].prefix + imageData[0].data;
-        console.log(compressedImg)
-        setFormData({...formData,selectedImg:compressedImg})
+        // console.log(compressedImg)
+        setFormData({ ...formData, selectedImg: compressedImg })
     }
 
-    const handleConfirmSlot = (e)=>{
+    const handleConfirmSlot = (e) => {
         e.preventDefault()
         console.log("slot confirming...")
         console.log(formData)
-        console.log(changed,id,startTime,endTime,vehicleType)
-        const data = { startTime: startTime.format('YYYY-MM-DD HH:00'), endTime: endTime.format('YYYY-MM-DD HH:00'), 
-                        lotId: id, slotId: changed, vehicleType: vehicleType,
-                       vehicleNo:formData.vehicleNo,carImg: formData.selectedImg,cancellable}
+        console.log(changed, id, startTime, endTime, vehicleType)
+        const data = {
+            startTime: startTime.format('YYYY-MM-DD HH:00'), endTime: endTime.format('YYYY-MM-DD HH:00'),
+            lotId: id, slotId: changed, vehicleType: vehicleType,
+            vehicleNo: formData.vehicleNo, carImg: formData.selectedImg, cancellable, charges: charges
+        }
         console.log(data)
-        dispatch(asyncBookSlot(data))
+        const userData = {
+            name: user.firstName + " " + user.lastName,
+            email: user.email,
+            mobileNo: user.mobileNo,
+            lotName: name
+        }
+        // dispatch(asyncBookSlot(data))
+
+        dispatch(asynccheckOutBookSlot(data, userData))
+
     }
 
     return (
@@ -259,14 +266,14 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
 
                             </Grid>
                             {
-                                lotImages && lotImages.length>0?(
+                                lotImages && lotImages.length > 0 ? (
                                     <Grid item xs={12}>
                                         <Button fullWidth onClick={handleClickOpenDialog3} variant="contained">Check out photos</Button>
                                     </Grid>
-                                ):null
-                                
+                                ) : null
+
                             }
-                            
+
                             {
                                 [...freeSlots, ...engagedSlots].sort().map((slot) => (
                                     <Grid item xs={2}>
@@ -346,12 +353,12 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
                             {
                                 imgFIleName !== '' ? (
                                     <>
-                                    <Box border="1px solid black">
-                                        <Typography>
-                                            {imgFIleName}
-                                        </Typography>
-                                    </Box>
-                                    <img src={formData.selectedImg} width="50%"/>
+                                        <Box border="1px solid black">
+                                            <Typography>
+                                                {imgFIleName}
+                                            </Typography>
+                                        </Box>
+                                        <img src={formData.selectedImg} width="50%" />
                                     </>
                                 ) : null
                             }
@@ -361,15 +368,23 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
                         </Grid>
                         <Grid item sm={8} xs={12} sx={styles.ipFields}>
                             <Typography variant="h5" display="inline">Do you want the Slot to be cancellable:</Typography>
-                            
-                            <FormHelperText sx={{color:"red"}} required children="*Cancelling a slot will refund 70% of your parking charge on cancellation"/>
+
+                            <FormHelperText sx={{ color: "red" }} required children="*Cancelling a slot will deduct 30% of your parking charge" />
                         </Grid>
                         <Grid item sm={4} xs={12} sx={styles.ipFields}>
-                            <Button variant={cancellable?"contained":"outlined"} color={cancellable?"success":"inherit"} startIcon={<DoneIcon/>} onClick={()=>setCancellable(true)}>Yes</Button>
-                            <Button variant={!cancellable?"contained":"outlined"} color={!cancellable?"warning":"inherit"} startIcon={<CloseIcon/>} onClick={()=>setCancellable(false)}>No</Button>
+                            <Button variant={cancellable ? "contained" : "outlined"} color={cancellable ? "success" : "inherit"} startIcon={<DoneIcon />} onClick={() => setCancellable(true)}>Yes</Button>
+                            <Button variant={!cancellable ? "contained" : "outlined"} color={!cancellable ? "warning" : "inherit"} startIcon={<CloseIcon />} onClick={() => setCancellable(false)}>No</Button>
                         </Grid>
                         <Grid item xs={12} sx={styles.ipFields}>
-                            <Button fullWidth type="submit" variant="contained">Confirm Slot</Button>
+                            {
+                                inProgress2 ? (
+                                    <Button fullWidth type="submit" variant="contained" color="info" startIcon={<CircularProgress size={20} sx={{ color: "yellow" }} />}>Slot Booking</Button>
+                                    
+                                ) : (
+                                    <Button fullWidth type="submit" variant="contained">Confirm Slot & Pay</Button>
+                                )
+                            }
+
                         </Grid>
                     </Grid>
                 </form>
@@ -379,21 +394,21 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
                 <Grid container sx={styles.dialog} justifyContent="center">
                     <Grid item xs={12}>
                         {
-                            lotImages && lotImages.length>0?(
-                                <ImageList sx={{ width: 500, height:170,margin:"auto" }} cols={lotImages.length} rowHeight={160}>
-                                {lotImages.map((img,index)=>(
-                                    <ImageListItem  key={index}>
-                                        <img src={img}
-                                        srcSet={img}
-                                        alt="Image title"
-                                        loading="lazy"
-                                        />
-                                    </ImageListItem>
-                                ))}
-                                 </ImageList>
-                            ):null
-                            
-                       
+                            lotImages && lotImages.length > 0 ? (
+                                <ImageList sx={{ width: 500, height: 170, margin: "auto" }} cols={lotImages.length} rowHeight={160}>
+                                    {lotImages.map((img, index) => (
+                                        <ImageListItem key={index}>
+                                            <img src={img}
+                                                srcSet={img}
+                                                alt="Image title"
+                                                loading="lazy"
+                                            />
+                                        </ImageListItem>
+                                    ))}
+                                </ImageList>
+                            ) : null
+
+
                         }
                     </Grid>
                 </Grid>

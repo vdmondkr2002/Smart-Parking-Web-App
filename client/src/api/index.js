@@ -28,7 +28,6 @@ export const getLocByAddress = async(formData)=>{
     return {lat:data[0].lat,lng:data[0].lon}
 }
 
-export const signUp = ()=>API.post(`${urlUser}/signUp`);
 
 export const sendOTP = (formData)=>API.post(`${urlUser}/sendOTP`,formData)
 
@@ -83,3 +82,15 @@ export const deleteParkingLot = (id)=>API.delete(`${urlAdmin}/removeParkingLot`,
 export const makeActiveParkingLot = (id)=>API.post(`${urlAdmin}/activeLot`,{id:id})
 
 export const getCancelledSlots = ()=>API.get(`${urlAdmin}/cancelledSlots`)
+
+
+const urlPayments = '/api/v1/payments'
+
+export const checkoutBookSlot = (formData)=>API.post(`${urlPayments}/checkoutBookSlot`,formData)
+
+export const getRazorPayKey = ()=>API.get(`${urlPayments}/razorPayKey`)
+
+export const checkoutRefund = (formData)=>API.post(`${urlPayments}/checkoutRefund`,formData)
+
+const urlNews = '/api/v1/news'
+export const getNews = ()=>API.get(`${urlNews}/`)

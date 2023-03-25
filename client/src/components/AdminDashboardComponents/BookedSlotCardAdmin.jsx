@@ -5,9 +5,9 @@ import { useMapEvents, MapContainer, Marker, Popup, TileLayer, Polyline, Polygon
 import { useEffect, useState } from "react"
 import L from 'leaflet'
 import { useDispatch } from "react-redux";
-import { asyncCancelParkingSlot } from "../../state";
+import { asyncCancelParkingSlot, asynccheckoutRefund } from "../../state";
 
-const BookedSlotCardAdmin = ({ id, name, charges, refundAmount,startTime, endTime, vehicleType, bookerName, vehicleNo, cancellable, address, carImage }) => {
+const BookedSlotCardAdmin = ({ id, name, charges, refundAmount,startTime, endTime, vehicleType, bookerName, vehicleNo, cancellable, address, carImage,refunded }) => {
     const theme = useTheme()
     const styles = {
         dialog: {
@@ -31,7 +31,8 @@ const BookedSlotCardAdmin = ({ id, name, charges, refundAmount,startTime, endTim
     }
 
     const handlePayRefund = ()=>{
-        console.log("Pay Refund")
+        console.log("Pay Refund",refundAmount)
+        dispatch(asynccheckoutRefund({amount:refundAmount,bookerName,vehicleType,name,startTime,endTime,id}))
     }
 
     const redIcon = new L.Icon({
@@ -148,7 +149,7 @@ const BookedSlotCardAdmin = ({ id, name, charges, refundAmount,startTime, endTim
                 </CardContent>
                 <CardActions>
                     {
-                        refundAmount?(
+                        refundAmount && !refunded?(
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
                             <Button variant="contained" onClick={handlePayRefund} fullWidth>Pay Refund</Button>
@@ -220,6 +221,12 @@ const BookedSlotCardAdmin = ({ id, name, charges, refundAmount,startTime, endTim
                                         </Grid>
                                         <Grid item xs={2} >
                                             {charges}
+                                        </Grid>
+                                        <Grid item xs={4} sx={{ fontWeight: "bold" }}>
+                                            Refunded Amount:
+                                        </Grid>
+                                        <Grid item xs={2} >
+                                            {refundAmount}
                                         </Grid>
                                         {/* <Grid item xs={6}></Grid> */}
                                         <Grid item xs={4} sx={{ fontWeight: "bold" }}>

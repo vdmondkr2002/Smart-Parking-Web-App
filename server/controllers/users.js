@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const sendEmail = require('../Utils/sendEmail')
 const webpush = require('web-push')
+const { instance } = require("../Utils/razorPayInstance")
 
 const createUser = async (formData) => {
 
@@ -237,7 +238,7 @@ exports.getCurrentUser = async (req, res) => {
         if (!req.userId) {
             return res.status(401).json({ msg: "Unauthorized" })
         }
-
+        
         const user = await User.findById(req.userId)
         // console.log("User->", user)
         return res.status(200).json({ firstName: user.firstName, lastName: user.lastName, userName: user.userName, _id: user._id, email: user.email, mobileNo: user.mobileNo, role: user.role, profilePic: user.profilePic })

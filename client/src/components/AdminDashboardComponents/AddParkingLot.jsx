@@ -1,4 +1,4 @@
-import { Button, Grid, Grow, IconButton, ImageList, ImageListItem, Paper, TextField, Typography } from "@mui/material"
+import { Button, CircularProgress, Grid, Grow, IconButton, ImageList, ImageListItem, Paper, TextField, Typography } from "@mui/material"
 import { Container } from "@mui/system"
 import { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
@@ -153,6 +153,7 @@ const AddParkingLot = () => {
     const user = useSelector(state => state.auth.user)
     const alert = useSelector(state => state.auth.alert)
     const [foundCurrLoc, setFoundCurrLoc] = useState(false)
+    const inProgress1 = useSelector(state=>state.auth.inProgress1)
     // const [openTime, setOpenTime] = useState()
     // const [closeTime, setCloseTime] = useState();
     const compress = new Compress()
@@ -372,7 +373,7 @@ const AddParkingLot = () => {
                         </Grid>
                         <Grid item xs={6} sm={4}>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <StaticTimePicker minTime={formData.openTime} label="Select Close Time" value={formData.closeTime} renderInput={(params) => <TextField {...params} />} views={['hours']} onChange={handleChangeClose} defaultValue={dayjs('2022-04-17T15:30')} />
+                                <StaticTimePicker label="Select Close Time" value={formData.closeTime} renderInput={(params) => <TextField {...params} />} views={['hours']} onChange={handleChangeClose} defaultValue={dayjs('2022-04-17T15:30')} />
                             </LocalizationProvider>
                         </Grid>
                         <Grid item xs={0} sm={2}></Grid>
@@ -514,73 +515,6 @@ const AddParkingLot = () => {
                                 <LocationMarker />
                             </MapContainer>
                         </Grid>
-                        {/* <Grid item xs={12} sx={styles.ipFields}>
-                            <Grid container>
-                                <Grid item xs={12} sm={4}>
-
-                                    <Button variant="contained">Pick a location</Button>
-                                </Grid>
-                                <Grid item xs={12} sm={4}>
-                                    <Grid container>
-                                        <Grid item sm={5}>
-                                            <Div>{"Latitude"}</Div>
-                                        </Grid>
-                                        <Grid item sm={6}>
-                                            <TextField
-                                                name="lat"
-                                                type="text"
-                                                InputLabelProps={{ shrink: true }}
-                                                variant="outlined"
-                                                required
-                                                fullWidth
-                                                label="Latitude"
-
-                                                onChange={handleChange}
-                                                value={formData.lat}
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                </Grid>
-                                <Grid item xs={12} sm={4}>
-                                    <Grid container>
-                                        <Grid item sm={5}>
-                                            <Div>{"Longitude"}</Div>
-                                        </Grid>
-                                        <Grid item sm={6}>
-                                            <TextField
-                                                name="lng"
-                                                type="text"
-                                                InputLabelProps={{ shrink: true }}
-                                                variant="outlined"
-                                                required
-                                                fullWidth
-                                                label="Longitude"
-
-                                                onChange={handleChange}
-                                                value={formData.lng}
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <MapContainer style={{ height: "400px" }} center={position} zoom={zoomLvl} >
-                                        <TileLayer
-                                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                        />
-                                        <Marker position={position}>
-                                            <Popup>
-                                                A pretty CSS3 popup. <br /> Easily customizable.
-                                            </Popup>
-                                        </Marker>
-
-                                        <LocationMarker />
-                                    </MapContainer>
-                                </Grid>
-                            </Grid>
-
-
-                        </Grid> */}
                         <Grid item xs={12} sm={12}>
                             <Paper sx={styles.titlePaper}>
                                 <Typography variant="h3" sx={styles.tit}>
@@ -619,7 +553,14 @@ const AddParkingLot = () => {
 
                         </Grid>
                         <Grid item xs={12}>
-                            <Button sx={{ width: "100%", padding: "1em" }} variant="contained" type="submit">Submit</Button>
+                            {
+                                inProgress1?(
+                                    <Button sx={{ width: "100%", padding: "1em",fontWeight:"bold",fontSize:14  }} color="info" variant="contained" startIcon={<CircularProgress size={20} sx={{color:"yellow"}}/>}>Submitting</Button>
+                                ):(
+                                    <Button sx={{ width: "100%", padding: "1em",fontWeight:"bold",fontSize:14 }} color="primary" variant="contained" type="submit">Submit</Button>
+                                )
+                            }
+                            
                         </Grid>
                     </Grid>
                 </form>

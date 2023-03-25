@@ -1,6 +1,6 @@
-import { Button, FormControl, FormHelperText, Grid, Grow, InputLabel, List, ListItem, ListItemText, MenuItem, Paper, Select, TextField, Typography, useTheme } from "@mui/material"
+import { Button, CircularProgress, FormControl, FormHelperText, Grid, Grow, InputLabel, List, ListItem, ListItemText, MenuItem, Paper, Select, TextField, Typography, useTheme } from "@mui/material"
 import { Container } from "@mui/system"
-import {Link as RouterLink} from 'react-router-dom'
+import { Link as RouterLink } from 'react-router-dom'
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
@@ -24,9 +24,10 @@ import 'leaflet-routing-machine'
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
 import LocationOn from "@mui/icons-material/LocationOn"
 import { getLocByAddress } from "../../api"
+import CustomCircularProgress from "../../Utils/CustomCircularProgress"
 
 const initialState = {
-    city:'',state:'',country:'',postalCode:''
+    city: '', state: '', country: '', postalCode: ''
 }
 const HomePage = () => {
     const theme = useTheme()
@@ -70,11 +71,12 @@ const HomePage = () => {
     const user = useSelector(state => state.auth.user)
     const alert = useSelector(state => state.auth.alert)
     const freeParkingLots = useSelector(state => state.auth.freeParkingLots)
+    const inProgress1 = useSelector(state => state.auth.inProgress1)
     const [startTime, setStartTime] = useState(dayjs(format(Date.now() + 1000 * 60 * 60, 'yyyy-MM-dd hh:00 a')))
     const [endTime, setEndTime] = useState(dayjs(format(Date.now() + 1000 * 60 * 60 * 2, 'yyyy-MM-dd hh:00 a')));
     const [vehicleType, setVehicleType] = useState('')
     const [position, setPosition] = useState([19.1485, 73.133]);
-    const [formData,setFormData] = useState(initialState)
+    const [formData, setFormData] = useState(initialState)
     const [polyline, setPolyline] = useState([[19.2735184, 73.1183625], [19.2735184, 73.1724625], [19.2159482, 73.1724625], [19.2159482, 73.1183625], [19.2735184, 73.1183625]])
     const [distances, setDistances] = useState([])
     const [times, setTimes] = useState([])
@@ -101,7 +103,7 @@ const HomePage = () => {
         shadowSize: [41, 41]
     })
 
-    
+
 
     useEffect(() => {
         dispatch(clearFreeParkingLots())
@@ -166,10 +168,10 @@ const HomePage = () => {
 
         }, [map])
 
-        useEffect(()=>{
-            map.flyTo({ 'lat': position[0], 'lng': position[1] },zoomLvl)
-        },[position])
-        
+        useEffect(() => {
+            map.flyTo({ 'lat': position[0], 'lng': position[1] }, zoomLvl)
+        }, [position])
+
         // useEffect(() => {
         //     if (!foundCurrLoc) {
         //         map.locate().on("locationfound",(e)=>{
@@ -216,6 +218,7 @@ const HomePage = () => {
             startTime: startTime.format('YYYY-MM-DD HH:00'), endTime: endTime.format('YYYY-MM-DD HH:00'),
             lat: position[0], lng: position[1], vehicleType: vehicleType
         }
+        console.log(data)
         dispatch(asyncgetParkingLot(data))
     }
 
@@ -235,15 +238,15 @@ const HomePage = () => {
         console.log(newValue)
         setEndTime(newValue)
     }
-    const handleSearchLoc = async()=>{
+    const handleSearchLoc = async () => {
         const loc = await getLocByAddress(formData)
         console.log(loc)
-        if(loc.msg){
-            dispatch(setAlert({msg:loc.msg,type:'info'}))
+        if (loc.msg) {
+            dispatch(setAlert({ msg: loc.msg, type: 'info' }))
             return;
         }
-        setPosition([parseFloat(loc['lat']),parseFloat(loc['lng'])])
-        
+        setPosition([parseFloat(loc['lat']), parseFloat(loc['lng'])])
+
     }
 
     const handleChangePos = (e) => {
@@ -254,7 +257,7 @@ const HomePage = () => {
         dispatch(clearFreeParkingLots())
     }
 
-     
+
 
     const handleChangeVehicleTp = (e) => {
         setVehicleType(e.target.value)
@@ -270,7 +273,7 @@ const HomePage = () => {
     }
 
 
-    
+
 
     const compByCharges = (a, b) => {
         if (a.charges < b.charges) {
@@ -550,7 +553,14 @@ const HomePage = () => {
                             </MapContainer>
                         </Grid>
                         <Grid item xs={12}>
-                            <Button fullWidth sx={{ padding: "1em" }} variant="contained" type="submit">Find Parking Lots</Button>
+                            {
+                                inProgress1 ? (
+                                    // <Button fullWidth sx={{ padding: "1em" }}  variant="contained" type="submit">Find Parking Lots</Button>
+                                    <Button fullWidth sx={{ padding: "1em", fontWeight: "bold", fontSize: 14 }} color="info" variant="contained" startIcon={<CircularProgress size={20} sx={{ color: "yellow" }} />}>Searching..</Button>
+                                ) : (
+                                    <Button fullWidth sx={{ padding: "1em", fontWeight: "bold", fontSize: 14 }} variant="contained" type="submit">Find Parking Lots</Button>
+                                )
+                            }
                         </Grid>
                     </Grid>
                 </form>
@@ -558,49 +568,61 @@ const HomePage = () => {
 
 
                 {
-                    freeParkingLots.length > 0 ? (
+                    inProgress1 ? (
+                        <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
+                            <Grid item>
+                                <CustomCircularProgress inProgress={inProgress1} />
+                            </Grid>
+                        </Grid>
+                    ) : (
                         <>
-                            <Grid container sx={styles.slotsCont} spacing={3}>
-                                <Grid item xs={8}>
+                        {
+                            freeParkingLots.length > 0 ? (
+                                <>
+                                    <Grid container sx={styles.slotsCont} spacing={3}>
+                                        <Grid item xs={8}>
 
-                                </Grid>
-                                <Grid item xs={4}>
-                                    <FormControl fullWidth>
-                                        <InputLabel id="demo-simple-select-label">Sort By</InputLabel>
-                                        <Select
-                                            labelId="demo-simple-select-label"
-                                            id="demo-simple-select"
-                                            value={sortBy}
-                                            defaultValue={"distance"}
-                                            label="Sort By"
-                                            onChange={handleChangeSortBy}
-                                        >
-                                            <MenuItem value={"distance"}>Distance</MenuItem>
-                                            <MenuItem value={"charges"}>Charges</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                            </Grid>
-                            <Grid container sx={styles.slotsCont} spacing={3}>
-                                {
-                                    (sortBy == "distance") ? (
-                                        freeParkingLots.map((freeLot) => (
-                                            <Grid item xs={12} sm={4}>
-                                                <ParkingLotCard startTime={startTime} endTime={endTime} vehicleType={vehicleType} lotImages={freeLot.lotImages} key={freeLot.id} id={freeLot.id} freeSlots={freeLot.freeSlots} engagedSlots={freeLot.engagedSlots} address={freeLot.address} lat={freeLot.location[0]} lng={freeLot.location[1]} currLoc={position} charges={freeLot.charges} name={freeLot.name} noOfFreeSlots={freeLot.freeSlots.length} distance={parseInt(freeLot.distance)} />
-                                            </Grid>
-                                        ))
-                                    ) : (
-                                        [...freeParkingLots].sort((a, b) => a.charges - b.charges).map((freeLot) => (
-                                            <Grid item xs={12} sm={4}>
-                                                <ParkingLotCard startTime={startTime} endTime={endTime} vehicleType={vehicleType} lotImages={freeLot.lotImages} key={freeLot.id} id={freeLot.id} freeSlots={freeLot.freeSlots} engagedSlots={freeLot.engagedSlots} address={freeLot.address} lat={freeLot.location[0]} lng={freeLot.location[1]} currLoc={position} charges={freeLot.charges} name={freeLot.name} noOfFreeSlots={freeLot.freeSlots.length} distance={parseInt(freeLot.distance)} />
-                                            </Grid>
+                                        </Grid>
+                                        <Grid item xs={4}>
+                                            <FormControl fullWidth>
+                                                <InputLabel id="demo-simple-select-label">Sort By</InputLabel>
+                                                <Select
+                                                    labelId="demo-simple-select-label"
+                                                    id="demo-simple-select"
+                                                    value={sortBy}
+                                                    defaultValue={"distance"}
+                                                    label="Sort By"
+                                                    onChange={handleChangeSortBy}
+                                                >
+                                                    <MenuItem value={"distance"}>Distance</MenuItem>
+                                                    <MenuItem value={"charges"}>Charges</MenuItem>
+                                                </Select>
+                                            </FormControl>
+                                        </Grid>
+                                    </Grid>
+                                    <Grid container sx={styles.slotsCont} spacing={3}>
+                                        {
+                                            (sortBy == "distance") ? (
+                                                freeParkingLots.map((freeLot) => (
+                                                    <Grid item xs={12} sm={4}>
+                                                        <ParkingLotCard startTime={startTime} endTime={endTime} vehicleType={vehicleType} lotImages={freeLot.lotImages} key={freeLot.id} id={freeLot.id} freeSlots={freeLot.freeSlots} engagedSlots={freeLot.engagedSlots} address={freeLot.address} lat={freeLot.location[0]} lng={freeLot.location[1]} currLoc={position} charges={freeLot.charges} name={freeLot.name} noOfFreeSlots={freeLot.freeSlots.length} distance={parseInt(freeLot.distance)} />
+                                                    </Grid>
+                                                ))
+                                            ) : (
+                                                [...freeParkingLots].sort((a, b) => a.charges - b.charges).map((freeLot) => (
+                                                    <Grid item xs={12} sm={4}>
+                                                        <ParkingLotCard startTime={startTime} endTime={endTime} vehicleType={vehicleType} lotImages={freeLot.lotImages} key={freeLot.id} id={freeLot.id} freeSlots={freeLot.freeSlots} engagedSlots={freeLot.engagedSlots} address={freeLot.address} lat={freeLot.location[0]} lng={freeLot.location[1]} currLoc={position} charges={freeLot.charges} name={freeLot.name} noOfFreeSlots={freeLot.freeSlots.length} distance={parseInt(freeLot.distance)} />
+                                                    </Grid>
 
-                                        ))
-                                    )
-                                }
-                            </Grid>
-                        </>
-                    ) : null
+                                                ))
+                                            )
+                                        }
+                                    </Grid>
+                                        </>
+                            ) :null
+                }
+                            </>
+                    )
                 }
             </Container>
         </Grow>

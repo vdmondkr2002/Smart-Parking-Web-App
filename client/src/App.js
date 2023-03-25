@@ -24,6 +24,8 @@ import AnalyzeHistory from './components/AdminDashboardComponents/AnalyzeHistory
 import Footer1 from './components/Footer/Footer1';
 import RefundAnalysis from './components/AdminDashboardComponents/RefundAnalysis';
 import ResetPassword from './components/LoginPageComponents/ResetPassword';
+import PaymentSuccess from './components/PaymentsComponents/PaymentSuccess';
+import PaymentFailure from './components/PaymentsComponents/PaymentFailure';
 
 
 
@@ -85,6 +87,8 @@ const App = ()=>{
                         <Route exact path="/analysis" element={<AnalyzeHistory/>} />
                         <Route exact path="/refunds" element={<RefundAnalysis/>}/>
                         <Route exact path="/resetPassword/:code" element={<ResetPassword/>}/>
+                        <Route exact path="/paymentSuccess" element={<PaymentSuccess/>}/>
+                        <Route exact path="/paymentFailure" element={<PaymentFailure/>}/>
                     </Routes>
                     
                 </Container>

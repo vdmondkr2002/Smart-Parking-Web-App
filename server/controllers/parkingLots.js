@@ -36,6 +36,11 @@ exports.postParkingLot = async(req,res)=>{
 
         openTime = Number(openTime)
         closeTime = Number(closeTime)
+        // if(openTime>closeTime){
+        //     let t=openTime
+        //     openTime=closeTime
+        //     closeTime=t
+        // }
         console.log(openTime,closeTime)
         // return res.status(400).json({msg:"arking Lot Added"})
         console.log("Here")
@@ -90,7 +95,7 @@ exports.getParkingLots = async(req,res)=>{
         
         hrs1 = new Date(startTime).getHours()
         hrs2 = new Date(endTime).getHours()
-        const parkingLots = await ParkingLot.aggregate([
+        var parkingLots = await ParkingLot.aggregate([
         
             {
                 $geoNear:{
@@ -105,22 +110,31 @@ exports.getParkingLots = async(req,res)=>{
                 
             },
             {$match:{
-                openTime:{
-                    $lte:hrs1
-                },
-                closeTime:{
-                    $gte:hrs2
-                },
                 isActive:true
             }},
             
         ])
-        // return res.status(400).json({msg:"Free parking lots returned"})
-        // let url = "https://nominatim.openstreetmap.org/reverse?format=jsonv2"+"&lat="+lat+"&lon="+lng;
-        // const response = await axios.get(url,{headers:{'Access-Control-Allow-Origin':'https://o2cj2q.csb.app',mode:'cors'}})
-
-        // console.log(response.data)
         
+        parkingLots = parkingLots.filter(lot=>{
+            console.log(lot.openTime,lot.closeTime)
+            if(lot.openTime<lot.closeTime){
+                if(lot.openTime<=hrs1 & hrs2<=lot.closeTime){
+                    return true;
+                }else{
+                    return false;
+                }
+            }else{
+                
+                if((lot.openTime<=hrs1 && hrs2<=lot.closeTime)||(lot.openTime<=hrs1+24 && hrs2+24<=lot.closeTime+24)){
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+        })
+        
+        
+        console.log(new Date())
         // console.log(parkingLots)
         const bookingStart = dayjs(startTime)
         const bookingEnd = dayjs(endTime)
@@ -130,16 +144,17 @@ exports.getParkingLots = async(req,res)=>{
         console.log("Now finding booked")
         const bookedParkingSlots = await BookedTimeSlot.find({
             startTime:{
-                $lte:storebookingEnd
+                $lt:storebookingEnd
             },
             endTime:{
-                $gte:storebookingStart
+                $gt:storebookingStart
             },
             vehicleType:vehicleType,
-            cancelled:false
+            cancelled:false,
+            paid:true
         })
         console.log("Found booked")
-        console.log(bookedParkingSlots)
+        // console.log(bookedParkingSlots)
         const bookedParkingSlotsIDs = bookedParkingSlots.map(slot=>slot.parkingSlot.toString())
         console.log(bookedParkingSlotsIDs)
         const freeParkingLots = []
@@ -165,79 +180,82 @@ exports.getParkingLots = async(req,res)=>{
         }
         
 
-        console.log(freeParkingLots)
+        // console.log(freeParkingLots)
         return res.status(200).json({msg:"Free parking lots returned",freeParkingLots:freeParkingLots})
+        
     }catch(err){
         console.log(err)
         return res.status(500).json({msg:"Something went wrong.."})
     }
 }
 
-exports.bookSlot = async(req,res)=>{
-    if(!req.userId){
-        return res.status(401).json({msg:"Unauthorized"})
-    }
-    const {error} = bookSlotValidator.validate(req.body)
-    try{
-        if(error){
-            return res.status(400).json({msg:error.details[0].message})
-        }
+// exports.bookSlot = async(req,res)=>{
+//     if(!req.userId){
+//         return res.status(401).json({msg:"Unauthorized"})
+//     }
+//     const {error} = bookSlotValidator.validate(req.body)
+//     try{
+//         if(error){
+//             return res.status(400).json({msg:error.details[0].message})
+//         }
         
         
-        const {lotId,slotId,startTime,endTime,vehicleType,carImg,vehicleNo,cancellable} = req.body
-        console.log(lotId,slotId,startTime,endTime,vehicleType,vehicleNo,cancellable)
-        const user = await User.findById(req.userId)
-        if(!user.profilePic){
-            return res.status(400).json({msg:"Please Upload a profile photo first for verification"})
-        }
-        const storebookingStart = new Date(startTime).getTime()
-        const storebookingEnd = new Date(endTime).getTime()
-        const date = new Date()
-        console.log(new Date(startTime).getDate())
-        if((storebookingEnd-storebookingStart)<=0){
-            return res.status(400).json({msg:"Please Enter a Valid time frame"})
-        }else if(storebookingStart<Date.now()){
-            return res.status(400).json({msg:"Cannot book slot in past"})
-        }else if(new Date(startTime).getDate()>date.getDate()+1){
-            console.log("Helo")
-            return res.status(400).json({msg:"Cannot book a slot starting after next day"})
-        }else if( (storebookingEnd-storebookingStart)/(1000*60*60)>3){
-            return res.status(400).json({msg:"Slot cannot be of more than three hours"})
-        }
+//         const {lotId,slotId,startTime,endTime,vehicleType,carImg,vehicleNo,cancellable} = req.body
+//         console.log(lotId,slotId,startTime,endTime,vehicleType,vehicleNo,cancellable)
+//         const user = await User.findById(req.userId)
+//         if(!user.profilePic){
+//             return res.status(400).json({msg:"Please Upload a profile photo first for verification"})
+//         }
+//         const storebookingStart = new Date(startTime).getTime()
+//         const storebookingEnd = new Date(endTime).getTime()
+//         const date = new Date()
+//         console.log(new Date(startTime).getDate())
+//         if((storebookingEnd-storebookingStart)<=0){
+//             return res.status(400).json({msg:"Please Enter a Valid time frame"})
+//         }else if(storebookingStart<Date.now()){
+//             return res.status(400).json({msg:"Cannot book slot in past"})
+//         }else if(new Date(startTime).getDate()>date.getDate()+1){
+//             console.log("Helo")
+//             return res.status(400).json({msg:"Cannot book a slot starting after next day"})
+//         }else if( (storebookingEnd-storebookingStart)/(1000*60*60)>3){
+//             return res.status(400).json({msg:"Slot cannot be of more than three hours"})
+//         }
 
-        const futureBookedParkingSlots = await BookedTimeSlot.find({
-            endTime:{
-                $gte:Date.now()
-            },
-            vehicleType:vehicleType,
-            booker:req.userId,
-            cancelled:false
-        })
+//         const futureBookedParkingSlots = await BookedTimeSlot.find({
+//             endTime:{
+//                 $gte:Date.now()
+//             },
+//             vehicleType:vehicleType,
+//             booker:req.userId,
+//             cancelled:false,
+//             paid:true
+//         })
 
-        if(futureBookedParkingSlots.length>0){
-            return res.status(400).json({msg:"You have already booked a slot"})
-        }
+//         if(futureBookedParkingSlots.length>0){
+//             return res.status(400).json({msg:"You have already booked a slot"})
+//         }
 
-        const vehicleBookedSlots = await BookedTimeSlot.find({
-            vehicleNo:vehicleNo,
-            cancelled:false
-        })
-        if(vehicleBookedSlots.length>0){
-            return res.status(400).json({msg:"This car already has an active slot booked"})
-        }
+//         const vehicleBookedSlots = await BookedTimeSlot.find({
+//             vehicleNo:vehicleNo,
+//             cancelled:false,
+//             paid:true
+//         })
+//         if(vehicleBookedSlots.length>0){
+//             return res.status(400).json({msg:"This car already has an active slot booked"})
+//         }
 
 
-        const bookedSlot = await BookedTimeSlot.create({
-            startTime:storebookingStart,endTime:storebookingEnd,parkingSlot:mongoose.Types.ObjectId(slotId),
-            parkingLot:mongoose.Types.ObjectId(lotId),booker:req.userId,vehicleType:vehicleType,
-            carImage:carImg,vehicleNo:vehicleNo,cancellable:cancellable
-        })
+//         const bookedSlot = await BookedTimeSlot.create({
+//             startTime:storebookingStart,endTime:storebookingEnd,parkingSlot:mongoose.Types.ObjectId(slotId),
+//             parkingLot:mongoose.Types.ObjectId(lotId),booker:req.userId,vehicleType:vehicleType,
+//             carImage:carImg,vehicleNo:vehicleNo,cancellable:cancellable
+//         })
          
-        return res.status(200).json({msg:"Slot Booked"})
-    }catch(err){
-        return res.status(500).json({msg:"Something went wrong.."})
-    }
-}
+//         return res.status(200).json({msg:"Slot Booked"})
+//     }catch(err){
+//         return res.status(500).json({msg:"Something went wrong.."})
+//     }
+// }
 
 exports.getBookedTimeSlots = async(req,res)=>{
     if(!req.userId){
@@ -246,7 +264,8 @@ exports.getBookedTimeSlots = async(req,res)=>{
     console.log("Get Booked time slots for->",req.userId)
     try{
         var bookedTimeSlots = await BookedTimeSlot.find({
-            booker:req.userId
+            booker:req.userId,
+            paid:true
         })
         const slotIds = []
         for(let slot of bookedTimeSlots){
@@ -283,16 +302,7 @@ exports.getBookedTimeSlots = async(req,res)=>{
             }
         })
         console.log(bookedTimeSlots)
-        // const street = 'Shakar Pawshe Road'
-        // const place = 'KDMC Kolsewadi Municipal Hospital'
-        let url = `https://nominatim.openstreetmap.org/search?
-        city=Dombivli
-        &state=Maharashtra
-        &country=India
-        &postalcode=421306&format=json`;
-        const response = await axios.get(url,{headers:{'Access-Control-Allow-Origin':'https://o2cj2q.csb.app',mode:'cors'}})
         
-        console.log(response.data)
         return res.status(200).json({msg:"Booked slots returned for user",bookedTimeSlots:bookedTimeSlots})
     }catch(err){
         return res.status(500).json({msg:"Something went wrong.."})
@@ -345,7 +355,7 @@ exports.cancelBookedSlot = async(req,res)=>{
         }
         const receiverMail = reqUser.email
         sendEmail({html,subject,receiverMail})
-        await BookedTimeSlot.findByIdAndUpdate(req.body.id,{cancelled:true})
+        await BookedTimeSlot.findByIdAndUpdate(req.body.id,{cancelled:true,cancelledAt:Date.now(),refunded:false})
         return res.status(200).json({msg:"Your Booked Slot Cancelled successfully"})
     }catch(err){
         return res.status(500).json({msg:"Something went wrong.."})

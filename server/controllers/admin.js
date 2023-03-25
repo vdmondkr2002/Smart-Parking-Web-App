@@ -52,7 +52,8 @@ exports.getUserHistory = async (req, res) => {
         }
 
         var bookedTimeSlots = await BookedTimeSlot.find({
-            booker: req.query._id
+            booker: req.query._id,
+            paid:true
         })
         if (bookedTimeSlots.length == 0) {
             return res.status(200).json({ msg: "Booked slots returned for user", bookedTimeSlots: bookedTimeSlots })
@@ -173,7 +174,8 @@ exports.getParkingLotHistory = async (req, res) => {
         }
 
         var bookedTimeSlots = await BookedTimeSlot.find({
-            parkingLot: req.query._id
+            parkingLot: req.query._id,
+            paid:true
         })
 
         const parkingLot = await ParkingLot.findById(req.query._id)
@@ -248,7 +250,8 @@ exports.deleteParkingLot = async (req, res) => {
             startTime: {
                 $gte: Date.now()
             },
-            cancelled:false
+            cancelled:false,
+            paid:true
         }, {
             booker: 1, startTime: 1, endTime: 1, vehicleType: 1
         })
@@ -285,7 +288,7 @@ exports.deleteParkingLot = async (req, res) => {
                     </div>
                 `
                 sendEmail({html,subject,receiverMail})
-                await BookedTimeSlot.findByIdAndUpdate(ts._id,{cancelled:true,adminCancelled:true,cancelledAt:Date.now()})
+                await BookedTimeSlot.findByIdAndUpdate(ts._id,{cancelled:true,adminCancelled:true,cancelledAt:Date.now(),refunded:false})
                 // console.log(`Dear ${userMap[ts.booker].name}, We are sorry to inform you that due to some issues your parking booking for a Bike at ${parkingLot.name} between ${dayjs(ts.startTime)} and ${dayjs(ts.endTime)} has been cancelled. The charges for this parking you booked ${charges}, will be refunded to your account within 2 days`)
             } else {
                 const charges = ((ts.endTime - ts.startTime) / (1000 * 60 * 60)) * parkingLot.parkingChargesCar
@@ -300,7 +303,7 @@ exports.deleteParkingLot = async (req, res) => {
                     </div>
                 `
                 sendEmail({html,subject,receiverMail})
-                await BookedTimeSlot.findByIdAndUpdate(ts._id,{cancelled:true,adminCancelled:true,cancelledAt:Date.now()})
+                await BookedTimeSlot.findByIdAndUpdate(ts._id,{cancelled:true,adminCancelled:true,cancelledAt:Date.now(),refunded:false})
                 // console.log(`Dear ${userMap[ts.booker].name}, We are sorry to inform you that due to some issues your parking booking for a Car at ${parkingLot.name} between ${dayjs(ts.startTime)} and ${dayjs(ts.endTime)} has been cancelled. The charges for this parking you booked ${charges}, will be refunded to your account within 2 days`)
             }
 
@@ -345,7 +348,8 @@ exports.getCancelledSlots = async(req,res)=>{
         console.log(req.body)
         
         var cancelledTimeSlots = await BookedTimeSlot.find({
-            cancelled:true
+            cancelled:true,
+            paid:true
         })
         console.log(cancelledTimeSlots)
 

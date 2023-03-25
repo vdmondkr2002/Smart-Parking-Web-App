@@ -6,7 +6,7 @@ const {postParkingLot, getParkingLots,bookSlot, getBookedTimeSlots, cancelBooked
 
 router.post('',auth,postParkingLot)
 router.get('',auth,getParkingLots)
-router.post('/book',auth,bookSlot)
+// router.post('/book',auth,bookSlot)
 router.get('/bookedSlots',auth,getBookedTimeSlots)
 router.delete('/cancelSlot',auth,cancelBookedSlot)
 
