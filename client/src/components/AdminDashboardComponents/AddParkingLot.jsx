@@ -22,8 +22,10 @@ import Search from "@mui/icons-material/Search"
 import { getLocByAddress } from "../../api"
 
 const initialState = {
-     noOfCarSlots: 0, noOfBikeSlots: 0, address: '', parkingChargesCar: 0, parkingChargesBike: 0, lat: '19.1485', lng: '73.133', openTime: dayjs('2022-04-17T15:30'), closeTime: dayjs('2022-04-17T15:30'), imgFiles: []
+    noOfCarSlots: 0, noOfBikeSlots: 0, parkingChargesCar: 0, parkingChargesBike: 0, lat: '19.1485', lng: '73.133'
 }
+
+
 
 const addressInState = {
     city:'',state:'',country:'',postalCode:''
@@ -147,9 +149,12 @@ const AddParkingLot = () => {
         padding: theme.spacing(1),
     }));
 
-
+    const [openTime,setOpenTime] = useState(dayjs('2022-04-17T15:30'))
+    const [closeTime,setCloseTime] = useState(dayjs('2022-04-17T15:30'))
+    const [imgFiles,setImgFiles] = useState([])
     const [formData, setFormData] = useState(initialState)
     const [parkName,setParkName] = useState('')
+    const [address,setAddress] = useState('')
     const [addressData, setAddressData] = useState(addressInState)
     const user = useSelector(state => state.auth.user)
     const alert = useSelector(state => state.auth.alert)
@@ -161,7 +166,6 @@ const AddParkingLot = () => {
     const dispatch = useDispatch()
     const [zoomLvl, setZoomLvl] = useState(13);
     const [position, setPosition] = useState([19.1485, 73.133])
-    // const [imgFiles, setImgFiles] = useState([])
 
     const navigate = useNavigate()
 
@@ -190,7 +194,7 @@ const AddParkingLot = () => {
     const handleSubmit = (e) => {
         e.preventDefault()
         console.log(formData)
-        const data = { ...formData, openTime: formData.openTime.format('HH').toString(), closeTime: formData.closeTime.format('HH').toString() }
+        const data = { ...formData, openTime: openTime.format('HH').toString(), closeTime: closeTime.format('HH').toString() }
         console.log(data)
         dispatch(asyncpostParkingLot(data))
     }
@@ -202,12 +206,12 @@ const AddParkingLot = () => {
 
     const handleChangeOpen = (newValue) => {
         console.log(newValue)
-        setFormData({ ...formData, openTime: newValue })
+        setOpenTime(newValue)
     }
 
     const handleChangeClose = (newValue) => {
         console.log(newValue)
-        setFormData({ ...formData, closeTime: newValue })
+        setCloseTime(newValue)
     }
 
 
@@ -217,7 +221,7 @@ const AddParkingLot = () => {
         console.log(e.target.files)
         const imgFile = e.target.files[0]
         console.log(imgFile)
-        if (formData.imgFiles.length == 3) {
+        if (imgFiles.length == 3) {
             dispatch(setAlert({ msg: "Maximum 3 photos allowed to upload", type: "error" }))
             return
         }
@@ -228,12 +232,12 @@ const AddParkingLot = () => {
 
         const imageData = await compress.compress([imgFile], { size: 0.2, quality: 0.5 })
         const compressedImg = imageData[0].prefix + imageData[0].data;
-        setFormData({ ...formData, imgFiles: [...formData.imgFiles, compressedImg] })
+        setImgFiles([...imgFiles, compressedImg])
 
     }
 
     const handleRemove = (ind) => {
-        setFormData({ ...formData, imgFiles: formData.imgFiles.filter((img, id) => id !== ind) })
+        setImgFiles(imgFiles.filter((img, id) => id !== ind))
     }
 
     const handleChangeAddress = (e) => {
@@ -370,12 +374,12 @@ const AddParkingLot = () => {
                         <Grid item xs={0} sm={2}></Grid>
                         <Grid item xs={6} sm={4}>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <StaticTimePicker label="Select Open Time" value={formData.openTime} renderInput={(params) => <TextField {...params} />} views={['hours']} onChange={handleChangeOpen} defaultValue={dayjs('2022-04-17T15:30')} />
+                                <StaticTimePicker label="Select Open Time" value={openTime} renderInput={(params) => <TextField {...params} />} views={['hours']} onChange={handleChangeOpen} defaultValue={dayjs('2022-04-17T15:30')} />
                             </LocalizationProvider>
                         </Grid>
                         <Grid item xs={6} sm={4}>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <StaticTimePicker label="Select Close Time" value={formData.closeTime} renderInput={(params) => <TextField {...params} />} views={['hours']} onChange={handleChangeClose} defaultValue={dayjs('2022-04-17T15:30')} />
+                                <StaticTimePicker label="Select Close Time" value={closeTime} renderInput={(params) => <TextField {...params} />} views={['hours']} onChange={handleChangeClose} defaultValue={dayjs('2022-04-17T15:30')} />
                             </LocalizationProvider>
                         </Grid>
                         <Grid item xs={0} sm={2}></Grid>
@@ -387,8 +391,9 @@ const AddParkingLot = () => {
                                 required
                                 fullWidth
                                 label="Enter The address"
-                                onChange={handleChange}
-                                value={formData.address}
+                                onChange={e=>setAddress(e.target.value)}
+                                value={address}
+
                             />
                         </Grid>
                         <Grid item xs={12} sm={12}>
@@ -537,9 +542,9 @@ const AddParkingLot = () => {
                         </Grid>
                         <Grid item xs={12} sm={12}>
                             {
-                                formData.imgFiles.length > 0 ? (
+                                imgFiles.length > 0 ? (
                                     <ImageList sx={{ width: 500, height: 170, margin: "auto" }} cols={3} rowHeight={160}>
-                                        {formData.imgFiles.map((img, index) => (
+                                        {imgFiles.map((img, index) => (
                                             <ImageListItem key={index}>
                                                 <CancelIcon onClick={() => handleRemove(index)} />
                                                 <img src={img}
