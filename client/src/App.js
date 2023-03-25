@@ -1,12 +1,12 @@
-import React, { useMemo,useEffect, useState } from 'react';
-import { BrowserRouter as Router,Routes,Route } from 'react-router-dom';
+import React, { useMemo, useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import * as faceapi from 'face-api.js'
-import * as canvas from 'canvas'
-import {Container,AppBar,} from '@mui/material'
+import canvas from 'canvas';
+import { Container, AppBar, } from '@mui/material'
 import Navbar from './components/Navbar/Navbar';
 import AboutUs from './components/AboutUsComponents/About';
-import {CssBaseline,ThemeProvider} from "@mui/material";
-import {createTheme} from '@mui/material/styles';
+import { CssBaseline, ThemeProvider } from "@mui/material";
+import { createTheme } from '@mui/material/styles';
 import { themeSettings } from './theme/theme';
 import RegisterPage from './components/LoginPageComponents/RegisterPage';
 import LoginPage from './components/LoginPageComponents/LoginPage';
@@ -29,73 +29,68 @@ import PaymentFailure from './components/PaymentsComponents/PaymentFailure';
 
 
 
-const App = ()=>{
-    const theme = useMemo(()=>createTheme(themeSettings()));
-    const [modelsIsLoaded,setModelisLoaded] = useState(false)
-    const styles ={
-        root:{
-          padding:0,
-          position:"relative"
+const App = () => {
+    const theme = useMemo(() => createTheme(themeSettings()));
+    const [modelsIsLoaded, setModelisLoaded] = useState(false)
+    const styles = {
+        root: {
+            padding: 0,
+            position: "relative"
         }
     }
 
     const dispatch = useDispatch()
 
-    useEffect(()=>{
+    useEffect(() => {
         dispatch(asyncloadUser())
         loadModels()
     })
 
-    const loadModels = async()=>{
-        const MODEL_URL = process.env.PUBLIC_URL+ '/models'
-        Promise.all([
-            faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-            faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
-            faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL)
-        ]).then(()=>{
-            setModelisLoaded(true)
-            const { Canvas, Image, ImageData } = canvas;
-            faceapi.env.monkeyPatch({
-                fetch: fetch,
-                Canvas: window.HTMLCanvasElement,
-                Image: window.HTMLImageElement,
-                ImageData: ImageData,
-                createCanvasElement: () => document.createElement('canvas'),
-                createImageElement: () => document.createElement('img')
-            });
-        }
-            
-        )
+    const loadModels = async () => {
+        const MODEL_URL = process.env.PUBLIC_URL + '/models'
+        await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL)
+        await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+        await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL)
+        setModelisLoaded(true)
+        const {Canvas,Image,ImageData} = canvas
+        faceapi.env.monkeyPatch({
+            fetch: fetch,
+            Canvas: window.HTMLCanvasElement,
+            Image: window.HTMLImageElement,
+            ImageData: ImageData,
+            createCanvasElement: () => document.createElement('canvas'),
+            createImageElement: () => document.createElement('img')
+        });
     }
     return (
         <Router>
             <ThemeProvider theme={theme}>
-                <CssBaseline/>
+                <CssBaseline />
                 <Container className={styles.root} maxWidth="1300px">
-                    <Navbar/>
+                    <Navbar />
                     <Routes>
-                        <Route exact path="/" element={<LandingPage/>}/>
-                        <Route exact path="/register" element={<RegisterPage/>}/>
-                        <Route exact path="/login" element={<LoginPage/>}/>
-                        <Route exact path="/aboutus" element={<AboutUs/>}/>
-                        <Route exact path="/admindb" element={<AdminDashboard/>} />
-                        <Route exact path="/profile" element={<ProfilePage/>}/>
-                        <Route exact path="/home" element={<HomePage/>}/>
-                        <Route exact path="/addparkingLot" element={<AddParkingLot/>}/>
-                        <Route exact path="/contactus" element={<ContactUs/>}/>
-                        <Route exact path="/news" element={<News/>}/>
-                        <Route exact path="/analysis" element={<AnalyzeHistory/>} />
-                        <Route exact path="/refunds" element={<RefundAnalysis/>}/>
-                        <Route exact path="/resetPassword/:code" element={<ResetPassword/>}/>
-                        <Route exact path="/paymentSuccess" element={<PaymentSuccess/>}/>
-                        <Route exact path="/paymentFailure" element={<PaymentFailure/>}/>
+                        <Route exact path="/" element={<LandingPage />} />
+                        <Route exact path="/register" element={<RegisterPage />} />
+                        <Route exact path="/login" element={<LoginPage />} />
+                        <Route exact path="/aboutus" element={<AboutUs />} />
+                        <Route exact path="/admindb" element={<AdminDashboard />} />
+                        <Route exact path="/profile" element={<ProfilePage />} />
+                        <Route exact path="/home" element={<HomePage />} />
+                        <Route exact path="/addparkingLot" element={<AddParkingLot />} />
+                        <Route exact path="/contactus" element={<ContactUs />} />
+                        <Route exact path="/news" element={<News />} />
+                        <Route exact path="/analysis" element={<AnalyzeHistory />} />
+                        <Route exact path="/refunds" element={<RefundAnalysis />} />
+                        <Route exact path="/resetPassword/:code" element={<ResetPassword />} />
+                        <Route exact path="/paymentSuccess" element={<PaymentSuccess />} />
+                        <Route exact path="/paymentFailure" element={<PaymentFailure />} />
                     </Routes>
-                    
+
                 </Container>
-                <Footer1/>
+                <Footer1 />
             </ThemeProvider>
         </Router>
-       
+
     )
 }
 
