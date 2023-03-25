@@ -22,7 +22,7 @@ import Search from "@mui/icons-material/Search"
 import { getLocByAddress } from "../../api"
 
 const initialState = {
-    parkName: '', noOfCarSlots: 0, noOfBikeSlots: 0, address: '', parkingChargesCar: 0, parkingChargesBike: 0, lat: '19.1485', lng: '73.133', openTime: dayjs('2022-04-17T15:30'), closeTime: dayjs('2022-04-17T15:30'), imgFiles: []
+     noOfCarSlots: 0, noOfBikeSlots: 0, address: '', parkingChargesCar: 0, parkingChargesBike: 0, lat: '19.1485', lng: '73.133', openTime: dayjs('2022-04-17T15:30'), closeTime: dayjs('2022-04-17T15:30'), imgFiles: []
 }
 
 const addressInState = {
@@ -149,6 +149,7 @@ const AddParkingLot = () => {
 
 
     const [formData, setFormData] = useState(initialState)
+    const [parkName,setParkName] = useState('')
     const [addressData, setAddressData] = useState(addressInState)
     const user = useSelector(state => state.auth.user)
     const alert = useSelector(state => state.auth.alert)
@@ -271,8 +272,8 @@ const AddParkingLot = () => {
                                 required
                                 fullWidth
                                 label="Enter The name of Parking"
-                                onChange={handleChange}
-                                value={formData.parkName}
+                                onChange={(e)=>setParkName(e.target.value)}
+                                value={parkName}
                             />
                         </Grid>
                         <Grid item sm={6} xs={12} sx={styles.ipFields}>
