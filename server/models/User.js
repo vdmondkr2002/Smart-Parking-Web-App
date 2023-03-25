@@ -56,7 +56,7 @@ const UserSchema = mongoose.Schema({
     //     type:Number,
     //     required:true
     // },
-    // correctSolved:{
+    // corre ctSolved:{
     //     type:Number,
     //     required:true
     // },

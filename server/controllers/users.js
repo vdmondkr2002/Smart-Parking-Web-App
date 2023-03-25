@@ -207,7 +207,7 @@ exports.signIn = async (req, res) => {
             return res.status(404).json({ msg: "User doesn't exist" })
         console.log(oldUser)
         if (!oldUser.verified)
-            return res.status(400).json({ msg: "Please verify your account first! Check the link sent on mail during registration" })
+            return res.status(400).json({ msg: "Please verify your account first! Check the otp sent on mail during registration" })
         console.log(oldUser)
         //Check passowrd
         // const isMatch = await bcrypt.compare(password, oldUser.password)
@@ -251,7 +251,7 @@ exports.getCurrentUser = async (req, res) => {
 
 exports.sendFeedback = async (req, res) => {
     const { error } = feedbackValidator.validate(req.body)
-
+    console.log(req.body)
     try {
         if (error) {
             return res.status(400).json({ msg: error.details[0].message, severity: "error" })

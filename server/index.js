@@ -23,6 +23,7 @@ app.get('/',(req,res)=>{
 
 app.use(express.json({ limit: "80mb", extended: true }))
 app.use(express.urlencoded({limit:"80mb",extended:true}))
+
 // app.use(helmet());
 // app.use(helmet.crossOriginResourcePolicy({policy:"cross-origin"}));
 // app.use(cors())
@@ -30,7 +31,6 @@ app.use(express.urlencoded({limit:"80mb",extended:true}))
 // sendNotifs()
 
 app.use((req, res, next) => {
-    // res.append("Access-Control-Allow-Origin", "https://quizzo-v1.netlify.app");
     res.append("Access-Control-Allow-Origin", process.env.REACT_APP_URL);
     res.append("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,PATCH");
     res.append(
@@ -38,7 +38,6 @@ app.use((req, res, next) => {
       "authorization,Content-Type,origin, x-requested-with"
     );
     res.append("Access-Control-Allow-Credentials", "true");
-    // res.append("Origin", "https://quizzo-v1.netlify.app");
     res.append("Origin", process.env.REACT_APP_URL);
     res.append("Access-Control-Max-Age", "86400");
     next();

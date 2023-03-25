@@ -44,7 +44,15 @@ const ContactUs = () => {
     }
     const [formData, setFormData] = useState(initialState)
     const dispatch = useDispatch()
+    const alert = useEffect(state=>state.auth.alert)
    
+    useEffect(()=>{
+        if(alert.msg){
+            if(alert.msg==="Feedback submit successfully"){
+                setFormData(initialState)
+            }
+        }
+    },[alert])
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value })

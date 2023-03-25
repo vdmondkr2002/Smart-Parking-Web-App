@@ -216,10 +216,10 @@ const RegisterPage = () => {
         const myCanvas = canvas.createCanvas(200, 200)
         const ctx = myCanvas.getContext('2d')
         ctx.drawImage(testImg, 0, 0, 200, 200)
-        console.log(testImg)
+        // console.log(testImg)
 
         // console.log(myCanvas instanceof HTMLCanvasElement)
-        console.log(myCanvas instanceof HTMLCanvasElement)
+        // console.log(myCanvas instanceof HTMLCanvasElement)
         const detections = await faceapi.detectSingleFace(myCanvas).withFaceLandmarks()
         console.log(detections)
         dispatch(setInProgress2(false))
