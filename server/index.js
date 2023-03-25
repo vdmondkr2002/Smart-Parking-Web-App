@@ -1,9 +1,9 @@
 const express = require('express')
-const cors = require('cors')
+// const cors = require('cors')
 const razorpay = require('razorpay')
 const dotenv = require('dotenv')
 const connectDB = require('./db')
-const helmet = require('helmet')
+// const helmet = require('helmet')
 const webpush = require('web-push')
 const { sendNotifs } = require('./Utils/sendNotifs')
 
@@ -23,13 +23,26 @@ app.get('/',(req,res)=>{
 
 app.use(express.json({ limit: "80mb", extended: true }))
 app.use(express.urlencoded({limit:"80mb",extended:true}))
-app.use(helmet());
-app.use(helmet.crossOriginResourcePolicy({policy:"cross-origin"}));
-app.use(cors())
+// app.use(helmet());
+// app.use(helmet.crossOriginResourcePolicy({policy:"cross-origin"}));
+// app.use(cors())
 
 // sendNotifs()
 
-
+app.use((req, res, next) => {
+    // res.append("Access-Control-Allow-Origin", "https://quizzo-v1.netlify.app");
+    res.append("Access-Control-Allow-Origin", process.env.REACT_APP_URL);
+    res.append("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,PATCH");
+    res.append(
+      "Access-Control-Allow-Headers",
+      "authorization,Content-Type,origin, x-requested-with"
+    );
+    res.append("Access-Control-Allow-Credentials", "true");
+    // res.append("Origin", "https://quizzo-v1.netlify.app");
+    res.append("Origin", process.env.REACT_APP_URL);
+    res.append("Access-Control-Max-Age", "86400");
+    next();
+});
 
 app.use('/api/v1/users',require('./routes/users'))
 app.use('/api/v1/parkingLots',require('./routes/parkingLots'))
