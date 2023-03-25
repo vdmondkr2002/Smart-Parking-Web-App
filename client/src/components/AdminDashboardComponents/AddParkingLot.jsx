@@ -21,10 +21,6 @@ import LocationOn from "@mui/icons-material/LocationOn"
 import Search from "@mui/icons-material/Search"
 import { getLocByAddress } from "../../api"
 
-const initialState = {
-    noOfCarSlots: 0, noOfBikeSlots: 0, parkingChargesCar: 0, parkingChargesBike: 0, lat: '19.1485', lng: '73.133'
-}
-
 
 
 const addressInState = {
@@ -119,6 +115,7 @@ const AddParkingLot = () => {
         }, [map])
 
         useEffect(()=>{
+            console.log("Flying to",position[0],position[1])
             map.flyTo({ 'lat': position[0], 'lng': position[1] },zoomLvl)
         },[position])
         // useEffect(()=>{
@@ -151,17 +148,22 @@ const AddParkingLot = () => {
 
     const [openTime,setOpenTime] = useState(dayjs('2022-04-17T15:30'))
     const [closeTime,setCloseTime] = useState(dayjs('2022-04-17T15:30'))
+    
     const [imgFiles,setImgFiles] = useState([])
-    const [formData, setFormData] = useState(initialState)
+    
     const [parkName,setParkName] = useState('')
     const [address,setAddress] = useState('')
+    const [noOfCarSlots,setNoOfCarSlots] = useState(0)
+    const [noOfBikeSlots,setNoOfBikeSlots] = useState(0)
+    const [parkingChargesBike,setParkingChargesBike] = useState(0)
+    const [parkingChargesCar,setParkingChargesCar] = useState(0)
+    const [lat,setLat] = useState('19.1485')
+    const [lng,setLng] = useState('73.133')
     const [addressData, setAddressData] = useState(addressInState)
     const user = useSelector(state => state.auth.user)
     const alert = useSelector(state => state.auth.alert)
     const [foundCurrLoc, setFoundCurrLoc] = useState(false)
     const inProgress1 = useSelector(state=>state.auth.inProgress1)
-    // const [openTime, setOpenTime] = useState()
-    // const [closeTime, setCloseTime] = useState();
     const compress = new Compress()
     const dispatch = useDispatch()
     const [zoomLvl, setZoomLvl] = useState(13);
@@ -186,23 +188,19 @@ const AddParkingLot = () => {
     }, [alert])
     useEffect(() => {
         if (position !== undefined) {
-            // console.log(position)
-            setFormData({ ...formData, lat: position[0].toString(), lng: position[1].toString() })
+            setLat(position[0].toString())
+            setLng(position[1].toString())
         }
 
     }, [position])
     const handleSubmit = (e) => {
         e.preventDefault()
         console.log(formData)
-        const data = { ...formData, openTime: openTime.format('HH').toString(), closeTime: closeTime.format('HH').toString() }
+        const data = { parkName,noOfCarSlots,noOfBikeSlots,address,parkingChargesBike,parkingChargesCar,lat,lng,imgFiles,openTime: openTime.format('HH').toString(), closeTime: closeTime.format('HH').toString() }
         console.log(data)
         dispatch(asyncpostParkingLot(data))
     }
 
-    const handleChange = (e) => {
-        console.log(e.target.name, e.target.value)
-        setFormData({ ...formData, [e.target.name]: e.target.value })
-    }
 
     const handleChangeOpen = (newValue) => {
         console.log(newValue)
@@ -294,8 +292,8 @@ const AddParkingLot = () => {
                                         fullWidth
                                         label="Bike"
 
-                                        onChange={handleChange}
-                                        value={formData.noOfBikeSlots}
+                                        onChange={(e)=>setNoOfBikeSlots(e.target.value)}
+                                        value={noOfBikeSlots}
                                     />
                                 </Grid>
                             </Grid>
@@ -315,8 +313,8 @@ const AddParkingLot = () => {
                                         fullWidth
                                         label="Car"
 
-                                        onChange={handleChange}
-                                        value={formData.noOfCarSlots}
+                                        onChange={(e)=>setNoOfCarSlots(e.target.value)}
+                                        value={noOfCarSlots}
                                     />
                                 </Grid>
                             </Grid>
@@ -336,8 +334,8 @@ const AddParkingLot = () => {
                                         fullWidth
                                         label="Bike"
 
-                                        onChange={handleChange}
-                                        value={formData.parkingChargesBike}
+                                        onChange={e=>setParkingChargesBike(e.target.value)}
+                                        value={parkingChargesBike}
                                     />
                                 </Grid>
                             </Grid>
@@ -357,8 +355,8 @@ const AddParkingLot = () => {
                                         fullWidth
                                         label="Car"
 
-                                        onChange={handleChange}
-                                        value={formData.parkingChargesCar}
+                                        onChange={e=>setParkingChargesCar(e.target.value)}
+                                        value={parkingChargesCar}
                                     />
                                 </Grid>
                             </Grid>
@@ -419,8 +417,8 @@ const AddParkingLot = () => {
                                                 fullWidth
                                                 label="Latitude"
 
-                                                onChange={handleChange}
-                                                value={formData.lat}
+                                                onChange={e=>setLat(e.target.value)}
+                                                value={lat}
                                             />
                                         </Grid>
                                     </Grid>
@@ -437,8 +435,8 @@ const AddParkingLot = () => {
                                                 fullWidth
                                                 label="Longitude"
 
-                                                onChange={handleChange}
-                                                value={formData.lng}
+                                                onChange={e=>setLng(e.target.value)}
+                                                value={lng}
                                             />
                                         </Grid>
                                     </Grid>
