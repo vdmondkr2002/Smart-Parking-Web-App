@@ -74,6 +74,7 @@ const AddParkingLot = () => {
                 loc.push(e.latlng['lat'])
                 loc.push(e.latlng['lng'])
                 setPosition(loc)
+                console.log("i am running 1")
             },
             load: () => {
                 console.log("Loaded map")
@@ -86,6 +87,7 @@ const AddParkingLot = () => {
                 loc.push(position.lng)
                 setPosition(loc);
                 setZoomLvl(map.getZoom());
+                console.log("i am running 2")
             },
             dragend: () => {
                 if (!map) return;
@@ -95,6 +97,7 @@ const AddParkingLot = () => {
                 loc.push(position.lng)
                 setPosition(loc);
                 setZoomLvl(map.getZoom());
+                console.log("i am running 3")
             },
         })
 
@@ -104,6 +107,7 @@ const AddParkingLot = () => {
                     navigator.geolocation.getCurrentPosition((position) => {
                         const loc = [position.coords.latitude, position.coords.longitude]
                         setPosition(loc)
+                        console.log("i am running 4")
                         map.flyTo({ 'lat': loc[0], 'lng': loc[1] }, zoomLvl)
                     }, () => {
                         console.log("Not able to locate")
@@ -118,23 +122,6 @@ const AddParkingLot = () => {
             console.log("Flying to",position[0],position[1])
             map.flyTo({ 'lat': position[0], 'lng': position[1] },zoomLvl)
         },[position])
-        // useEffect(()=>{
-        //     if(!foundCurrLoc){
-        //         map.locate().on("locationfound",(e)=>{
-        //             console.log("Helo->>>>>>>>",e.latlng['lat'],e.latlng['lng'])
-        //             console.log("rinning")
-        //             const loc = []
-        //             loc.push(e.latlng['lat'])
-        //             loc.push(e.latlng['lng'])
-        //             setPosition(loc)
-        //             map.flyTo(e.latlng, zoomLvl);
-        //             setFoundCurrLoc(true)
-
-        //         })
-
-        //     }
-
-        // },[map])
         return null;
     }
 
@@ -249,6 +236,7 @@ const AddParkingLot = () => {
             return;
         }
         setPosition([parseFloat(loc['lat']),parseFloat(loc['lng'])])
+        console.log("i am running 5")
         
     }
 
