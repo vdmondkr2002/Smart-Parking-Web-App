@@ -119,9 +119,13 @@ const AddParkingLot = () => {
         }, [map])
 
         useEffect(()=>{
-            console.log("Flying to",position[0],position[1])
-            map.flyTo({ 'lat': position[0], 'lng': position[1] },zoomLvl)
-        },[position])
+            if(changePos){
+                console.log("Flying to",position[0],position[1])
+                map.flyTo({ 'lat': position[0], 'lng': position[1] },zoomLvl)
+                setChangePos(false)
+            }
+           
+        },[changePos])
         return null;
     }
 
@@ -135,7 +139,7 @@ const AddParkingLot = () => {
 
     const [openTime,setOpenTime] = useState(dayjs('2022-04-17T15:30'))
     const [closeTime,setCloseTime] = useState(dayjs('2022-04-17T15:30'))
-    
+    const [changePos,setChangePos] = useState(false)
     const [imgFiles,setImgFiles] = useState([])
     
     const [parkName,setParkName] = useState('')
@@ -229,6 +233,7 @@ const AddParkingLot = () => {
     }
 
     const handleSearchLoc = async()=>{
+        
         const loc = await getLocByAddress(addressData)
         console.log(loc)
         if(loc.msg){
@@ -236,6 +241,7 @@ const AddParkingLot = () => {
             return;
         }
         setPosition([parseFloat(loc['lat']),parseFloat(loc['lng'])])
+        setChangePos(true)
         console.log("i am running 5")
         
     }
