@@ -83,10 +83,10 @@ const AnalyzeHistory = () => {
         }
     }, [user])
 
-    useEffect(()=>{
+    useEffect(() => {
         console.log(open)
         console.log(parkingLotDetails.location)
-    },[open])
+    }, [open])
     useEffect(() => {
         console.log(inProgress1)
     }, [inProgress1])
@@ -168,8 +168,8 @@ const AnalyzeHistory = () => {
                         userName === '' ? (
                             <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
                                 <Grid item>
-                                <Typography variant="h4" fontWeight="bold">
-                                    Select a User Name to Get History
+                                    <Typography variant="h4" fontWeight="bold">
+                                        Select a User Name to Get History
                                     </Typography>
                                 </Grid>
                             </Grid>
@@ -323,8 +323,8 @@ const AnalyzeHistory = () => {
                         parkingLot == '' ? (
                             <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
                                 <Grid item>
-                                <Typography variant="h4" fontWeight="bold">
-                                    Select a Parking Lot Name to Get History
+                                    <Typography variant="h4" fontWeight="bold">
+                                        Select a Parking Lot Name to Get History
                                     </Typography>
                                 </Grid>
                             </Grid>
@@ -372,7 +372,7 @@ const AnalyzeHistory = () => {
                                                             <Grid item >
                                                                 <AccessTimeIcon sx={{ display: "inline", marginX: "10px" }} fontSize="large" />
                                                                 <Typography sx={{ display: "inline", fontWeight: "bold" }} variant="h5" component="p" >Open Between :</Typography>
-                                                                <Typography sx={{ display: "inline" }} variant="h5" component="p">{parkingLotDetails.openTime %12 || 12}{parkingLotDetails.openTime<12?" AM":" PM"} - {parkingLotDetails.closeTime%12 || 12}{parkingLotDetails.closeTime<12?" AM":" PM"}</Typography>
+                                                                <Typography sx={{ display: "inline" }} variant="h5" component="p">{parkingLotDetails.openTime % 12 || 12}{parkingLotDetails.openTime < 12 ? " AM" : " PM"} - {parkingLotDetails.closeTime % 12 || 12}{parkingLotDetails.closeTime < 12 ? " AM" : " PM"}</Typography>
                                                             </Grid>
                                                             <Grid item xs={12}></Grid>
                                                             <Grid item xs={6} sx={{ textAlign: "center" }}>
@@ -381,19 +381,19 @@ const AnalyzeHistory = () => {
                                                             <Grid item xs={6} sx={{ textAlign: "center" }}>
                                                                 {
                                                                     parkingLotDetails.isActive ? (
-                                                                        inProgress2?(
-                                                                            <Button variant="contained" color="success"  startIcon={<CircularProgress size={20} color="warning"/>}>Mark This Parking Lot as Inactive</Button>
-                                                                        ):(
+                                                                        inProgress2 ? (
+                                                                            <Button variant="contained" color="success" startIcon={<CircularProgress size={20} color="warning" />}>Mark This Parking Lot as Inactive</Button>
+                                                                        ) : (
                                                                             <Button variant="contained" color="warning" onClick={handleDeleteParkingLot} >Mark This Parking Lot as Inactive</Button>
                                                                         )
-                                                                        
+
                                                                     ) : (
-                                                                        inProgress2?(
-                                                                            <Button variant="contained" color="warning"  startIcon={<CircularProgress size={20} color="success"/>}>Mark Parking Lot Active Again</Button>
-                                                                        ):(
+                                                                        inProgress2 ? (
+                                                                            <Button variant="contained" color="warning" startIcon={<CircularProgress size={20} color="success" />}>Mark Parking Lot Active Again</Button>
+                                                                        ) : (
                                                                             <Button variant="contained" color="success" onClick={handleRestartParkingLot} >Mark Parking Lot Active Again</Button>
                                                                         )
-                                                                        
+
                                                                     )
                                                                 }
 
@@ -507,9 +507,10 @@ const AnalyzeHistory = () => {
                                                                 )
                                                             }
                                                         </TabPanel>
-                                                        {
-                                                            parkingLotDetails.location ? (
-                                                                <Dialog fullWidth onClose={handleCloseDialog} open={open} sx={{ padding: "1em" }}>
+
+                                                        <Dialog fullWidth onClose={handleCloseDialog} open={open} sx={{ padding: "1em" }}>
+                                                            {
+                                                                parkingLotDetails.location ? (
                                                                     <MapContainer style={{ height: "400px", width: "100%" }} center={parkingLotDetails.location.coordinates} zoom={14} >
 
                                                                         <TileLayer
@@ -522,9 +523,10 @@ const AnalyzeHistory = () => {
                                                                             </Popup>
                                                                         </Marker>
                                                                     </MapContainer>
-                                                                </Dialog>
-                                                            ) : null
-                                                        }
+                                                                ) : null
+                                                            }
+
+                                                        </Dialog>
 
                                                     </>
                                                 ) : (
