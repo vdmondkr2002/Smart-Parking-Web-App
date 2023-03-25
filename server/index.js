@@ -38,6 +38,7 @@ app.use('/api/v1/payments',require('./routes/payments'))
 app.use('/api/v1/news',require('./routes/news'))
 
 
-const PORT = process.env.PORT || 5000
+// const PORT = process.env.PORT || 5000
+const PORT = process.env.PORT
 
 app.listen(PORT,()=>console.log(`Server Running ${PORT}`))
