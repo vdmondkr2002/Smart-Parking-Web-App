@@ -319,6 +319,25 @@ const AnalyzeHistory = () => {
                             }
                         </Select>
                     </FormControl>
+                    <Dialog fullWidth onClose={handleCloseDialog} open={open} sx={{ padding: "1em" }}>
+                        {
+                            parkingLotDetails.location ? (
+                                <MapContainer style={{ height: "400px", width: "100%" }} center={parkingLotDetails.location.coordinates} zoom={14} >
+
+                                    <TileLayer
+                                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                    />
+                                    <Marker position={parkingLotDetails.location.coordinates}>
+                                        <Popup>
+                                            {parkingLotDetails.name}
+                                        </Popup>
+                                    </Marker>
+                                </MapContainer>
+                            ) : null
+                        }
+
+                    </Dialog>
                     {
                         parkingLot == '' ? (
                             <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
@@ -508,25 +527,7 @@ const AnalyzeHistory = () => {
                                                             }
                                                         </TabPanel>
 
-                                                        <Dialog fullWidth onClose={handleCloseDialog} open={open} sx={{ padding: "1em" }}>
-                                                            {
-                                                                parkingLotDetails.location ? (
-                                                                    <MapContainer style={{ height: "400px", width: "100%" }} center={parkingLotDetails.location.coordinates} zoom={14} >
 
-                                                                        <TileLayer
-                                                                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                                                                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                                                        />
-                                                                        <Marker position={parkingLotDetails.location.coordinates}>
-                                                                            <Popup>
-                                                                                {parkingLotDetails.name}
-                                                                            </Popup>
-                                                                        </Marker>
-                                                                    </MapContainer>
-                                                                ) : null
-                                                            }
-
-                                                        </Dialog>
 
                                                     </>
                                                 ) : (
