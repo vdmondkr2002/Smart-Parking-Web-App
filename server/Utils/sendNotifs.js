@@ -1,7 +1,7 @@
 const cron = require('node-cron')
 const User = require('../models/User')
 const webpush = require('web-push')
-const BookedTimeSlot = require('../models/BookedTimeSlot')
+const BookedTimeSlot = require('../models/BookedTimeSlot.js')
 
 exports.sendNotifs = ()=>{
     cron.schedule('5 * * * *',async()=>{
