@@ -83,6 +83,10 @@ const AnalyzeHistory = () => {
         }
     }, [user])
 
+    useEffect(()=>{
+        console.log(open)
+        console.log(parkingLotDetails.location)
+    },[open])
     useEffect(() => {
         console.log(inProgress1)
     }, [inProgress1])
