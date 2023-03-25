@@ -5,7 +5,6 @@ const dotenv = require('dotenv')
 const connectDB = require('./db')
 const helmet = require('helmet')
 const webpush = require('web-push')
-const { sendNotifs } = require('./Utils/sendNotifs')
 
 
 dotenv.config({path:'./config/config.env'})
