@@ -162,7 +162,7 @@ const ProfilePage = () => {
                                         ) : (
                                             <Grid container sx={styles.slotsCont} spacing={3}>
                                                 {
-                                                    bookedTimeSlots.filter(slot => slot.endTime.valueOf() >= Date.now() && !slot.cancelled).map(slot => (
+                                                    bookedTimeSlots.filter(slot => slot.endTime >= Date.now() && !slot.cancelled).map(slot => (
                                                         <Grid item xs={12} sm={4}>
                                                             <BookedSlotCard startTime={dayjs(slot.startTime)} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} address={slot.parkingLot.address} currLoc={position} vehicleNo={slot.vehicleNo} cancellable={slot.cancellable} id={slot._id} />
                                                         </Grid>
@@ -179,7 +179,7 @@ const ProfilePage = () => {
                             </TabPanel>
                             <TabPanel value={tabValue} index={1} dir={theme.direction} >
                                 {
-                                    bookedTimeSlots.filter(slot => slot.endTime.valueOf() < Date.now() && !slot.cancelled).length == 0 && !inProgress1 ? (
+                                    bookedTimeSlots.filter(slot => slot.endTime < Date.now() && !slot.cancelled).length == 0 && !inProgress1 ? (
                                         <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
                                             <Grid item>
                                                 <Typography variant="h4" fontWeight="bold">
@@ -197,7 +197,7 @@ const ProfilePage = () => {
                                         ) : (
                                             <Grid container sx={styles.slotsCont} spacing={3}>
                                                 {
-                                                    bookedTimeSlots.filter(slot => slot.endTime.valueOf() < Date.now() && !slot.cancelled).map(slot => (
+                                                    bookedTimeSlots.filter(slot => slot.endTime < Date.now() && !slot.cancelled).map(slot => (
                                                         <Grid item xs={12} sm={4}>
                                                             <BookedSlotCard startTime={dayjs(slot.startTime)} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} currLoc={position} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} id={slot._id} />
                                                         </Grid>
