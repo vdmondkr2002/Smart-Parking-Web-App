@@ -27,7 +27,7 @@ const BookedSlotCard = ({ id, name, charges, startTime, endTime, vehicleType, bo
         console.log(dayjs(startTime).unix(),dayjs(endTime).unix())
     }, [])
     const handleClose = () => {
-        console.log("dialog closed")
+        console.log("dialog  closed")
         setOpen(false)
     }
 
