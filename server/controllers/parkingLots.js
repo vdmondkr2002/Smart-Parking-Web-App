@@ -224,12 +224,10 @@ exports.getBookedTimeSlots = async(req,res)=>{
             // {...timeSlot,charges:((timeSlot.endTime-timeSlot.startTime)/1000*60*60)*timeSlot.parkingLot.}
             if(timeSlot.vehicleType=="Bike"){
                 const charges= ((timeSlot.endTime-timeSlot.startTime)/(1000*60*60))*parkingLotMap[timeSlot.parkingLot].parkingChargesBike
-                console.log(dayjs(startTime).format('YYYY-MM-DD HH:00'),dayjs(endTime).format('YYYY-MM-DD HH:00'))
-                return {...timeSlot._doc,parkingLot:parkingLotMap[timeSlot.parkingLot],charges:charges}
+                return {...timeSlot._doc,parkingLot:parkingLotMap[timeSlot.parkingLot],startTime:dayjs(timeSlot.startTime).format('YYYY-MM-DD HH:00'),endTime:dayjs(timeSlot.endTime).format('YYYY-MM-DD HH:00'),charges:charges}
             }else{
                 const charges= ((timeSlot.endTime-timeSlot.startTime)/(1000*60*60))*parkingLotMap[timeSlot.parkingLot].parkingChargesCar
-                console.log(dayjs(startTime).format('YYYY-MM-DD HH:00'),dayjs(endTime).format('YYYY-MM-DD HH:00'))
-                return {...timeSlot._doc,parkingLot:parkingLotMap[timeSlot.parkingLot],charges:charges}
+                return {...timeSlot._doc,parkingLot:parkingLotMap[timeSlot.parkingLot],startTime:dayjs(timeSlot.startTime).format('YYYY-MM-DD HH:00'),endTime:dayjs(timeSlot.endTime).format('YYYY-MM-DD HH:00'),charges:charges}
             }
         })
         console.log(bookedTimeSlots)
