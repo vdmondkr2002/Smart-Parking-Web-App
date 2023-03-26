@@ -206,7 +206,7 @@ const HomePage = () => {
         const data = {
             startTime: startTime.format('YYYY-MM-DD HH:00'), endTime: endTime.format('YYYY-MM-DD HH:00'),
             lat: position[0], lng: position[1], vehicleType: vehicleType,
-            currTime: new Date().format('YYYY-MM-DD HH:00')
+            currTime: dayjs(Date.now()).format('YYYY-MM-DD HH:00')
         }
         console.log(data)
         dispatch(asyncgetParkingLot(data))

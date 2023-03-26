@@ -163,7 +163,7 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
             startTime: startTime.format('YYYY-MM-DD HH:00'), endTime: endTime.format('YYYY-MM-DD HH:00'),
             lotId: id, slotId: changed, vehicleType: vehicleType,
             vehicleNo: formData.vehicleNo, carImg: formData.selectedImg, cancellable, charges: charges,
-            currTime: new Date().format('YYYY-MM-DD HH:00')
+            currTime: dayjs(Date.now()).format('YYYY-MM-DD HH:00')
         }
         console.log(data)
         const userData = {
