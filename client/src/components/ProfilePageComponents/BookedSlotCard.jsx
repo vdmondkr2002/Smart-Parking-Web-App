@@ -160,7 +160,7 @@ const BookedSlotCard = ({ id,name, charges, startTime, endTime, vehicleType, boo
                         <Button variant="contained" onClick={handleShowDetails} fullWidth>Show Details</Button>
                         </Grid>
                         {
-                            cancellable && startTime>Date.now()?(
+                            cancellable && startTime.unix()>Date.now()?(
                                 inProgress2?(
                                     <Grid item xs={12}>
                                 <Button variant="contained" color="warning" startIcon={<CircularProgress size={20} sx={{color:"yellow"}}/>} fullWidth>Cancel Booking</Button>

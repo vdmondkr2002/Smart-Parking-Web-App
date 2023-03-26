@@ -219,7 +219,6 @@ exports.getBookedTimeSlots = async(req,res)=>{
         console.log(parkingLotMap)
         
         
-        console.log(bookedTimeSlots)
         bookedTimeSlots = bookedTimeSlots.map(timeSlot=>{
             delete timeSlot._doc.carImage
             // {...timeSlot,charges:((timeSlot.endTime-timeSlot.startTime)/1000*60*60)*timeSlot.parkingLot.}
