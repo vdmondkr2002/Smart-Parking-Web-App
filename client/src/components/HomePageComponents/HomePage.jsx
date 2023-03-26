@@ -171,6 +171,7 @@ const HomePage = () => {
 
         useEffect(() => {
             if(changePos){
+                console.log(changePos)
                 console.log("FLying to position",position[0],position[1])
                 map.flyTo({ 'lat': position[0], 'lng': position[1] }, zoomLvl)
                 setChangePos(false)
@@ -195,7 +196,7 @@ const HomePage = () => {
 
         // }, [map])
 
-
+        return null
     }
 
     const handleSubmit = (e) => {
@@ -227,6 +228,7 @@ const HomePage = () => {
         setEndTime(newValue)
     }
     const handleSearchLoc = async () => {
+        console.log("i am called")
         const loc = await getLocByAddress(formData)
         console.log(loc)
         if (loc.msg) {
