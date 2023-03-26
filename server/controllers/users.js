@@ -241,7 +241,7 @@ exports.sendFeedback = async (req, res) => {
                     >${req.body.feedback}</div>`;
         const subject = `Feedback from ${req.body.firstName} ${req.body.lastName}`
 
-        await sendEmail({ html, subject, receiverMail })
+        await sendEmail2({ html, subject, receiverMail })
 
         return res.status(200).json({ msg: "Feedback submit successfully" })
     } catch (err) {
