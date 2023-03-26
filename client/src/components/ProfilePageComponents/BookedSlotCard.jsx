@@ -8,7 +8,7 @@ import L from 'leaflet'
 import { useDispatch, useSelector } from "react-redux";
 import { asyncCancelParkingSlot } from "../../state";
 
-const BookedSlotCard = ({ id,name, charges, startTime, endTime, vehicleType, bookerName, lat, lng, currLoc, address, vehicleNo,cancellable }) => {
+const BookedSlotCard = ({ id, name, charges, startTime, endTime, vehicleType, bookerName, lat, lng, currLoc, address, vehicleNo, cancellable }) => {
     const theme = useTheme()
     const styles = {
         dialog: {
@@ -17,28 +17,28 @@ const BookedSlotCard = ({ id,name, charges, startTime, endTime, vehicleType, boo
     }
 
     const [open, setOpen] = useState(false)
-    const [open2,setOpen2] = useState(false)
-    const inProgress2 = useSelector(state=>state.inProgress2)
+    const [open2, setOpen2] = useState(false)
+    const inProgress2 = useSelector(state => state.inProgress2)
     const [position, setPosition] = useState([19.2, 73.2])
     const [zoomLvl, setZoomLvl] = useState(13)
     const dispatch = useDispatch()
-    useEffect(()=>{
-       console.log(startTime,endTime)
-    },[])
+    useEffect(() => {
+        console.log(startTime, endTime)
+    }, [])
     const handleClose = () => {
         console.log("dialog closed")
         setOpen(false)
     }
-    
+
     const handleShowDetails = () => {
         setOpen(true)
     }
-    const handleYesCancelDialog = ()=>{
+    const handleYesCancelDialog = () => {
         setOpen2(false)
-        console.log("Slot  cancelled",id)
-        dispatch(asyncCancelParkingSlot({id,currTimeStamp:Date.now()}))
+        console.log("Slot  cancelled", id)
+        dispatch(asyncCancelParkingSlot({ id, currTimeStamp: Date.now() }))
     }
-    const handleNoCancelDialog = ()=>{
+    const handleNoCancelDialog = () => {
         setOpen2(false)
     }
 
@@ -160,27 +160,27 @@ const BookedSlotCard = ({ id,name, charges, startTime, endTime, vehicleType, boo
                 <CardActions>
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
-                        <Button variant="contained" onClick={handleShowDetails} fullWidth>Show Details</Button>
+                            <Button variant="contained" onClick={handleShowDetails} fullWidth>Show Details</Button>
                         </Grid>
                         {
-                            cancellable && dayjs(startTime).unix()>Date.now()?(
-                                inProgress2?(
+                            cancellable && dayjs(startTime).unix()*1000 > Date.now() ? (
+                                inProgress2 ? (
                                     <Grid item xs={12}>
-                                <Button variant="contained" color="warning" startIcon={<CircularProgress size={20} sx={{color:"yellow"}}/>} fullWidth>Cancel Booking</Button>
-                                </Grid>
+                                        <Button variant="contained" color="warning" startIcon={<CircularProgress size={20} sx={{ color: "yellow" }} />} fullWidth>Cancel Booking</Button>
+                                    </Grid>
 
-                                ):(
-<Grid item xs={12}>
-                                <Button variant="contained" color="warning" onClick={()=>setOpen2(true)} fullWidth>Cancel Booking</Button>
-                                </Grid>
+                                ) : (
+                                    <Grid item xs={12}>
+                                        <Button variant="contained" color="warning" onClick={() => setOpen2(true)} fullWidth>Cancel Booking</Button>
+                                    </Grid>
                                 )
-                                
-                            ):null
+
+                            ) : null
                         }
-                        
+
                     </Grid>
-                    
-                    
+
+
                 </CardActions>
             </Card>
             <Dialog maxWidth='lg' fullWidth onClose={handleClose} open={open} sx={styles.dialog}>
@@ -209,7 +209,7 @@ const BookedSlotCard = ({ id,name, charges, startTime, endTime, vehicleType, boo
                                         </Grid>
                                         <Grid item xs={10}>
                                             <Typography variant="h6">
-                                            {startTime}- {endTime}
+                                                {startTime}- {endTime}
                                             </Typography>
 
                                         </Grid>
@@ -251,9 +251,9 @@ const BookedSlotCard = ({ id,name, charges, startTime, endTime, vehicleType, boo
                                     )
                                 }
                             </Grid>
-                            
+
                         </Paper>
-                        
+
                     </Grid>
                     <Grid item sm={7}>
                         <MapContainer style={{ height: "400px", width: "100%" }} center={position} zoom={zoomLvl} >
