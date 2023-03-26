@@ -73,7 +73,7 @@ exports.sendOTP = async (req, res) => {
         </div>`
         const receiverMail =email
 
-        sendEmail2({ html, subject, receiverMail })
+        await sendEmail2({ html, subject, receiverMail })
         return res.status(200).json({ msg: "Account Created, Verify OTP Sent to your email id to access your account" })
     } catch (err) {
         return res.status(500).json({ msg: "Something went wrong.." })
@@ -122,7 +122,7 @@ exports.resendOTP = async(req,res)=>{
 
         
 
-        sendEmail2({html,subject,receiverMail})
+        await sendEmail2({html,subject,receiverMail})
         await User.findByIdAndUpdate(existingUser._id,{otp:otpGenerated})
         
         return res.status(200).json({msg:"Vefiy OTP sent to your email To Access Your Account"})
@@ -326,7 +326,7 @@ exports.sendResetEmail = async (req, res) => {
         const receiverMail = req.body.email
 
         console.log(receiverMail)
-        sendEmail2({ html, subject, receiverMail })
+        await sendEmail2({ html, subject, receiverMail })
         return res.status(200).json({ msg: "Mail sent with link to reset Your password" })
     } catch (err) {
         return res.status(500).json({ msg: "Something went wrong.." })
