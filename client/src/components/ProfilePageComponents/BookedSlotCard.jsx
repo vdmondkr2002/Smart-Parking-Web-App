@@ -18,7 +18,7 @@ const BookedSlotCard = ({ id, name, charges, startTime, endTime, vehicleType, bo
 
     const [open, setOpen] = useState(false)
     const [open2, setOpen2] = useState(false)
-    const inProgress2 = useSelector(state => state.inProgress2)
+    const inProgress2 = useSelector(state => state.auth.inProgress2)
     const [position, setPosition] = useState([19.2, 73.2])
     const [zoomLvl, setZoomLvl] = useState(13)
     const dispatch = useDispatch()
@@ -37,7 +37,7 @@ const BookedSlotCard = ({ id, name, charges, startTime, endTime, vehicleType, bo
     const handleYesCancelDialog = () => {
         setOpen2(false)
         console.log("Slot  cancelled", id)
-        dispatch(asyncCancelParkingSlot({ id, currTimeStamp: Date.now() }))
+        dispatch(asyncCancelParkingSlot({ id:id}))
     }
     const handleNoCancelDialog = () => {
         setOpen2(false)
