@@ -169,6 +169,7 @@ const HomePage = () => {
         }, [map])
 
         useEffect(() => {
+            console.log("FLying to position",position[0],position[1])
             map.flyTo({ 'lat': position[0], 'lng': position[1] }, zoomLvl)
         }, [position])
 

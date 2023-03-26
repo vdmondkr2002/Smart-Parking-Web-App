@@ -662,7 +662,7 @@ const authSlice = createSlice({
                 }
                 state.inProgress1 = false
             }
-        }).addCase(asyncsetProfilePic.pending,(state,action)=>{
+        }).addCase(asyncsetProfilePic.pending,(state)=>{
             state.alert = {msg:"Uploading photo..",type:'info'}
             state.inProgress2 = true
         }).addCase(asyncsetProfilePic.fulfilled,(state,action)=>{
