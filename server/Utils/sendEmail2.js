@@ -26,7 +26,8 @@ const API_KEY_COURIER = 'pk_prod_R87VK9DSNYMHBBMNSNPTB3TH2GCD'
 const courier = CourierClient({authorizationToken:API_KEY_COURIER})
 
 const sendEmail2 = async(mailData)=>{
-    const {subject,receiverMail,html,name} = mailData;
+    const {subject,receiverMail,html} = mailData;
+    console.log(receiverMail)
     try{
         const {requestId} = await courier.send({
             message:{
