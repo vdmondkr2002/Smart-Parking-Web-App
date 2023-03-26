@@ -57,6 +57,7 @@ const ProfileSideBar = () => {
             dispatch(setUserProfilePic(selectedImg))
         }
     }, [alert])
+    
     const handleUploadClick = async (e) => {
         console.log(e)
         const imgFile = e.target.files[0]

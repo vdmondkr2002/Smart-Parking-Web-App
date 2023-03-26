@@ -22,7 +22,9 @@ const BookedSlotCard = ({ id,name, charges, startTime, endTime, vehicleType, boo
     const [position, setPosition] = useState([19.2, 73.2])
     const [zoomLvl, setZoomLvl] = useState(13)
     const dispatch = useDispatch()
-
+    useEffect(()=>{
+       console.log(startTime,endTime)
+    },[])
     const handleClose = () => {
         console.log("dialog closed")
         setOpen(false)
