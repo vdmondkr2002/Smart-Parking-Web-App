@@ -44,7 +44,7 @@ const ContactUs = () => {
     }
     const [formData, setFormData] = useState(initialState)
     const dispatch = useDispatch()
-    const alert = useEffect(state=>state.auth.alert)
+    const alert = useSelector(state=>state.auth.alert)
    
     useEffect(()=>{
         if(alert.msg){
