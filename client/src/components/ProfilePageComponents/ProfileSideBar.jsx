@@ -1,4 +1,4 @@
-import { Avatar, Grid, IconButton, Paper, Typography } from "@mui/material"
+import { Avatar, CircularProgress, Grid, IconButton, Paper, Typography } from "@mui/material"
 import { useDispatch, useSelector } from "react-redux"
 import * as faceapi from 'face-api.js'
 import canvas from 'canvas'
@@ -6,7 +6,7 @@ import CallIcon from '@mui/icons-material/Call';
 import Compress from 'compress.js'
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import { useEffect, useRef, useState } from "react";
-import { asyncsetProfilePic, setAlert, setUserProfilePic } from "../../state";
+import { asyncsetProfilePic, setAlert, setInProgress2, setUserProfilePic } from "../../state";
 
 const ProfileSideBar = () => {
     const styles = {
@@ -48,15 +48,16 @@ const ProfileSideBar = () => {
     const compress = new Compress()
     const dispatch = useDispatch()
     const user = useSelector(state => state.auth.user)
+    const inProgress2 = useSelector(state => state.auth.inProgress2)
     const alert = useSelector(state => state.auth.alert)
-    const [selectedImg,setSelectedImg] = useState('')
+    const [selectedImg, setSelectedImg] = useState('')
 
-    useEffect(()=>{
-        if(alert.msg==="Profile image updated succesfully"){
+    useEffect(() => {
+        if (alert.msg === "Profile image updated succesfully") {
             dispatch(setUserProfilePic(selectedImg))
         }
-    },[alert])
-    const handleUploadClick = async(e) => {
+    }, [alert])
+    const handleUploadClick = async (e) => {
         console.log(e)
         const imgFile = e.target.files[0]
         console.log(imgFile)
@@ -65,11 +66,11 @@ const ProfileSideBar = () => {
             dispatch(setAlert({ msg: "Only jpg/jpeg/png file allowed to upload", type: "error" }))
             return
         }
-
-        const imageData = await compress.compress([imgFile],{size:0.2,quality:0.5})
+        dispatch(setInProgress2(true))
+        const imageData = await compress.compress([imgFile], { size: 0.2, quality: 0.5 })
         const compressedImg = imageData[0].prefix + imageData[0].data;
         const testImg = await canvas.loadImage(compressedImg)
-        const myCanvas = canvas.createCanvas(200,200)
+        const myCanvas = canvas.createCanvas(200, 200)
         const ctx = myCanvas.getContext('2d')
         ctx.drawImage(testImg, 0, 0, 200, 200)
         console.log(testImg)
@@ -77,29 +78,43 @@ const ProfileSideBar = () => {
         console.log(myCanvas instanceof HTMLCanvasElement)
         const detections = await faceapi.detectSingleFace(myCanvas).withFaceLandmarks()
         console.log(detections)
-        if(detections===undefined){
+        dispatch(setInProgress2(false))
+        if (detections === undefined) {
             dispatch(setAlert({ msg: "Please select a photo with face clearly visible", type: "error" }))
+
             return
         }
         // console.log(compressedImg)
         setSelectedImg(compressedImg)
-        dispatch(asyncsetProfilePic({selectedImg:compressedImg}))
+        dispatch(asyncsetProfilePic({ selectedImg: compressedImg }))
     }
     return (
         <Paper sx={styles.sidebarPaper}>
             <Grid container sx={styles.sidebarInnerGrid} spacing={1} justifyContent="center">
-                <Grid item xs={12} sx={styles.centerImg}>
-                    <Avatar src={user?.profilePic} sx={styles.largeAvatar} alt={user?.userName}>
-                        {user?.firstName?.charAt(0)} {user?.lastName?.charAt(0)}
-                    </Avatar>
-                    
-                </Grid>
-                <Grid item sx={{margin:"auto",position:"relative",top:"-50px"}}>
-                    <IconButton color="primary" sx={styles.camIcon} aria-label="Upload picture" component="label">
-                        <input hidden accept="image/*" type="file" id="image-element" onChange={handleUploadClick} ref={imgInput} />
-                        <PhotoCamera fontSize="large" />
-                    </IconButton>
-                </Grid>
+
+
+                {
+                    inProgress2 ? (
+                        <>
+                            <Grid item xs={12} sx={styles.centerImg}>
+                                <Avatar src={user?.profilePic} sx={styles.largeAvatar} alt={user?.userName}>
+                                    {user?.firstName?.charAt(0)} {user?.lastName?.charAt(0)}
+                                </Avatar>
+
+                            </Grid>
+                            <Grid item sx={{ margin: "auto", position: "relative", top: "-50px" }}>
+                                <IconButton color="primary" sx={styles.camIcon} aria-label="Upload picture" component="label">
+                                    <input hidden accept="image/*" type="file" id="image-element" onChange={handleUploadClick} ref={imgInput} />
+                                    <PhotoCamera fontSize="large" />
+                                </IconButton>
+                            </Grid>
+                        </>
+                    ) : (
+                        <Grid item xs={12} sx={styles.centerImg}>
+                            <CircularProgress/>
+                        </Grid>
+                    )}
+
                 <Grid item xs={12} sx={{ ...styles.fullNameCont, ...styles.centerImg }}>
                     <Typography variant="body1" sx={{ fontWeight: "bold" }}>
                         {user.firstName} {user.lastName}
