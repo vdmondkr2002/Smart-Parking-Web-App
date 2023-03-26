@@ -55,7 +55,7 @@ const ResetPassword = (match) => {
     const handleSubmit = (e) => {
         e.preventDefault()
         console.log("Password reset", params.code)
-        dispatch(asyncresetPassword({ code: params.code, ...formData }))
+        dispatch(asyncresetPassword({ code: params.code,currTimeStamp:Date.now(), ...formData }))
     }
 
     const handleClickShowPassword1 = () => {

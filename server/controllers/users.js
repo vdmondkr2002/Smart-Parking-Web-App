@@ -18,7 +18,7 @@ exports.sendOTP = async (req, res) => {
         if (error)
             return res.status(400).json({ msg: error.details[0].message })
 
-        const { email, password, confirmPassword,firstName,lastName,userName,mobileNo,selectedImg } = req.body
+        const { email, password, confirmPassword,firstName,lastName,userName,mobileNo,selectedImg,currTimeStamp } = req.body
 
 
         //find existing user
@@ -51,7 +51,7 @@ exports.sendOTP = async (req, res) => {
             firstName: firstName, lastName: lastName,
             userName:userName, mobileNo: mobileNo,
             profilePic: selectedImg,
-            createdAt: new Date().toISOString(),
+            createdAt: new Date(currTimeStamp).toISOString(),
             otp: otpGenerated
         })
         console.log(newUser.email)
@@ -186,6 +186,7 @@ exports.signIn = async (req, res) => {
         if (!oldUser.verified)
             return res.status(400).json({ msg: "Please verify your account first! Check the otp sent on mail during registration" })
         console.log(oldUser)
+        console.log(new Date(1679838284981))
         //Check passowrd
         // const isMatch = await bcrypt.compare(password, oldUser.password)
         const isMatch = passwordHash.verify(password,oldUser.password)
@@ -339,7 +340,7 @@ exports.resetPassword = async (req, res) => {
         if (error)
             return res.status(400).json({ msg: error.details[0].message })
 
-        const {code,confirmPassword,password} = req.body
+        const {code,confirmPassword,password,currTimeStamp} = req.body
         console.log(req.body)
         if (password !== confirmPassword) {
             console.log("No match")
@@ -348,7 +349,7 @@ exports.resetPassword = async (req, res) => {
 
         const decodedData = jwt.decode(code)
 
-        if(decodedData.exp*1000<Date.now()){
+        if(decodedData.exp*1000<currTimeStamp){
             return res.status(400).json({msg:"Expired code"})
         }
 

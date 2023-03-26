@@ -186,7 +186,7 @@ const AddParkingLot = () => {
     }, [position])
     const handleSubmit = (e) => {
         e.preventDefault()
-        const data = { parkName,noOfCarSlots,noOfBikeSlots,address,parkingChargesBike,parkingChargesCar,lat,lng,imgFiles,openTime: openTime.format('HH').toString(), closeTime: closeTime.format('HH').toString() }
+        const data = { parkName,noOfCarSlots,noOfBikeSlots,address,parkingChargesBike,parkingChargesCar,lat,lng,imgFiles,openTime: openTime.format('HH').toString(), closeTime: closeTime.format('HH').toString(),currTimeStamp:Date.now() }
         console.log(data)
         dispatch(asyncpostParkingLot(data))
     }

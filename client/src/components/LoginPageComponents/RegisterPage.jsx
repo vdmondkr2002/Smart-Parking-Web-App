@@ -155,10 +155,11 @@ const RegisterPage = () => {
                 if (formData.selectedImg == '') {
                     dispatch(asyncsendOTP({
                         userName: formData.userName, email: formData.email, mobileNo: formData.mobileNo, confirmPassword: formData.confirmPassword,
-                        password: formData.password, firstName: formData.firstName, lastName: formData.lastName, otp: formData.otp
+                        password: formData.password, firstName: formData.firstName, lastName: formData.lastName, otp: formData.otp,
+                        currTimeStamp: Date.now()
                     }))
                 } else {
-                    dispatch(asyncsendOTP(formData))
+                    dispatch(asyncsendOTP({...formData,currTimeStamp:Date.now()}))
                 }
             }
 

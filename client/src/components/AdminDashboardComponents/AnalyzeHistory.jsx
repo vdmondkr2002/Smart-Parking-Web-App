@@ -105,7 +105,7 @@ const AnalyzeHistory = () => {
     }
     const handleDeleteParkingLot = () => {
         console.log("deleting", parkingLotDetails._id)
-        dispatch(asyncDeleteParkingLot(parkingLotDetails._id))
+        dispatch(asyncDeleteParkingLot({id:parkingLotDetails._id,currTimeStamp:Date.now()}))
     }
 
     const handleRestartParkingLot = () => {

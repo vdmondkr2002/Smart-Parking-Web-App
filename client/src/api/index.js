@@ -78,7 +78,7 @@ export const getParkingLots = ()=>API.get(`${urlAdmin}/parkingLots`)
 
 export const getParkingLotHistory = (formData)=>API.get(`${urlAdmin}/parkingLotHistory`,{params:formData})
 
-export const deleteParkingLot = (id)=>API.delete(`${urlAdmin}/removeParkingLot`,{data:{id:id}})
+export const deleteParkingLot = (formData)=>API.delete(`${urlAdmin}/removeParkingLot`,{data:formData})
 
 export const makeActiveParkingLot = (id)=>API.post(`${urlAdmin}/activeLot`,{id:id})
 

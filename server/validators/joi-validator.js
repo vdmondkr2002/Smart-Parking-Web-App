@@ -9,7 +9,8 @@ const sendOTPValidator = joi.object({
     password:joi.string().min(6).required(),
     confirmPassword:joi.string().min(6).required(),
     otp:joi.string().optional(),
-    selectedImg:joi.string().optional()
+    selectedImg:joi.string().optional(),
+    currTimeStamp:joi.number().required()
 })
 
 const loginValidator = joi.object({
@@ -33,7 +34,8 @@ const postParkingValidator = joi.object({
     lng:joi.string().required(),
     openTime:joi.string().required(),
     closeTime:joi.string().required(),
-    imgFiles:joi.array().required()
+    imgFiles:joi.array().required(),
+    currTimeStamp:joi.number().required()
 })
 
 const getParkingValidator = joi.object({
@@ -76,7 +78,8 @@ const resetMailValidator = joi.object({
 const resetPassValidator = joi.object({
     password:joi.string().min(6).required(),
     confirmPassword:joi.string().min(6).required(),
-    code:joi.string().required()
+    code:joi.string().required(),
+    currTimeStamp:joi.number().require()
 })
 
 module.exports = {sendOTPValidator,loginValidator,verifyEmailValidator,postParkingValidator,getParkingValidator,bookSlotValidator,feedbackValidator,latLonValidator,resetMailValidator,resetPassValidator}

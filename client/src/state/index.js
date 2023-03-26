@@ -282,7 +282,7 @@ export const asyncDeleteParkingLot = createAsyncThunk('admin/removeParkingLot',a
     try{
         const {data} = await deleteParkingLot(formData);
         console.log(data)
-        return {alertData:{msg:data.msg,type:'success'},id:formData}
+        return {alertData:{msg:data.msg,type:'success'},id:formData.id}
     }catch(err){
         if(err.response){
             const data = err.response.data
