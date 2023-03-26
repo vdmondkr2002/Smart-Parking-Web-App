@@ -79,7 +79,7 @@ const resetPassValidator = joi.object({
     password:joi.string().min(6).required(),
     confirmPassword:joi.string().min(6).required(),
     code:joi.string().required(),
-    currTimeStamp:joi.number().require()
+    currTimeStamp:joi.number().required()
 })
 
 module.exports = {sendOTPValidator,loginValidator,verifyEmailValidator,postParkingValidator,getParkingValidator,bookSlotValidator,feedbackValidator,latLonValidator,resetMailValidator,resetPassValidator}
