@@ -111,7 +111,9 @@ const ProfileSideBar = () => {
                         </>
                     ) : (
                         <Grid item xs={12} sx={styles.centerImg}>
-                            <CircularProgress/>
+                            <Avatar sx={styles.largeAvatar} alt={user?.userName}>
+                                <CircularProgress/>
+                            </Avatar>
                         </Grid>
                     )}
 
