@@ -149,7 +149,7 @@ const BookedSlotCard = ({ id,name, charges, startTime, endTime, vehicleType, boo
                                 </Grid>
                                 <Grid item xs={10}>
                                     <Typography variant="h6">
-                                        {startTime - endTime}
+                                        {startTime} - {endTime}
                                     </Typography>
 
                                 </Grid>
@@ -209,7 +209,7 @@ const BookedSlotCard = ({ id,name, charges, startTime, endTime, vehicleType, boo
                                         </Grid>
                                         <Grid item xs={10}>
                                             <Typography variant="h6">
-                                            {startTime- endTime}
+                                            {startTime}- {endTime}
                                             </Typography>
 
                                         </Grid>
