@@ -206,7 +206,7 @@ const BookedSlotCard = ({ id,name, charges, startTime, endTime, vehicleType, boo
                                         </Grid>
                                         <Grid item xs={10}>
                                             <Typography variant="h6">
-                                                {startTime.format('DD MMM hh:00 A')} - {endTime.format('DD MMM hh:00 A')}
+                                            {startTime.format('D MMM hh:00 A') - endTime.format('D MMM hh:00 A')}
                                             </Typography>
 
                                         </Grid>
