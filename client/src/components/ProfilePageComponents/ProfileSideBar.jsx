@@ -104,7 +104,7 @@ const ProfileSideBar = () => {
                         </Grid>
                         <Grid item sx={{ margin: "auto", position: "relative", top: "-50px" }}>
                         <IconButton color="primary" sx={styles.camIcon} aria-label="Upload picture" component="label">
-                            <input hidden accept="image/*" type="file" id="image-element" onChange={handleUploadClick} ref={imgInput} />
+                            {/* <input hidden accept="image/*" type="file" id="image-element" onChange={handleUploadClick} ref={imgInput} /> */}
                             <PhotoCamera fontSize="large" />
                         </IconButton>
                     </Grid>
@@ -119,7 +119,7 @@ const ProfileSideBar = () => {
                             </Grid>
                             <Grid item sx={{ margin: "auto", position: "relative", top: "-50px" }}>
                                 <IconButton color="primary" sx={styles.camIcon} aria-label="Upload picture" component="label">
-                                    {/* <input hidden accept="image/*" type="file" id="image-element" onChange={handleUploadClick} ref={imgInput} /> */}
+                                    <input hidden accept="image/*" type="file" id="image-element" onChange={handleUploadClick} ref={imgInput} />
                                     <PhotoCamera fontSize="large" />
                                 </IconButton>
                             </Grid>
