@@ -80,6 +80,7 @@ const HomePage = () => {
     const [polyline, setPolyline] = useState([[19.2735184, 73.1183625], [19.2735184, 73.1724625], [19.2159482, 73.1724625], [19.2159482, 73.1183625], [19.2735184, 73.1183625]])
     const [distances, setDistances] = useState([])
     const [times, setTimes] = useState([])
+    const [changePos,setChangePos] = useState(false)
     const [foundCurrLoc, setFoundCurrLoc] = useState(false)
     const [sortBy, setSortBy] = useState('distance')
     const [zoomLvl, setZoomLvl] = useState(13)
@@ -169,9 +170,13 @@ const HomePage = () => {
         }, [map])
 
         useEffect(() => {
-            console.log("FLying to position",position[0],position[1])
-            map.flyTo({ 'lat': position[0], 'lng': position[1] }, zoomLvl)
-        }, [position])
+            if(changePos){
+                console.log("FLying to position",position[0],position[1])
+                map.flyTo({ 'lat': position[0], 'lng': position[1] }, zoomLvl)
+                setChangePos(false)
+            }
+            
+        }, [changePos])
 
         // useEffect(() => {
         //     if (!foundCurrLoc) {
@@ -190,24 +195,6 @@ const HomePage = () => {
 
         // }, [map])
 
-        // useEffect(()=>{
-
-        //     var myRoute = L.Routing.osrmv1()
-        //     for(let pk of freeParkingLots){
-        //         var w1 = L.latLng(position[0],position[1])
-        //         var w2 = L.latLng(pk.location[0],pk.location[1])
-        //         let rwP1 = new L.Routing.Waypoint;
-        //         rwP1.latLng = w1
-        //         let rwP2 = new L.Routing.Waypoint;
-        //         rwP2.latLng = w2
-        //         myRoute.route([rwP1,rwP2],(err,routes)=>{
-        //             let dist = routes[0].summary.totalDistance
-        //             console.log(dist);
-        //             setDistances([...distances,dist])    
-        //         })
-        //     }
-
-        // },[freeParkingLots])
 
     }
 
@@ -247,6 +234,7 @@ const HomePage = () => {
             return;
         }
         setPosition([parseFloat(loc['lat']), parseFloat(loc['lng'])])
+        setChangePos(true)
 
     }
 
