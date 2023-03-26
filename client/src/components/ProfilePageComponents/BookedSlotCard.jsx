@@ -24,6 +24,7 @@ const BookedSlotCard = ({ id, name, charges, startTime, endTime, vehicleType, bo
     const dispatch = useDispatch()
     useEffect(() => {
         console.log(startTime, endTime)
+        console.log(dayjs(startTime).unix(),dayjs(endTime).unix())
     }, [])
     const handleClose = () => {
         console.log("dialog closed")
