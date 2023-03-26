@@ -7,6 +7,7 @@ const { postParkingValidator, getParkingValidator, bookSlotValidator } = require
 const mongoose = require('mongoose')
 const axios = require('axios')
 const sendEmail = require('../Utils/sendEmail.js')
+const sendEmail2 = require('../Utils/sendEmail2')
 
 exports.postParkingLot = async(req,res)=>{
     if(!req.userId){
@@ -356,7 +357,7 @@ exports.cancelBookedSlot = async(req,res)=>{
         `
         }
         const receiverMail = reqUser.email
-        sendEmail({html,subject,receiverMail})
+        await sendEmail2({html,subject,receiverMail})
         await BookedTimeSlot.findByIdAndUpdate(req.body.id,{cancelled:true,cancelledAt:Date.now(),refunded:false})
         return res.status(200).json({msg:"Your Booked Slot Cancelled successfully"})
     }catch(err){

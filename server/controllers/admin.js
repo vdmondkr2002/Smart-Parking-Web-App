@@ -5,6 +5,7 @@ const dayjs = require('dayjs')
 const passwordHash = require('password-hash')
 const { latLonValidator } = require('../validators/joi-validator')
 const sendEmail = require('../Utils/sendEmail')
+const sendEmail2 = require('../Utils/sendEmail2')
 
 exports.createAdmin = async (req, res) => {
     // const salt = await bcrypt.genSalt(10)
@@ -288,7 +289,7 @@ exports.deleteParkingLot = async (req, res) => {
                     The charges for this parking you booked <b>${charges}</b>, will be refunded to your account within 2 days
                     </div>
                 `
-                sendEmail({html,subject,receiverMail})
+                await sendEmail2({html,subject,receiverMail})
                 await BookedTimeSlot.findByIdAndUpdate(ts._id,{cancelled:true,adminCancelled:true,cancelledAt:Date.now(),refunded:false})
                 // console.log(`Dear ${userMap[ts.booker].name}, We are sorry to inform you that due to some issues your parking booking for a Bike at ${parkingLot.name} between ${dayjs(ts.startTime)} and ${dayjs(ts.endTime)} has been cancelled. The charges for this parking you booked ${charges}, will be refunded to your account within 2 days`)
             } else {
@@ -303,7 +304,7 @@ exports.deleteParkingLot = async (req, res) => {
                     The charges for this parking you booked <b>${charges}</b>, will be refunded to your account within 2 days
                     </div>
                 `
-                sendEmail({html,subject,receiverMail})
+                await sendEmail({html,subject,receiverMail})
                 await BookedTimeSlot.findByIdAndUpdate(ts._id,{cancelled:true,adminCancelled:true,cancelledAt:Date.now(),refunded:false})
                 // console.log(`Dear ${userMap[ts.booker].name}, We are sorry to inform you that due to some issues your parking booking for a Car at ${parkingLot.name} between ${dayjs(ts.startTime)} and ${dayjs(ts.endTime)} has been cancelled. The charges for this parking you booked ${charges}, will be refunded to your account within 2 days`)
             }
