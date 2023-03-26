@@ -393,7 +393,7 @@ export const asynccheckOutBookSlot = createAsyncThunk('payments/checkoutBookSlot
             image: "https://lh3.googleusercontent.com/N8LxEaBwVEQ_B31XdQL1_NZ-4QbGK2Jhpvp1i_wJ3HFJASijQtU6BPnGGmSNwF9K_j9lExWOvnT4L96PNH0Vaq4lJM5Qga0_ukTl8g",
             order_id: order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
             // callback_url: `${process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"}/api/v1/payments/verifyBookingPayment`,
-            callback_url: `${process.env.REACT_APP_BACKEND_URL}api/v1/payments/verifyBookingPayment`,
+            callback_url: `${process.env.REACT_APP_BACKEND_URL}/api/v1/payments/verifyBookingPayment`,
             prefill: {
                 "name": userData.name,
                 "email": userData.email,
@@ -436,7 +436,7 @@ export const asynccheckoutRefund = createAsyncThunk('payments/checkoutRefund',as
             description: `Payment for refund to ${formData.bookerName} for booking of a ${formData.vehicleType} at ${formData.name} between ${dayjs(formData.startTime)} and ${dayjs(formData.endTime)} `,
             image: "https://lh3.googleusercontent.com/N8LxEaBwVEQ_B31XdQL1_NZ-4QbGK2Jhpvp1i_wJ3HFJASijQtU6BPnGGmSNwF9K_j9lExWOvnT4L96PNH0Vaq4lJM5Qga0_ukTl8g",
             order_id: order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
-            callback_url: `${process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"}/api/v1/payments/verifyRefundPayment?slotID=${formData.id}`,
+            callback_url: `${process.env.REACT_APP_BACKEND_URL}/api/v1/payments/verifyRefundPayment?slotID=${formData.id}`,
             prefill: {
                 "name": 'Smart Parker',
                 "email": 'smartparking678@gmail.com',
