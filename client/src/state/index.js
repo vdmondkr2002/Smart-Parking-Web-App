@@ -662,8 +662,12 @@ const authSlice = createSlice({
                 }
                 state.inProgress1 = false
             }
+        }).addCase(asyncsetProfilePic.pending,(state,action)=>{
+            state.alert = {msg:"Uploading photo..",type:'info'}
+            state.inProgress2 = true
         }).addCase(asyncsetProfilePic.fulfilled,(state,action)=>{
             state.alert = action.payload
+            state.inProgress2 = false
             console.log("In set profilepic reducer")
         }).addCase(asyncCancelParkingSlot.pending,(state)=>{
             state.alert = {msg:"Cancelling Slot..",type:"info"}
