@@ -146,7 +146,7 @@ const BookedSlotCard = ({ id,name, charges, startTime, endTime, vehicleType, boo
                                 </Grid>
                                 <Grid item xs={10}>
                                     <Typography variant="h6">
-                                        {startTime.format('D MMM hh:00 A') - endTime.format('D MMM hh:00 A')}
+                                        {startTime - endTime}
                                     </Typography>
 
                                 </Grid>
@@ -160,7 +160,7 @@ const BookedSlotCard = ({ id,name, charges, startTime, endTime, vehicleType, boo
                         <Button variant="contained" onClick={handleShowDetails} fullWidth>Show Details</Button>
                         </Grid>
                         {
-                            cancellable && startTime.unix()>Date.now()?(
+                            cancellable && dayjs(startTime).unix()>Date.now()?(
                                 inProgress2?(
                                     <Grid item xs={12}>
                                 <Button variant="contained" color="warning" startIcon={<CircularProgress size={20} sx={{color:"yellow"}}/>} fullWidth>Cancel Booking</Button>
@@ -206,7 +206,7 @@ const BookedSlotCard = ({ id,name, charges, startTime, endTime, vehicleType, boo
                                         </Grid>
                                         <Grid item xs={10}>
                                             <Typography variant="h6">
-                                            {startTime.format('D MMM hh:00 A') - endTime.format('D MMM hh:00 A')}
+                                            {startTime- endTime}
                                             </Typography>
 
                                         </Grid>
