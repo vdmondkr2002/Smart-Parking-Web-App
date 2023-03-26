@@ -16,7 +16,7 @@ const sendEmail = async(mailData)=>{
             rejectUnauthorized:false
         }
     });
-    
+    console.log(receiverMail)
     var mailOptions;
     if(mailData.html){
         mailOptions = {

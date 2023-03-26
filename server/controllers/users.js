@@ -4,6 +4,7 @@ const { generateOTP } = require("../Utils/generateOTP")
 const passwordHash = require('password-hash')
 const jwt = require('jsonwebtoken')
 const sendEmail = require('../Utils/sendEmail')
+const sendEmail2 = require('../Utils/sendEmail2')
 const webpush = require('web-push')
 const { instance } = require("../Utils/razorPayInstance")
 
@@ -72,7 +73,7 @@ exports.sendOTP = async (req, res) => {
         </div>`
         const receiverMail =email
 
-        sendEmail({ html, subject, receiverMail })
+        sendEmail2({ html, subject, receiverMail })
         return res.status(200).json({ msg: "Account Created, Verify OTP Sent to your email id to access your account" })
     } catch (err) {
         return res.status(500).json({ msg: "Something went wrong.." })
@@ -121,7 +122,7 @@ exports.resendOTP = async(req,res)=>{
 
         
 
-        sendEmail({html,subject,receiverMail})
+        sendEmail2({html,subject,receiverMail})
         await User.findByIdAndUpdate(existingUser._id,{otp:otpGenerated})
         
         return res.status(200).json({msg:"Vefiy OTP sent to your email To Access Your Account"})
@@ -240,7 +241,7 @@ exports.sendFeedback = async (req, res) => {
                     >${req.body.feedback}</div>`;
         const subject = `Feedback from ${req.body.firstName} ${req.body.lastName}`
 
-        sendEmail({ html, subject, receiverMail })
+        sendEmail2({ html, subject, receiverMail })
 
         return res.status(200).json({ msg: "Feedback submit successfully" })
     } catch (err) {
@@ -325,7 +326,7 @@ exports.sendResetEmail = async (req, res) => {
         const receiverMail = req.body.email
 
         console.log(receiverMail)
-        sendEmail({ html, subject, receiverMail })
+        sendEmail2({ html, subject, receiverMail })
         return res.status(200).json({ msg: "Mail sent with link to reset Your password" })
     } catch (err) {
         return res.status(500).json({ msg: "Something went wrong.." })
