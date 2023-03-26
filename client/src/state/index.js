@@ -185,11 +185,11 @@ export const asyncgetBookedSlots = createAsyncThunk('parkings/getBookedSlots',as
 })
 
 
-export const asyncCancelParkingSlot = createAsyncThunk('parkings/cancelParkingSlot',async(id)=>{
+export const asyncCancelParkingSlot = createAsyncThunk('parkings/cancelParkingSlot',async(formData)=>{
     try{
-        console.log(id)
-        const {data} = await cancelBookedSlot(id);
-        return {alertData:{msg:data.msg,type:'success'},id:id}
+        console.log(formData)
+        const {data} = await cancelBookedSlot(formData);
+        return {alertData:{msg:data.msg,type:'success'},id:formData.id}
     }catch(err){
         if(err.response){
             const data = err.response.data

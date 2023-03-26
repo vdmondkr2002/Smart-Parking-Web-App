@@ -53,7 +53,8 @@ const bookSlotValidator = joi.object({
     vehicleNo:joi.string().required(),
     carImg:joi.string().required(),
     cancellable:joi.boolean().required(),
-    charges:joi.number().required()
+    charges:joi.number().required(),
+    currTimeStamp: joi.number().required()
 })
 
 const feedbackValidator = joi.object({

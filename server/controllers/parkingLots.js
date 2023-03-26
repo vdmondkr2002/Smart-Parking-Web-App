@@ -319,8 +319,8 @@ exports.cancelBookedSlot = async(req,res)=>{
     try{
         const reqUser = await User.findById(req.userId)
         console.log(req.body)
-        if(!req.body.id){
-            return res.status(400).json({msg:"Please pass bookedSlotId"})
+        if(!req.body.id && !req.body.currTimeStamp){
+            return res.status(400).json({msg:"Please pass parameters"})
         }
         const bookedSlot = await BookedTimeSlot.findById(req.body.id)
         console.log(bookedSlot.startTime,bookedSlot.endTime,bookedSlot.vehicleType)
@@ -358,7 +358,7 @@ exports.cancelBookedSlot = async(req,res)=>{
         }
         const receiverMail = reqUser.email
         await sendEmail2({html,subject,receiverMail})
-        await BookedTimeSlot.findByIdAndUpdate(req.body.id,{cancelled:true,cancelledAt:Date.now(),refunded:false})
+        await BookedTimeSlot.findByIdAndUpdate(req.body.id,{cancelled:true,cancelledAt:currTimeStamp,refunded:false})
         return res.status(200).json({msg:"Your Booked Slot Cancelled successfully"})
     }catch(err){
         return res.status(500).json({msg:"Something went wrong.."})

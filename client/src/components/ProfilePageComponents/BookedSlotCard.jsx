@@ -33,7 +33,7 @@ const BookedSlotCard = ({ id,name, charges, startTime, endTime, vehicleType, boo
     const handleYesCancelDialog = ()=>{
         setOpen2(false)
         console.log("Slot cancelled",id)
-        dispatch(asyncCancelParkingSlot(id))
+        dispatch(asyncCancelParkingSlot({id,currTimeStamp:Date.now()}))
     }
     const handleNoCancelDialog = ()=>{
         setOpen2(false)

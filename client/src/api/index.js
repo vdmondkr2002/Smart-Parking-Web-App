@@ -62,7 +62,7 @@ export const bookSlot = (formData)=>API.post(`${urlParkingLot}/book`,formData)
 
 export const getBookedSlots = ()=>API.get(`${urlParkingLot}/bookedSlots`)
 
-export const cancelBookedSlot = (id)=>API.delete(`${urlParkingLot}/cancelSlot`,{data:{id:id}})
+export const cancelBookedSlot = (formData)=>API.delete(`${urlParkingLot}/cancelSlot`,{data:formData})
 
 
 
