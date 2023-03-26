@@ -125,7 +125,9 @@ exports.getParkingLots = async(req,res)=>{
                 }
             }else{
                 
-                if((lot.openTime<=hrs1 && hrs2<=lot.closeTime)||(lot.openTime<=hrs1+24 && hrs2+24<=lot.closeTime+24)){
+                if((lot.openTime<=hrs1 && hrs2<=lot.closeTime)
+                ||(lot.openTime<=hrs1+24 && hrs2+24<=lot.closeTime+24)
+                ||(lot.openTime<=hrs1 && hrs2<=lot.closeTime+24)){
                     return true;
                 }else{
                     return false;
