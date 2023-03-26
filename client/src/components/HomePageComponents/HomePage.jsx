@@ -204,9 +204,9 @@ const HomePage = () => {
         console.log(startTime, endTime, position)
         // console.log(startTime.format('YYYY-MM-DD HH:00'))
         const data = {
-            startTime: startTime.unix(), endTime: endTime.unix(),
+            startTime: startTime.format('YYYY-MM-DD HH:00'), endTime: endTime.format('YYYY-MM-DD HH:00'),
             lat: position[0], lng: position[1], vehicleType: vehicleType,
-            currTimeStamp: Date.now()
+            currTime: new Date().format('YYYY-MM-DD HH:00')
         }
         console.log(data)
         dispatch(asyncgetParkingLot(data))

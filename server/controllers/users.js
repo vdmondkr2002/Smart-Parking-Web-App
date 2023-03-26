@@ -185,7 +185,7 @@ exports.signIn = async (req, res) => {
         console.log(oldUser)
         if (!oldUser.verified)
             return res.status(400).json({ msg: "Please verify your account first! Check the otp sent on mail during registration" })
-        console.log(oldUser)
+        
         console.log(new Date(1679838284981))
         //Check passowrd
         // const isMatch = await bcrypt.compare(password, oldUser.password)

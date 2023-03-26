@@ -65,11 +65,7 @@ exports.postParkingLot = async(req,res)=>{
         }
         console.log(bikeParkingSlotsIDs,carParkingSlotsIDs)
         await ParkingLot.findByIdAndUpdate(newParkingLot._id,{bikeParkingSlots:bikeParkingSlotsIDs,carParkingSlots:carParkingSlotsIDs})
-        // const id=newParkingLot._id;
-        // const newParkingLot = await ParkingLot.findOne({name:parkName})
-        // const slots = await ParkingSlot.find({parkingLot:newParkingLot._id})
-        // console.log(slots)
-
+        
         return res.status(200).json({msg:"Parking Lot Added"})
     }catch(err){
         return res.status(500).json({msg:"Something went wrong.."})
@@ -94,8 +90,8 @@ exports.getParkingLots = async(req,res)=>{
         lat = parseFloat(lat)
         lng = parseFloat(lng)
         
-        hrs1 = new Date(startTime).getHours()
-        hrs2 = new Date(endTime).getHours()
+        let hrs1 = new Date(startTime).getHours()
+        let hrs2 = new Date(endTime).getHours()
         var parkingLots = await ParkingLot.aggregate([
         
             {

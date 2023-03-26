@@ -15,21 +15,22 @@ exports.checkoutBookSlot = async (req, res) => {
         if (error) {
             return res.status(400).json({ msg: error.details[0].message })
         }
-        const { lotId, slotId, startTime, endTime, vehicleType, carImg, vehicleNo, cancellable, charges,currTimeStamp } = req.body
-        console.log(lotId, slotId, startTime, endTime, vehicleType, vehicleNo, cancellable, charges,currTimeStamp)
+        const { lotId, slotId, startTime, endTime, vehicleType, carImg, vehicleNo, cancellable, charges,currTime } = req.body
+        console.log(lotId, slotId, startTime, endTime, vehicleType, vehicleNo, cancellable, charges,currTime)
         const user = await User.findById(req.userId)
         if (!user.profilePic) {
             return res.status(400).json({ msg: "Please Upload a profile photo first for verification" })
         }
-        const storebookingStart = startTime
-        const storebookingEnd = endTime
+        const storebookingStart = new Date(startTime).getTime()
+        const storebookingEnd = new Date(endTime).getTime()
+        const currTimeStamp = new Date(currTime).getTime()
         // const date = new Date()
         // console.log(new Date(startTime).getDate())
         if ((storebookingEnd - storebookingStart) <= 0) {
             return res.status(400).json({ msg: "Please Enter a Valid time frame" })
         } else if (storebookingStart < currTimeStamp) {
             return res.status(400).json({ msg: "Cannot book slot in past" })
-        } else if (new Date(storebookingStart).getDate() > new Date(currTimeStamp).getDate() + 1) {
+        } else if (new Date(startTime).getDate() > new Date(currTime).getDate() + 1) {
             console.log("Helo")
             return res.status(400).json({ msg: "Cannot book a slot starting after next day" })
         } else if ((storebookingEnd - storebookingStart) / (1000 * 60 * 60) > 3) {

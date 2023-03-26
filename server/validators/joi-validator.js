@@ -43,7 +43,8 @@ const getParkingValidator = joi.object({
     lng:joi.string().required(),
     startTime:joi.string().required(),
     endTime:joi.string().required(),
-    vehicleType:joi.string().required()
+    vehicleType:joi.string().required(),
+    currTime:joi.string().required()
 })
 
 const bookSlotValidator = joi.object({
@@ -56,7 +57,7 @@ const bookSlotValidator = joi.object({
     carImg:joi.string().required(),
     cancellable:joi.boolean().required(),
     charges:joi.number().required(),
-    currTimeStamp: joi.number().required()
+    currTime: joi.string().required()
 })
 
 const feedbackValidator = joi.object({
