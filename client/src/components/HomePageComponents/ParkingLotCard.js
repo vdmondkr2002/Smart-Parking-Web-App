@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import ParkingSlot from "./ParkingSlot";
 import { asyncBookSlot, asynccheckOut, asynccheckOutBookSlot, setAlert } from "../../state";
 import { useDispatch, useSelector } from "react-redux";
+import dayjs from 'dayjs'
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import { useMapEvents, MapContainer, Marker, Popup, TileLayer, Polyline, Polygon } from "react-leaflet"
 import L from 'leaflet'
