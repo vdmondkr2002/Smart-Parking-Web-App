@@ -249,7 +249,7 @@ exports.cancelBookedSlot = async(req,res)=>{
     try{
         const reqUser = await User.findById(req.userId)
         console.log(req.body)
-        if(!req.body.id && !req.body.currTimeStamp){
+        if(!req.body.id){
             return res.status(400).json({msg:"Please pass parameters"})
         }
         const bookedSlot = await BookedTimeSlot.findById(req.body.id)

@@ -238,7 +238,7 @@ exports.deleteParkingLot = async (req, res) => {
             return res.status(401).json({ msg: "Unauthorized" })
         }
         console.log(req.body)
-        if (!req.body.id && !req.body.currTimeStamp) {
+        if (!req.body.id) {
             return res.status(400).json({ msg: "Please pass Parking Lot ID" })
         }
         const parkingLot = await ParkingLot.findById(req.body.id)
@@ -250,7 +250,7 @@ exports.deleteParkingLot = async (req, res) => {
         const bookedTimeSlots = await BookedTimeSlot.find({
             parkingLot: req.body.id,
             startTime: {
-                $gte: req.body.currTimeStamp
+                $gte: Date.now()
             },
             cancelled:false,
             paid:true
@@ -285,7 +285,7 @@ exports.deleteParkingLot = async (req, res) => {
                         The charges for this parking you booked ${charges}, will be refunded to your account within 2 days
                 `
                 await sendEmail2({html,subject,receiverMail})
-                await BookedTimeSlot.findByIdAndUpdate(ts._id,{cancelled:true,adminCancelled:true,cancelledAt:currTimeStamp,refunded:false})
+                await BookedTimeSlot.findByIdAndUpdate(ts._id,{cancelled:true,adminCancelled:true,cancelledAt:Date.now(),refunded:false})
                 // console.log(`Dear ${userMap[ts.booker].name}, We are sorry to inform you that due to some issues your parking booking for a Bike at ${parkingLot.name} between ${dayjs(ts.startTime)} and ${dayjs(ts.endTime)} has been cancelled. The charges for this parking you booked ${charges}, will be refunded to your account within 2 days`)
             } else {
                 const charges = ((ts.endTime - ts.startTime) / (1000 * 60 * 60)) * parkingLot.parkingChargesCar
@@ -295,7 +295,7 @@ exports.deleteParkingLot = async (req, res) => {
                         The charges for this parking you booked ${charges}, will be refunded to your account within 2 days
                 `
                 await sendEmail({html,subject,receiverMail})
-                await BookedTimeSlot.findByIdAndUpdate(ts._id,{cancelled:true,adminCancelled:true,cancelledAt:currTimeStamp,refunded:false})
+                await BookedTimeSlot.findByIdAndUpdate(ts._id,{cancelled:true,adminCancelled:true,cancelledAt:Date.now(),refunded:false})
                 // console.log(`Dear ${userMap[ts.booker].name}, We are sorry to inform you that due to some issues your parking booking for a Car at ${parkingLot.name} between ${dayjs(ts.startTime)} and ${dayjs(ts.endTime)} has been cancelled. The charges for this parking you booked ${charges}, will be refunded to your account within 2 days`)
             }
 

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 
-/* This schema holds data related to booking of a particular vehicle at particular parking slot in a parking lot
+/* 
+This schema holds data related to booking of a particular vehicle at particular parking slot in a parking lot
 for a particular period of time by a booker
 it also holds additional data such as whether parking lot is canecellable,
 if its cancelled whether cancelled by admin or user self cancelled it, cancellation time,
