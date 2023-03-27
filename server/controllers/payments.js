@@ -55,10 +55,13 @@ exports.checkoutBookSlot = async (req, res) => {
         const vehicleBookedSlots = await BookedTimeSlot.find({
             vehicleNo: vehicleNo,
             cancelled: false,
-            paid: true
+            paid: true,
+            startTime:{
+                $gte:currTimeStamp
+            }
         })
         if (vehicleBookedSlots.length > 0) {
-            return res.status(400).json({ msg: "This car already has an active slot booked" })
+            return res.status(400).json({ msg: `This ${vehicleType} already has an active slot booked` })
         }
 
 
