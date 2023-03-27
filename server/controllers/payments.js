@@ -56,7 +56,8 @@ exports.checkoutBookSlot = async (req, res) => {
             vehicleNo: vehicleNo,
             cancelled: false,
             paid: true,
-            startTime:{
+            vehcileType:vehicleType,
+            endTime:{
                 $gte:currTimeStamp
             }
         })
