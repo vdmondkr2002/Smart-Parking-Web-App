@@ -201,9 +201,8 @@ const AnalyzeHistory = () => {
                                                             <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
                                                                 {
                                                                     bookedTimeSlots.length > 0 ? (
-                                                                        bookedTimeSlots.filter(slot => slot.endTime >= Date.now() && !slot.cancelled).map(slot => (
+                                                                        bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf() >= Date.now() && !slot.cancelled).map(slot => (
                                                                             <Grid item xs={12} sm={4}>
-                                                                                {/* <BookedSlotCard startTime={dayjs(slot.startTime)} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} bookerName={null} name={slot.parkingLot.name} charges={slot.charges} /> */}
                                                                                 <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} bookerName={null} name={slot.parkingLot.name} charges={slot.charges} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} carImage={slot.carImage} />
                                                                             </Grid>
                                                                         ))
@@ -220,7 +219,7 @@ const AnalyzeHistory = () => {
                                                             <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
                                                                 {
                                                                     bookedTimeSlots.length > 0 ? (
-                                                                        bookedTimeSlots.filter(slot => slot.endTime < Date.now() && !slot.cancelled).map(slot => (
+                                                                        bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf()< Date.now() && !slot.cancelled).map(slot => (
                                                                             <Grid item xs={12} sm={4}>
                                                                                 <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} bookerName={null} name={slot.parkingLot.name} charges={slot.charges} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} carImage={slot.carImage} />
                                                                             </Grid>
@@ -437,8 +436,8 @@ const AnalyzeHistory = () => {
                                                             <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
 
                                                                 {
-                                                                    bookedTimeSlots.filter(slot => slot.endTime >= Date.now() && !slot.cancelled).length > 0 ? (
-                                                                        bookedTimeSlots.filter(slot => slot.endTime >= Date.now() && !slot.cancelled).map(slot => (
+                                                                    bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf()>= Date.now() && !slot.cancelled).length > 0 ? (
+                                                                        bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf()>= Date.now() && !slot.cancelled).map(slot => (
                                                                             <Grid item xs={12} sm={4}>
                                                                                 <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} endTime={dayjs(slot.endTime)} vehicleType={slot.vehicleType} name={null} bookerName={slot.booker.name} vehicleNo={slot.vehicleNo} charges={slot.charges} carImage={slot.carImage} />
                                                                             </Grid>
@@ -458,8 +457,8 @@ const AnalyzeHistory = () => {
                                                             <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
 
                                                                 {
-                                                                    bookedTimeSlots.filter(slot => slot.endTime < Date.now() && !slot.cancelled).length > 0 ? (
-                                                                        bookedTimeSlots.filter(slot => slot.endTime < Date.now() && !slot.cancelled).map(slot => (
+                                                                    bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf()< Date.now() && !slot.cancelled).length > 0 ? (
+                                                                        bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf()< Date.now() && !slot.cancelled).map(slot => (
                                                                             <Grid item xs={12} sm={4}>
                                                                                 <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} endTime={dayjs(slot.endTime)} vehicleType={slot.vehicleType} name={null} bookerName={slot.booker.name} vehicleNo={slot.vehicleNo} charges={slot.charges} carImage={slot.carImage} />
                                                                             </Grid>

@@ -87,10 +87,10 @@ exports.getUserHistory = async (req, res) => {
             // {...timeSlot,charges:((timeSlot.endTime-timeSlot.startTime)/1000*60*60)*timeSlot.parkingLot.}
             if (timeSlot.vehicleType == "Bike") {
                 const charges = ((timeSlot.endTime - timeSlot.startTime) / (1000 * 60 * 60)) * parkingLotMap[timeSlot.parkingLot].parkingChargesBike
-                return { ...timeSlot._doc, parkingLot: parkingLotMap[timeSlot.parkingLot], charges: charges }
+                return { ...timeSlot._doc, parkingLot: parkingLotMap[timeSlot.parkingLot],startTime:dayjs(timeSlot.startTime).format('YYYY-MM-DD HH:00'),endTime:dayjs(timeSlot.endTime).format('YYYY-MM-DD HH:00'), charges: charges }
             } else {
                 const charges = ((timeSlot.endTime - timeSlot.startTime) / (1000 * 60 * 60)) * parkingLotMap[timeSlot.parkingLot].parkingChargesCar
-                return { ...timeSlot._doc, parkingLot: parkingLotMap[timeSlot.parkingLot], charges: charges }
+                return { ...timeSlot._doc, parkingLot: parkingLotMap[timeSlot.parkingLot],startTime:dayjs(timeSlot.startTime).format('YYYY-MM-DD HH:00'),endTime:dayjs(timeSlot.endTime).format('YYYY-MM-DD HH:00'), charges: charges }
             }
         })
         console.log(bookedTimeSlots)
@@ -212,10 +212,10 @@ exports.getParkingLotHistory = async (req, res) => {
             // {...timeSlot,charges:((timeSlot.endTime-timeSlot.startTime)/1000*60*60)*timeSlot.parkingLot.}
             if (timeSlot.vehicleType == "Bike") {
                 const charges = ((timeSlot.endTime - timeSlot.startTime) / (1000 * 60 * 60)) * parkingLot.parkingChargesBike
-                return { ...timeSlot._doc, charges: charges, booker: userMap[timeSlot.booker] }
+                return { ...timeSlot._doc, charges: charges,startTime:dayjs(timeSlot.startTime).format('YYYY-MM-DD HH:00'),endTime:dayjs(timeSlot.endTime).format('YYYY-MM-DD HH:00'), booker: userMap[timeSlot.booker] }
             } else {
                 const charges = ((timeSlot.endTime - timeSlot.startTime) / (1000 * 60 * 60)) * parkingLot.parkingChargesCar
-                return { ...timeSlot._doc, charges: charges, booker: userMap[timeSlot.booker] }
+                return { ...timeSlot._doc, charges: charges,startTime:dayjs(timeSlot.startTime).format('YYYY-MM-DD HH:00'),endTime:dayjs(timeSlot.endTime).format('YYYY-MM-DD HH:00'), booker: userMap[timeSlot.booker] }
             }
         })
         console.log(bookedTimeSlots)

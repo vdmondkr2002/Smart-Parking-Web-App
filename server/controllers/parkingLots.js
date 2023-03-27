@@ -73,6 +73,7 @@ exports.postParkingLot = async(req,res)=>{
     
 }
 
+//tested
 exports.getParkingLots = async(req,res)=>{
     if(!req.userId){
         return res.status(401).json({msg:"Unauthorized"})
@@ -187,6 +188,8 @@ exports.getParkingLots = async(req,res)=>{
     }
 }
 
+
+//tested
 exports.getBookedTimeSlots = async(req,res)=>{
     if(!req.userId){
         return res.status(401).json({msg:"Unauthorized"})
@@ -238,6 +241,7 @@ exports.getBookedTimeSlots = async(req,res)=>{
     }
 }
 
+//tested
 exports.cancelBookedSlot = async(req,res)=>{
     if(!req.userId){
         return res.status(401).json({msg:"Unauthorized"})
