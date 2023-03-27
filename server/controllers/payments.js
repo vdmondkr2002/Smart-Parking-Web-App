@@ -105,6 +105,7 @@ exports.bookPaymentVerification = async (req, res) => {
             .digest('hex')
 
         const paymentDetails = await instance.payments.fetch(razorpay_payment_id)
+       
         console.log(paymentDetails)
 
         console.log('sign received', razorpay_signature)

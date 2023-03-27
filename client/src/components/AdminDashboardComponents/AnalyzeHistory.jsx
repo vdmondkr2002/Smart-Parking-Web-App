@@ -91,6 +91,11 @@ const AnalyzeHistory = () => {
         console.log(inProgress1)
     }, [inProgress1])
 
+    useEffect(()=>{
+        setTabValueInner(0)
+        setTabValueSupInner(0)
+    },[tabValueOuter])
+
     const handleCloseDialog = () => {
         setOpen(false)
     }

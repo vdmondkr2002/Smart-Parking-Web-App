@@ -405,9 +405,9 @@ exports.getCancelledSlots = async(req,res)=>{
         cancelledTimeSlots= cancelledTimeSlots.map(slot=>(
             slot.vehicleType==="Bike"?(
                 {...slot._doc,charges:((slot.endTime - slot.startTime) / (1000 * 60 * 60))*parkingLotMap[slot.parkingLot].parkingChargesBike,
-                booker:userMap[slot.booker],parkingLot:parkingLotMap[slot.parkingLot]}):
+                booker:userMap[slot.booker],startTime:dayjs(slot.startTime).format('YYYY-MM-DD HH:00'),endTime:dayjs(slot.endTime).format('YYYY-MM-DD HH:00'),parkingLot:parkingLotMap[slot.parkingLot]}):
             ({...slot._doc,charges:((slot.endTime - slot.startTime) / (1000 * 60 * 60))*parkingLotMap[slot.parkingLot].parkingChargesCar,
-            booker:userMap[slot.booker],parkingLot:parkingLotMap[slot.parkingLot]})
+            booker:userMap[slot.booker],startTime:dayjs(slot.startTime).format('YYYY-MM-DD HH:00'),endTime:dayjs(slot.endTime).format('YYYY-MM-DD HH:00'),parkingLot:parkingLotMap[slot.parkingLot]})
         ))
 
         console.log(cancelledTimeSlots)

@@ -78,7 +78,6 @@ const RefundAnalysis = () => {
                     inProgress1 ? (
                         <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
                             <Grid item>
-
                                 <CustomCircularProgress inProgress={inProgress1}/>
                             </Grid>
                         </Grid>
@@ -103,7 +102,7 @@ const RefundAnalysis = () => {
 
                                                     bookedTimeSlots.filter(slot => !slot.refunded && slot.adminCancelled).map(slot => (
                                                         <Grid item xs={12} sm={4}>
-                                                            <BookedSlotCardAdmin id={slot._id} bookerName={slot.booker.name} name={slot.parkingLot.name} charges={slot.charges} refundAmount={slot.adminCancelled ? slot.charges : slot.charges * 0.7} refunded={false} startTime={dayjs(slot.startTime)} endTime={dayjs(slot.endTime)} vehicleNo={slot.vehicleNo} vehicleType={slot.vehicleType} address={slot.address} />
+                                                            <BookedSlotCardAdmin id={slot._id} bookerName={slot.booker.name} name={slot.parkingLot.name} charges={slot.charges} refundAmount={slot.adminCancelled ? slot.charges : (slot.charges * 0.7).toFixed(2)} refunded={false} startTime={dayjs(slot.startTime)} endTime={dayjs(slot.endTime)} vehicleNo={slot.vehicleNo} vehicleType={slot.vehicleType} address={slot.address} />
                                                         </Grid>
                                                     ))
 
@@ -116,7 +115,7 @@ const RefundAnalysis = () => {
 
                                                     bookedTimeSlots.filter(slot => !slot.refunded && !slot.adminCancelled).map(slot => (
                                                         <Grid item xs={12} sm={4}>
-                                                            <BookedSlotCardAdmin id={slot._id} bookerName={slot.booker.name} name={slot.parkingLot.name} charges={slot.charges} refundAmount={slot.adminCancelled ? slot.charges : slot.charges * 0.7} refunded={false} startTime={dayjs(slot.startTime)} endTime={dayjs(slot.endTime)} vehicleNo={slot.vehicleNo} vehicleType={slot.vehicleType} address={slot.address} />
+                                                            <BookedSlotCardAdmin id={slot._id} bookerName={slot.booker.name} name={slot.parkingLot.name} charges={slot.charges} refundAmount={slot.adminCancelled ? slot.charges : (slot.charges * 0.7).toFixed(2)} refunded={false} startTime={dayjs(slot.startTime)} endTime={dayjs(slot.endTime)} vehicleNo={slot.vehicleNo} vehicleType={slot.vehicleType} address={slot.address} />
                                                         </Grid>
                                                     ))
 
@@ -165,7 +164,7 @@ const RefundAnalysis = () => {
 
                                                     bookedTimeSlots.filter(slot => slot.refunded && slot.adminCancelled).map(slot => (
                                                         <Grid item xs={12} sm={4}>
-                                                            <BookedSlotCardAdmin id={slot._id} bookerName={slot.booker.name} name={slot.parkingLot.name} charges={slot.charges} refundAmount={slot.adminCancelled ? slot.charges : slot.charges * 0.7} refunded={true} startTime={dayjs(slot.startTime)} endTime={dayjs(slot.endTime)} vehicleNo={slot.vehicleNo} vehicleType={slot.vehicleType} address={slot.address} />
+                                                            <BookedSlotCardAdmin id={slot._id} bookerName={slot.booker.name} name={slot.parkingLot.name} charges={slot.charges} refundAmount={slot.adminCancelled ? slot.charges : (slot.charges * 0.7).toFixed(2)} refunded={true} startTime={dayjs(slot.startTime)} endTime={dayjs(slot.endTime)} vehicleNo={slot.vehicleNo} vehicleType={slot.vehicleType} address={slot.address} />
                                                         </Grid>
                                                     ))
 
@@ -178,7 +177,7 @@ const RefundAnalysis = () => {
 
                                                     bookedTimeSlots.filter(slot => slot.refunded && !slot.adminCancelled).map(slot => (
                                                         <Grid item xs={12} sm={4}>
-                                                            <BookedSlotCardAdmin id={slot._id} bookerName={slot.booker.name} name={slot.parkingLot.name} charges={slot.charges} refundAmount={slot.adminCancelled ? slot.charges : slot.charges * 0.7} refunded={true} startTime={dayjs(slot.startTime)} endTime={dayjs(slot.endTime)} vehicleNo={slot.vehicleNo} vehicleType={slot.vehicleType} address={slot.address} />
+                                                            <BookedSlotCardAdmin id={slot._id} bookerName={slot.booker.name} name={slot.parkingLot.name} charges={slot.charges} refundAmount={slot.adminCancelled ? slot.charges : (slot.charges * 0.7).toFixed(2)} refunded={true} startTime={dayjs(slot.startTime)} endTime={dayjs(slot.endTime)} vehicleNo={slot.vehicleNo} vehicleType={slot.vehicleType} address={slot.address} />
                                                         </Grid>
                                                     ))
 
