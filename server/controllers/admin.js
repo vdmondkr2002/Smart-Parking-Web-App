@@ -7,6 +7,8 @@ const { latLonValidator } = require('../validators/joi-validator')
 const sendEmail = require('../Utils/sendEmail')
 const sendEmail2 = require('../Utils/sendEmail2')
 
+//query to craete an admin not accessible from frontend
+//but one can query using postman to create a new admin
 exports.createAdmin = async (req, res) => {
     // const salt = await bcrypt.genSalt(10)
     const hashedPassword = passwordHash.generate('admin123')
@@ -22,6 +24,10 @@ exports.createAdmin = async (req, res) => {
     })
     return res.status(200).json({ msg: "Admin created" })
 }
+
+
+//tested
+/*get list of all the users registered on the system*/
 exports.getUsersName = async (req, res) => {
     if (!req.userId) {
         return res.status(401).json({ msg: "Unauthorized" })
@@ -29,19 +35,26 @@ exports.getUsersName = async (req, res) => {
     try {
         const reqUser = await User.findById(req.userId)
         console.log(reqUser)
+        //check if user making request is an admin
         if (reqUser.role !== "admin") {
             return res.status(401).json({ msg: "Unauthorized" })
         }
 
+        //get List of all user's firstName and lastName
         var users = await User.find({role:"user"}, { firstName: 1, lastName: 1 })
+
+        //send name concatenating both firstName and lastName
         users = users.map(user => ({ _id: user._id, name: user.firstName + " " + user.lastName }))
-        console.log(users)
+        
+
         return res.status(200).json({ msg: "Users List returned", usersName: users })
     } catch (err) {
         return res.status(500).json({ msg: "Something went wrong" })
     }
 }
 
+//tested
+/*get all of slots booked by a particular user*/
 exports.getUserHistory = async (req, res) => {
     if (!req.userId) {
         return res.status(401).json({ msg: "Unauthorized" })
@@ -53,53 +66,63 @@ exports.getUserHistory = async (req, res) => {
             return res.status(401).json({ msg: "Unauthorized" })
         }
 
+
+        //get all of slots booked by user
         var bookedTimeSlots = await BookedTimeSlot.find({
             booker: req.query._id,
             paid:true
         })
+        //if no slots return directly
         if (bookedTimeSlots.length == 0) {
             return res.status(200).json({ msg: "Booked slots returned for user", bookedTimeSlots: bookedTimeSlots })
         }
-        const slotIds = []
+
+        //get list of all the lotIDs where user has booked slot at least ones
+        const lotIds = []
         for (let slot of bookedTimeSlots) {
-            if (!slotIds.includes(slot.parkingLot)) {
-                slotIds.push(slot.parkingLot)
+            if (!lotIds.includes(slot.parkingLot)) {
+                lotIds.push(slot.parkingLot)
             }
         }
+        console.log(lotIds)
+        //get all the ParkingLot details of those lots which are included in lotIDs
         var parkingLots = await ParkingLot.find({
             _id: {
-                $in: slotIds
+                $in: lotIds
             }
-        })
-        var parkingLotMap = {}
-        parkingLots = parkingLots.map((lot) => {
-            parkingLotMap[lot._id] = lot
-            return { _id: lot._id, name: lot.name, address: lot.address, location: lot.location.coordinates, parkingChargesBike: lot.parkingChargesBike, parkingChargesCar: lot.parkingChargesCar }
-        })
+        },{lotImages:0})
+
+        //create a map from lotID to lotDetails for quick access of lockDetails
+        var parkingLotMap= {}
+        for(let lot of parkingLots){
+            parkingLotMap[lot._id]={_id:lot._id,name:lot.name,address:lot.address,location:lot.location.coordinates,
+                                    parkingChargesBike:lot.parkingChargesBike,parkingChargesCar:lot.parkingChargesCar}
+        }
 
 
-        console.log(parkingLots)
-        console.log(parkingLotMap)
-
-
-        console.log(bookedTimeSlots)
         bookedTimeSlots = bookedTimeSlots.map(timeSlot => {
-            // {...timeSlot,charges:((timeSlot.endTime-timeSlot.startTime)/1000*60*60)*timeSlot.parkingLot.}
-            if (timeSlot.vehicleType == "Bike") {
+            if (timeSlot.vehicleType === "Bike") {
+                //calculate charges
                 const charges = ((timeSlot.endTime - timeSlot.startTime) / (1000 * 60 * 60)) * parkingLotMap[timeSlot.parkingLot].parkingChargesBike
+                //pas startTime and endTime as formatted strings
+                //put details of parkingLot instead of just its ID
                 return { ...timeSlot._doc, parkingLot: parkingLotMap[timeSlot.parkingLot],startTime:dayjs(timeSlot.startTime).format('YYYY-MM-DD HH:00'),endTime:dayjs(timeSlot.endTime).format('YYYY-MM-DD HH:00'), charges: charges }
             } else {
+                //calculate charges
                 const charges = ((timeSlot.endTime - timeSlot.startTime) / (1000 * 60 * 60)) * parkingLotMap[timeSlot.parkingLot].parkingChargesCar
+                //pas startTime and endTime as formatted strings
+                //put details of parkingLot instead of just its ID
                 return { ...timeSlot._doc, parkingLot: parkingLotMap[timeSlot.parkingLot],startTime:dayjs(timeSlot.startTime).format('YYYY-MM-DD HH:00'),endTime:dayjs(timeSlot.endTime).format('YYYY-MM-DD HH:00'), charges: charges }
             }
         })
-        console.log(bookedTimeSlots)
         return res.status(200).json({ msg: "Booked slots returned for user", bookedTimeSlots: bookedTimeSlots })
     } catch (err) {
         return res.status(500).json({ msg: "Something went wrong" })
     }
 }
 
+
+//Not being used currently
 exports.getParkingLotsNear = async (req, res) => {
     if (!req.userId) {
         return res.status(401).json({ msg: "Unauthorized" })
@@ -142,6 +165,8 @@ exports.getParkingLotsNear = async (req, res) => {
 }
 
 
+//tested
+/*get Names of all parking lots */
 exports.getParkingLots = async (req, res) => {
     console.log("Here")
     if (!req.userId) {
@@ -154,6 +179,7 @@ exports.getParkingLots = async (req, res) => {
             return res.status(401).json({ msg: "Unauthorized" })
         }
 
+        //fetch all the parkingLot Names and whether they are active
         var parkingLots = await ParkingLot.find({}, { name: 1,isActive:1 });
 
         parkingLots = parkingLots.map(lot => lot._doc)
@@ -164,6 +190,8 @@ exports.getParkingLots = async (req, res) => {
     }
 }
 
+//tested
+/*get all the bookedSlots ever booked in a particular parking Lot*/
 exports.getParkingLotHistory = async (req, res) => {
     if (!req.userId) {
         return res.status(401).json({ msg: "Unauthorized" })
@@ -175,17 +203,22 @@ exports.getParkingLotHistory = async (req, res) => {
             return res.status(401).json({ msg: "Unauthorized" })
         }
 
+        //get all the bookedSlots which are booked in this parkingLot
         var bookedTimeSlots = await BookedTimeSlot.find({
             parkingLot: req.query._id,
             paid:true
         })
 
+        //get the details of parking Lot
         const parkingLot = await ParkingLot.findById(req.query._id)
         console.log(parkingLot)
+    
+        //if no slots booked till now in parkingLot
         if (bookedTimeSlots.length == 0) {
             return res.status(200).json({ msg: "Booked slots history returned for parking lot", bookedTimeSlots: bookedTimeSlots, parkingLotDetails: parkingLot })
         }
 
+        //get all the userIds who have booker atleast one slot in that parkingLot
         const userIds = []
         for (var slot of bookedTimeSlots) {
             if (!userIds.includes(slot.booker)) {
@@ -193,28 +226,35 @@ exports.getParkingLotHistory = async (req, res) => {
             }
         }
 
+        //get the firstName and lastName of users who booked the slots
         var users = await User.find({
             _id: {
                 $in: userIds
             }
-
         }, {
             firstName: 1, lastName: 1
         })
-        console.log(userIds)
-        console.log(users)
+
+        //create a userMap to access the user details corresponding to a userId
         var userMap = {}
         for (let user of users) {
             userMap[user._id] = { _id: user._id, name: user.firstName + " " + user.lastName }
         }
         console.log(userMap)
+
+
         bookedTimeSlots = bookedTimeSlots.map(timeSlot => {
-            // {...timeSlot,charges:((timeSlot.endTime-timeSlot.startTime)/1000*60*60)*timeSlot.parkingLot.}
             if (timeSlot.vehicleType == "Bike") {
+                //calculate charges
                 const charges = ((timeSlot.endTime - timeSlot.startTime) / (1000 * 60 * 60)) * parkingLot.parkingChargesBike
+                //pas startTime and endTime as formatted strings
+                //put details of booker instead of just its ID
                 return { ...timeSlot._doc, charges: charges,startTime:dayjs(timeSlot.startTime).format('YYYY-MM-DD HH:00'),endTime:dayjs(timeSlot.endTime).format('YYYY-MM-DD HH:00'), booker: userMap[timeSlot.booker] }
             } else {
+                //calculate charges
                 const charges = ((timeSlot.endTime - timeSlot.startTime) / (1000 * 60 * 60)) * parkingLot.parkingChargesCar
+                //pas startTime and endTime as formatted strings
+                //put details of booker instead of just its ID
                 return { ...timeSlot._doc, charges: charges,startTime:dayjs(timeSlot.startTime).format('YYYY-MM-DD HH:00'),endTime:dayjs(timeSlot.endTime).format('YYYY-MM-DD HH:00'), booker: userMap[timeSlot.booker] }
             }
         })
@@ -226,7 +266,8 @@ exports.getParkingLotHistory = async (req, res) => {
     }
 }
 
-
+//tested
+/*make a particular parking Lot inactive*/
 exports.deleteParkingLot = async (req, res) => {
     if (!req.userId) {
         return res.status(401).json({ msg: "Unauthorized" })
@@ -237,19 +278,21 @@ exports.deleteParkingLot = async (req, res) => {
         if (reqUser.role !== "admin") {
             return res.status(401).json({ msg: "Unauthorized" })
         }
+
+        //check if ID of the lot which is to be deleted is passed
         console.log(req.body)
         if (!req.body.id) {
             return res.status(400).json({ msg: "Please pass Parking Lot ID" })
         }
-        const parkingLot = await ParkingLot.findById(req.body.id)
-        console.log(parkingLot.name, parkingLot.parkingChargesBike)
+        
+        //get the details of parkingLot to be deleted
         const updatedLot = await ParkingLot.findByIdAndUpdate(req.body.id,{isActive:false},{new:true})
-        console.log(updatedLot)
+        console.log(updatedLot.name,updatedLot.parkingChargesBike,updatedLot.parkingChargesCar)
 
-        //finding the active timeslots booked
+        //finding the active timeslots booked in that particular parkingLot
         const bookedTimeSlots = await BookedTimeSlot.find({
             parkingLot: req.body.id,
-            startTime: {
+            endTime: {
                 $gte: Date.now()
             },
             cancelled:false,
@@ -258,8 +301,11 @@ exports.deleteParkingLot = async (req, res) => {
             booker: 1, startTime: 1, endTime: 1, vehicleType: 1
         })
 
+
+        //get the userIds of all those users who have an active slot booked
         const userIds = bookedTimeSlots.map(slot => slot.booker)
         console.log(userIds)
+        //get user details for sending them email
         var users = await User.find({
             _id: {
                 $in: userIds
@@ -272,43 +318,46 @@ exports.deleteParkingLot = async (req, res) => {
             userMap[user._id] = { _id: user._id, name: user.firstName + " " + user.lastName, email: user.email }
         }
         console.log(users)
+
+        //for each booked slot
         for (let ts of bookedTimeSlots) {
             const subject = "[Smart Parker] Booking Cancellation"
             
             const receiverMail = userMap[ts.booker].email
 
+            //send email to user that their slot has been cancelled
             if (ts.vehicleType === "Bike") {
-                const charges = ((ts.endTime - ts.startTime) / (1000 * 60 * 60)) * parkingLot.parkingChargesBike
+                const charges = ((ts.endTime - ts.startTime) / (1000 * 60 * 60)) * updatedLot.parkingChargesBike
                 const html = `
                     Dear ${userMap[ts.booker].name}, 
-                        We are sorry to inform you that due to some issues your parking booking for a Bike at ${parkingLot.name} between ${dayjs(ts.startTime).format('DD MMM hh:00 A')} and ${dayjs(ts.endTime).format('DD MMM hh:00 A')} has been cancelled. 
+                        We are sorry to inform you that due to some issues your parking booking for a Bike at ${updatedLot.name} between ${dayjs(ts.startTime).format('DD MMM hh:00 A')} and ${dayjs(ts.endTime).format('DD MMM hh:00 A')} has been cancelled. 
                         The charges for this parking you booked ${charges}, will be refunded to your account within 2 days
                 `
                 await sendEmail2({html,subject,receiverMail})
+                //mark those slots as cancelled and adminCancelled as they are cancelledBy Admin
                 await BookedTimeSlot.findByIdAndUpdate(ts._id,{cancelled:true,adminCancelled:true,cancelledAt:Date.now(),refunded:false})
-                // console.log(`Dear ${userMap[ts.booker].name}, We are sorry to inform you that due to some issues your parking booking for a Bike at ${parkingLot.name} between ${dayjs(ts.startTime)} and ${dayjs(ts.endTime)} has been cancelled. The charges for this parking you booked ${charges}, will be refunded to your account within 2 days`)
             } else {
-                const charges = ((ts.endTime - ts.startTime) / (1000 * 60 * 60)) * parkingLot.parkingChargesCar
+                const charges = ((ts.endTime - ts.startTime) / (1000 * 60 * 60)) * updatedLot.parkingChargesCar
                 const html = `
                     Dear ${userMap[ts.booker].name}, 
-                        We are sorry to inform you that due to some issues your parking booking for a Bike at ${parkingLot.name} between ${dayjs(ts.startTime).format('DD MMM hh:00 A')} and ${dayjs(ts.endTime).format('DD MMM hh:00 A')} has been cancelled. 
+                        We are sorry to inform you that due to some issues your parking booking for a Bike at ${updatedLot.name} between ${dayjs(ts.startTime).format('DD MMM hh:00 A')} and ${dayjs(ts.endTime).format('DD MMM hh:00 A')} has been cancelled. 
                         The charges for this parking you booked ${charges}, will be refunded to your account within 2 days
                 `
                 await sendEmail({html,subject,receiverMail})
+                //mark those slots as cancelled and adminCancelled as they are cancelledBy Admin
                 await BookedTimeSlot.findByIdAndUpdate(ts._id,{cancelled:true,adminCancelled:true,cancelledAt:Date.now(),refunded:false})
-                // console.log(`Dear ${userMap[ts.booker].name}, We are sorry to inform you that due to some issues your parking booking for a Car at ${parkingLot.name} between ${dayjs(ts.startTime)} and ${dayjs(ts.endTime)} has been cancelled. The charges for this parking you booked ${charges}, will be refunded to your account within 2 days`)
             }
 
         }
         
-        console.log(bookedTimeSlots)
-
         return res.status(200).json({ msg: "Parking Lot Made Inactive" })
     } catch (err) {
         return res.status(500).json({ msg: "Something went wrong.." })
     }
 }
 
+//tested
+/*Make parking lot active again*/
 exports.makeActiveParkingLot = async(req,res)=>{
     if (!req.userId) {
         return res.status(401).json({ msg: "Unauthorized" })
@@ -320,6 +369,7 @@ exports.makeActiveParkingLot = async(req,res)=>{
             return res.status(401).json({ msg: "Unauthorized" })
         }
         console.log(req.body)
+        //Mark parking Lot as active
         await ParkingLot.findByIdAndUpdate(req.body.id,{isActive:true})
         return res.status(200).json({msg: "Parking Lot Active Again"})
     }catch(err){
@@ -327,6 +377,9 @@ exports.makeActiveParkingLot = async(req,res)=>{
     }
 }
 
+
+//tested
+/*Get all the cancelled Slots */
 exports.getCancelledSlots = async(req,res)=>{
     if (!req.userId) {
         return res.status(401).json({ msg: "Unauthorized" })
@@ -337,14 +390,15 @@ exports.getCancelledSlots = async(req,res)=>{
         if (reqUser.role !== "admin") {
             return res.status(401).json({ msg: "Unauthorized" })
         }
-        console.log(req.body)
         
+        //get all the slots which are cancelled
         var cancelledTimeSlots = await BookedTimeSlot.find({
             cancelled:true,
             paid:true
         })
         console.log(cancelledTimeSlots)
 
+        //get the userIDs and parkingLot IDs of each booked slots
         const userIds = []
         const lotIds = []
         for (var slot of cancelledTimeSlots) {
@@ -356,9 +410,7 @@ exports.getCancelledSlots = async(req,res)=>{
             }
         }
 
-        console.log(userIds)
-        console.log(lotIds)
-
+        //get users details such as name,email who have cancelled slot
         var users = await User.find({
             _id: {
                 $in: userIds
@@ -367,7 +419,7 @@ exports.getCancelledSlots = async(req,res)=>{
         }, {
             firstName: 1, lastName: 1,email:1
         })
-
+        //get parkingLot details in which slot has cancelled
         var parkingLots = await ParkingLot.find({
             _id: {
                 $in: lotIds
@@ -377,8 +429,8 @@ exports.getCancelledSlots = async(req,res)=>{
             name:1,parkingChargesBike:1,parkingChargesCar:1
         })
 
-        console.log(parkingLots)
 
+        //create maps for quick access to details from IDs
         var userMap = {}
         for (let user of users) {
             userMap[user._id] = { _id: user._id,  name:user.firstName + " " + user.lastName, email: user.email }
@@ -389,18 +441,22 @@ exports.getCancelledSlots = async(req,res)=>{
             parkingLotMap[lot._id] = lot
         }
 
-        console.log(userMap,parkingLotMap)
-        
 
+        //put the details and calculated charge in cancelledTimeSlots
         cancelledTimeSlots= cancelledTimeSlots.map(slot=>(
             slot.vehicleType==="Bike"?(
                 {...slot._doc,charges:((slot.endTime - slot.startTime) / (1000 * 60 * 60))*parkingLotMap[slot.parkingLot].parkingChargesBike,
-                booker:userMap[slot.booker],startTime:dayjs(slot.startTime).format('YYYY-MM-DD HH:00'),endTime:dayjs(slot.endTime).format('YYYY-MM-DD HH:00'),parkingLot:parkingLotMap[slot.parkingLot]}):
-            ({...slot._doc,charges:((slot.endTime - slot.startTime) / (1000 * 60 * 60))*parkingLotMap[slot.parkingLot].parkingChargesCar,
-            booker:userMap[slot.booker],startTime:dayjs(slot.startTime).format('YYYY-MM-DD HH:00'),endTime:dayjs(slot.endTime).format('YYYY-MM-DD HH:00'),parkingLot:parkingLotMap[slot.parkingLot]})
+                    booker:userMap[slot.booker],
+                    startTime:dayjs(slot.startTime).format('YYYY-MM-DD HH:00'),endTime:dayjs(slot.endTime).format('YYYY-MM-DD HH:00'),
+                    parkingLot:parkingLotMap[slot.parkingLot]}
+                ):
+                (
+                {...slot._doc,charges:((slot.endTime - slot.startTime) / (1000 * 60 * 60))*parkingLotMap[slot.parkingLot].parkingChargesCar,
+                    booker:userMap[slot.booker],
+                    startTime:dayjs(slot.startTime).format('YYYY-MM-DD HH:00'),endTime:dayjs(slot.endTime).format('YYYY-MM-DD HH:00'),
+                    parkingLot:parkingLotMap[slot.parkingLot]}
+                )
         ))
-
-        console.log(cancelledTimeSlots)
 
         return res.status(200).json({msg:"Cancelled slots returned",cancelledSlots:cancelledTimeSlots})
     }catch(err){

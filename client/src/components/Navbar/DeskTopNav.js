@@ -16,11 +16,7 @@ import { setLogout } from '../../state';
 
 
 const DeskTopNav = ()=>{
-    const dispatch = useDispatch();
-    const history = useNavigate();
-    const location = useLocation();
-    const [anchorEl,setAnchorEl] = useState(null);
-    const user = useSelector(state=>state.auth.user);
+    
     
     const theme = useTheme();
 
@@ -44,7 +40,7 @@ const DeskTopNav = ()=>{
             "&:hover":{
                 color:"white"
             }
-            // color:"white !important"
+            //  color:"white !important"
         },
         home:{
             marginLeft:"auto"
@@ -68,7 +64,9 @@ const DeskTopNav = ()=>{
         }
         
     }
-
+    const dispatch = useDispatch();
+    const [anchorEl,setAnchorEl] = useState(null);
+    const user = useSelector(state=>state.auth.user);
     const navigate = useNavigate()
 
     const logout = ()=>{
