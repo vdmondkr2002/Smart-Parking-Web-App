@@ -281,7 +281,7 @@ exports.deleteParkingLot = async (req, res) => {
                 const charges = ((ts.endTime - ts.startTime) / (1000 * 60 * 60)) * parkingLot.parkingChargesBike
                 const html = `
                     Dear ${userMap[ts.booker].name}, 
-                        We are sorry to inform you that due to some issues your parking booking for a Bike at ${parkingLot.name} between ${dayjs(ts.startTime)} and ${dayjs(ts.endTime)} has been cancelled. 
+                        We are sorry to inform you that due to some issues your parking booking for a Bike at ${parkingLot.name} between ${dayjs(ts.startTime).format('DD MMM hh:00 A')} and ${dayjs(ts.endTime).format('DD MMM hh:00 A')} has been cancelled. 
                         The charges for this parking you booked ${charges}, will be refunded to your account within 2 days
                 `
                 await sendEmail2({html,subject,receiverMail})
@@ -291,7 +291,7 @@ exports.deleteParkingLot = async (req, res) => {
                 const charges = ((ts.endTime - ts.startTime) / (1000 * 60 * 60)) * parkingLot.parkingChargesCar
                 const html = `
                     Dear ${userMap[ts.booker].name}, 
-                        We are sorry to inform you that due to some issues your parking booking for a Bike at ${parkingLot.name} between ${dayjs(ts.startTime)} and ${dayjs(ts.endTime)} has been cancelled. 
+                        We are sorry to inform you that due to some issues your parking booking for a Bike at ${parkingLot.name} between ${dayjs(ts.startTime).format('DD MMM hh:00 A')} and ${dayjs(ts.endTime).format('DD MMM hh:00 A')} has been cancelled. 
                         The charges for this parking you booked ${charges}, will be refunded to your account within 2 days
                 `
                 await sendEmail({html,subject,receiverMail})

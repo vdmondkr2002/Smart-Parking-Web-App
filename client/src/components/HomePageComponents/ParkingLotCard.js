@@ -175,7 +175,7 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
         }
         // dispatch(asyncBookSlot(data))
 
-        dispatch(asynccheckOutBookSlot(data, userData))
+        dispatch(asynccheckOutBookSlot({formData:data, userData}))
 
     }
 

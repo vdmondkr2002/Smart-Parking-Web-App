@@ -265,14 +265,14 @@ exports.cancelBookedSlot = async(req,res)=>{
             const charges = ((bookedSlot.endTime - bookedSlot.startTime) / (1000 * 60 * 60)) * parkingLot.parkingChargesCar
             html = `
                     Dear ${reqUser.firstName+" "+reqUser.lastName}, 
-                        Your booking for a Car at ${parkingLot.name} between ${dayjs(bookedSlot.startTime)} and ${dayjs(bookedSlot.endTime)} has been cancelled. 
+                        Your booking for a Car at ${parkingLot.name} between ${dayjs(bookedSlot.startTime).format('DD MMM hh:00 A')} and ${dayjs(bookedSlot.endTime).format('DD MMM hh:00 A')} has been cancelled. 
                         The charges for this parking you booked ${charges}, 70% of that will be refunded to your account within 2 days
             `
         }else{
             const charges = ((bookedSlot.endTime - bookedSlot.startTime) / (1000 * 60 * 60)) * parkingLot.parkingChargesBike
             var html=`
                 Dear ${reqUser.firstName+" "+reqUser.lastName}, 
-                    Your booking for a Bike at ${parkingLot.name} between ${dayjs(bookedSlot.startTime)} and ${dayjs(bookedSlot.endTime)} has been cancelled. 
+                    Your booking for a Bike at ${parkingLot.name} between ${dayjs(bookedSlot.startTime).format('DD MMM hh:00 A')} and ${dayjs(bookedSlot.endTime).format('DD MMM hh:00 A')} has been cancelled. 
                     The charges for this parking you booked ${charges}, 70% of that will be refunded to your account within 2 days
         `
         }

@@ -377,9 +377,10 @@ export const asyncresetPassword = createAsyncThunk('users/resetPassword',async(f
 })
 
 
-export const asynccheckOutBookSlot = createAsyncThunk('payments/checkoutBookSlot',async(formData,userData)=>{
+export const asynccheckOutBookSlot = createAsyncThunk('payments/checkoutBookSlot',async(param)=>{
     try{
-        
+        const {formData,userData} = param
+        console.log(userData)
         const {data} = await checkoutBookSlot(formData)
         console.log(data)
         const {data:{key}} = await getRazorPayKey()
