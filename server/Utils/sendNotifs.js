@@ -3,25 +3,28 @@ const User = require('../models/User')
 const webpush = require('web-push')
 const BookedTimeSlot = require('../models/BookedTimeSlot.js')
 
+//send notification to user before their booking slot time arrives
 exports.sendNotifs = ()=>{
     cron.schedule('5 * * * *',async()=>{
-        // startTime-Date.now()<=1000*60
-        //statrTime<=1000*60
         try{
             const payload = JSON.stringify({
                 title:'Attention',
                 body:"Hurry Up! Only few minutes left for your booked parking slot to start"
             })
     
+            //get all those active slots with less than 10 mins left to start which haven't been notified 
             const bookedTimeSlots = await BookedTimeSlot.find({
                 startTime:{
+                    $gte:Date.now(),
                     $lte:Date.now()+1000*60*10
                 },
                 notified:false
             })
+            //for all such slots
             for(let slot of bookedTimeSlots){
                 const user = await User.findById(slot.booker)
                 if(user.subscription){
+                    //send web push notification to users who have booked and update notified as true for that particular slot booking
                     const result = await webpush.sendNotification(user.subscription,payload)
                     await BookedTimeSlot.findByIdAndUpdate(slot._id,{notified:true})
                     console.log(result)
@@ -31,19 +34,6 @@ exports.sendNotifs = ()=>{
             console.log("Error occured while sending notification",err)
         }
         
-        // const users = await User.find();
-        // const payload = JSON.stringify({
-        //     title:'Attention',
-        //     body:"Hurry Up! Only few minutes left for your booked parking slot to start"
-        // })
-        
-        // for(let user of users){
-        //     console.log(user.subscription)
-        //     if(user.subscription){
-        //         const result = await webpush.sendNotification(user.subscription,payload)
-        //         console.log(result)
-        //     }
-        // }
     })
 }
 

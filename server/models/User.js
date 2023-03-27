@@ -1,5 +1,13 @@
 const mongoose = require('mongoose')
 
+/* 
+This schema holds data for user details
+such as user's basic info,
+whether user verified or not,
+subscription object if subscribed for notification which will be used in future to send push notification,
+otp while registration,
+role of user or admin
+*/
 const UserSchema = mongoose.Schema({
     firstName:{
         type:String,
@@ -16,7 +24,6 @@ const UserSchema = mongoose.Schema({
         required:true,
         min:5
     },
-    // profilePic:String,
     email:{
         type:String,
         required:true,
@@ -25,9 +32,6 @@ const UserSchema = mongoose.Schema({
         type:String,
         requried:true,
     },
-    // bio:{
-    //     type:String
-    // },
     password:{
         type:String,
         required:true,
@@ -40,34 +44,9 @@ const UserSchema = mongoose.Schema({
         type:Boolean,
         default:false
     },
-    //attributes:  endpoint expirationTime keys
     subscription:{
         type:Object,
     },
-    // quizesTaken:{
-    //     type:Number,
-    //     required:true
-    // },
-    // totalScore:{
-    //     type:Number,
-    //     required:true
-    // },
-    // questionsAttempted:{
-    //     type:Number,
-    //     required:true
-    // },
-    // corre ctSolved:{
-    //     type:Number,
-    //     required:true
-    // },
-    // questionsContributed:{
-    //     type:Number,
-    //     required:true
-    // },
-    // timeSpent:{
-    //     type:Number,
-    //     required:true
-    // },
     otp:{
         type:String,
         required:true

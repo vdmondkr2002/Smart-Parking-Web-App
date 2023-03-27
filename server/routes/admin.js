@@ -3,6 +3,16 @@ const { getUsersName, getUserHistory, getParkingLotsNear, getParkingLots, getPar
 const router = express.Router()
 const auth = require('../middleware/auth')
 
+//Those routes which require an authentication such as admin to access them have added auth as middleware
+
+/*Router indicates the mapping of url string with corresponding handler(controller) function*/
+
+/*
+This router handle requests related to admin such as
+getting users name and parking lot names
+when admin selects particular one show the details for that parking lot or user
+make a particular parking lot inactive or make it active again
+*/
 router.get('/users',auth,getUsersName)
 router.get('/userHistory',auth,getUserHistory)
 router.get('/parkingLotsNear',auth,getParkingLotsNear)

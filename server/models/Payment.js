@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 
-
+/* This schema holds data related to payment done for booking or cancellation
+it contains orderID, paymentID and sign*/
 const PaymentSchema = mongoose.Schema({
     orderID:{
         type:String,

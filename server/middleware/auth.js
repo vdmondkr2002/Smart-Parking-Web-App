@@ -1,5 +1,11 @@
 const jwt = require('jsonwebtoken')
 
+/*
+This is a middleware here used for authorization purpose-> 
+it intercepts incoming requests and checks if request contains authorization header
+if yes gets the user id by verifying token and adds it to request object
+else proceeds to route as it is
+*/
 const auth = (req,res,next)=>{
     try{
         //get token from header

@@ -1,5 +1,10 @@
 const joi = require('joi')
 
+
+/* All of these are validators to validate if incoming request has all the parameters inside body which
+are required to process request*/
+
+
 const sendOTPValidator = joi.object({
     firstName:joi.string().min(2).max(30).required(),
     lastName:joi.string().min(2).max(40).required(),

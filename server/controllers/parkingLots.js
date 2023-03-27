@@ -56,11 +56,11 @@ exports.postParkingLot = async(req,res)=>{
         const carParkingSlotsIDs = []
         const bikeParkingSlotsIDs = []
         for(i=0;i<noOfBikeSlots;i++){
-            let parkingSlot = await ParkingSlot.create({parkingLot:newParkingLot._id,vehicleType:"Bike",createdAt:new Date(currTimeStamp).toISOString()})
+            let parkingSlot = await ParkingSlot.create({parkingLot:newParkingLot._id,vehicleType:"Bike"})
             bikeParkingSlotsIDs.push(parkingSlot._id)
         }
         for(i=0;i<noOfCarSlots;i++){
-            let parkingSlot = await ParkingSlot.create({parkingLot:newParkingLot._id,vehicleType:"Car",createdAt:new Date(currTimeStamp).toISOString()})
+            let parkingSlot = await ParkingSlot.create({parkingLot:newParkingLot._id,vehicleType:"Car"})
             carParkingSlotsIDs.push(parkingSlot._id)
         }
         console.log(bikeParkingSlotsIDs,carParkingSlotsIDs)

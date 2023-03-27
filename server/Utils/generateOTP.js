@@ -6,6 +6,7 @@ const OTP_CONFIG= {
     specialChars: false,
 }
 
+//generates an OTP 
 module.exports.generateOTP = ()=>{
     const OTP = otpGenerator.generate(OTP_LENGTH,OTP_CONFIG);
     return OTP;

@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 
+//point schema for location
 const PointSchema = new mongoose.Schema({
     type:{
         type:String,
