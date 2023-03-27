@@ -64,16 +64,11 @@ exports.sendOTP = async (req, res) => {
         //send the otp to user for verification
         const subject = "[Smart Parking] Welcome smart parker"
         const html = `
-        <div
-            class="container"
-            style="max-width: 90%; margin: auto; padding-top: 20px"
-        >
-            <h2>Welcome to the club</h2>
-            <h4> You are just one step away from becoming a smart parker</h4>
-            <p style="margin-bottom: 30px;">Pleas enter the sign up OTP to get started</p>
-            <h1 style="font-size: 40px; letter-spacing: 2px; text-align:center;">${otpGenerated}</h1>
-            <h5>If you haven't made this request. simply ignore the mail and no changes will be made</h5>
-        </div>`
+            Welcome to the club
+                You are just one step away from becoming a smart parker
+                    Please enter the sign up OTP to get started
+                                ${otpGenerated}
+                If you haven't made this request. simply ignore the mail and no changes will be made`
         const receiverMail =email
 
         await sendEmail2({ html, subject, receiverMail })
@@ -112,16 +107,11 @@ exports.resendOTP = async(req,res)=>{
        //send email to user with otp
        const subject = "[Smart Parking] Welcome smart parker"
         const html = `
-        <div
-            class="container"
-            style="max-width: 90%; margin: auto; padding-top: 20px"
-        >
-            <h2>Welcome to the club</h2>
-            <h4> You are just one step away from becoming a smart parker</h4>
-            <p style="margin-bottom: 30px;">Pleas enter the sign up OTP to get started</p>
-            <h1 style="font-size: 40px; letter-spacing: 2px; text-align:center;">${otpGenerated}</h1>
-            <h5>If you haven't made this request. simply ignore the mail and no changes will be made</h5>
-        </div>`
+            Welcome to the club
+            You are just one step away from becoming a smart parker
+                Please enter the sign up OTP to get started
+                            ${otpGenerated}
+            If you haven't made this request. simply ignore the mail and no changes will be made`
         const receiverMail = req.body.email
         await sendEmail2({html,subject,receiverMail})
 
@@ -232,10 +222,7 @@ exports.sendFeedback = async (req, res) => {
 
         //send self email using the details
         const receiverMail = 'smartparking678@gmail.com'
-        const html = `<div
-                        class="container"
-                        style="max-width: 90%; margin: auto; padding-top: 20px"
-                    >${req.body.feedback}</div>`;
+        const html = `${req.body.feedback}`;
         const subject = `Feedback from ${req.body.firstName} ${req.body.lastName}`
 
         await sendEmail2({ html, subject, receiverMail })
@@ -304,16 +291,10 @@ exports.sendResetEmail = async (req, res) => {
 
         //send email to user with the code appended to link
         const html = `
-        <div
-                        class="container"
-                        style="max-width: 90%; margin: auto; padding-top: 20px"
-                    >
-                        <h3>To reset Your password follow the link below:</h3>
-                        <div>
-                            <a href="${process.env.REACT_APP_URL || "http://localhost:3000"}/resetPassword/${resetCode}">Reset Your password</a>
-                        </div>
-                        <h5>If you haven't made this request. simply ignore the mail and no changes will be made</h5>
-                    </div>
+                        To reset Your password follow the link below:
+                        Reset Your password
+                        ${process.env.REACT_APP_URL || "http://localhost:3000"}/resetPassword/${resetCode}
+                        If you haven't made this request. simply ignore the mail and no changes will be made
         `
         const receiverMail = req.body.email
 

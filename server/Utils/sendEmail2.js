@@ -37,12 +37,13 @@ const sendEmail2 = async(mailData)=>{
                 },
                 content:{
                     title:subject,
-                    body:html
+                    body:html,
+                    
                 },
                 routing:{
                     method:'single',
                     channels:['email']
-                }
+                },
             }
         })
         console.log(requestId)

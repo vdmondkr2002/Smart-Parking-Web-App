@@ -280,14 +280,9 @@ exports.deleteParkingLot = async (req, res) => {
             if (ts.vehicleType === "Bike") {
                 const charges = ((ts.endTime - ts.startTime) / (1000 * 60 * 60)) * parkingLot.parkingChargesBike
                 const html = `
-                    <div
-                    class="container"
-                    style="max-width: 90%; margin: auto; padding-top: 20px"
-                >
                     Dear ${userMap[ts.booker].name}, 
-                    We are sorry to inform you that due to some issues your parking booking for a <b>Bike</b> at <b>${parkingLot.name}</b> between <b>${dayjs(ts.startTime)}</b> and <b>${dayjs(ts.endTime)}</b> has been cancelled. 
-                    The charges for this parking you booked <b>${charges}</b>, will be refunded to your account within 2 days
-                    </div>
+                        We are sorry to inform you that due to some issues your parking booking for a Bike at ${parkingLot.name} between ${dayjs(ts.startTime)} and ${dayjs(ts.endTime)} has been cancelled. 
+                        The charges for this parking you booked ${charges}, will be refunded to your account within 2 days
                 `
                 await sendEmail2({html,subject,receiverMail})
                 await BookedTimeSlot.findByIdAndUpdate(ts._id,{cancelled:true,adminCancelled:true,cancelledAt:currTimeStamp,refunded:false})
@@ -295,14 +290,9 @@ exports.deleteParkingLot = async (req, res) => {
             } else {
                 const charges = ((ts.endTime - ts.startTime) / (1000 * 60 * 60)) * parkingLot.parkingChargesCar
                 const html = `
-                    <div
-                    class="container"
-                    style="max-width: 90%; margin: auto; padding-top: 20px"
-                >
                     Dear ${userMap[ts.booker].name}, 
-                    We are sorry to inform you that due to some issues your parking booking for a <b>Bike</b> at <b>${parkingLot.name}</b> between <b>${dayjs(ts.startTime)}</b> and <b>${dayjs(ts.endTime)}</b> has been cancelled. 
-                    The charges for this parking you booked <b>${charges}</b>, will be refunded to your account within 2 days
-                    </div>
+                        We are sorry to inform you that due to some issues your parking booking for a Bike at ${parkingLot.name} between ${dayjs(ts.startTime)} and ${dayjs(ts.endTime)} has been cancelled. 
+                        The charges for this parking you booked ${charges}, will be refunded to your account within 2 days
                 `
                 await sendEmail({html,subject,receiverMail})
                 await BookedTimeSlot.findByIdAndUpdate(ts._id,{cancelled:true,adminCancelled:true,cancelledAt:currTimeStamp,refunded:false})

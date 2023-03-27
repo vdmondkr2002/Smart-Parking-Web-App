@@ -264,30 +264,20 @@ exports.cancelBookedSlot = async(req,res)=>{
         if(bookedSlot.vehicleType=='Car'){
             const charges = ((bookedSlot.endTime - bookedSlot.startTime) / (1000 * 60 * 60)) * parkingLot.parkingChargesCar
             html = `
-            <div
-                    class="container"
-                    style="max-width: 90%; margin: auto; padding-top: 20px"
-                >
                     Dear ${reqUser.firstName+" "+reqUser.lastName}, 
-                    You booking for a <b>Car</b> at <b>${parkingLot.name}</b> between <b>${dayjs(bookedSlot.startTime)}</b> and <b>${dayjs(bookedSlot.endTime)}</b> has been cancelled. 
-                    The charges for this parking you booked <b>${charges}</b>, 70% of that will be refunded to your account within 2 days
-                </div>
+                        Your booking for a Car at ${parkingLot.name} between ${dayjs(bookedSlot.startTime)} and ${dayjs(bookedSlot.endTime)} has been cancelled. 
+                        The charges for this parking you booked ${charges}, 70% of that will be refunded to your account within 2 days
             `
         }else{
             const charges = ((bookedSlot.endTime - bookedSlot.startTime) / (1000 * 60 * 60)) * parkingLot.parkingChargesBike
             var html=`
-            <div
-                class="container"
-                style="max-width: 90%; margin: auto; padding-top: 20px"
-            >
                 Dear ${reqUser.firstName+" "+reqUser.lastName}, 
-                You booking for a <b>Bike</b> at <b>${parkingLot.name}</b> between <b>${dayjs(bookedSlot.startTime)}</b> and <b>${dayjs(bookedSlot.endTime)}</b> has been cancelled. 
-                The charges for this parking you booked <b>${charges}</b>, 70% of that will be refunded to your account within 2 days
-            </div>
+                    Your booking for a Bike at ${parkingLot.name} between ${dayjs(bookedSlot.startTime)} and ${dayjs(bookedSlot.endTime)} has been cancelled. 
+                    The charges for this parking you booked ${charges}, 70% of that will be refunded to your account within 2 days
         `
         }
         const receiverMail = reqUser.email
-        await sendEmail2({html,subject,receiverMail})
+        await sendEmail2({html,subject,receiverMail,name:reqUser.firstName})
         await BookedTimeSlot.findByIdAndUpdate(req.body.id,{cancelled:true,cancelledAt:Date.now(),refunded:false})
         return res.status(200).json({msg:"Your Booked Slot Cancelled successfully"})
     }catch(err){
