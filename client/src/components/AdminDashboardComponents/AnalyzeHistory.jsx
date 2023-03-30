@@ -339,7 +339,7 @@ const AnalyzeHistory = () => {
 
                                                         <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
                                                             {
-                                                                bookedTimeSlots.length > 0 ? (
+                                                                bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf() >= Date.now() && !slot.cancelled).length > 0 ? (
                                                                     bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf() >= Date.now() && !slot.cancelled).map(slot => (
                                                                         <Grid item xs={12} sm={6} lg={4}>
                                                                             <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} type={slot.parkingLot.type} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} bookerName={null} name={slot.parkingLot.name} charges={slot.charges} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} carImage={slot.carImage} />
@@ -357,7 +357,7 @@ const AnalyzeHistory = () => {
                                                     <TabPanel value={tabValueInner} index={1} dir={theme.direction}>
                                                         <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
                                                             {
-                                                                bookedTimeSlots.length > 0 ? (
+                                                                bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf() < Date.now() && !slot.cancelled).length > 0 ? (
                                                                     bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf() < Date.now() && !slot.cancelled).map(slot => (
                                                                         <Grid item xs={12} sm={6} lg={4}>
                                                                             <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} type={slot.parkingLot.type} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} bookerName={null} name={slot.parkingLot.name} charges={slot.charges} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} carImage={slot.carImage} />

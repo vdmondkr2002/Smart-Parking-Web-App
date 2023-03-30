@@ -192,7 +192,7 @@ const BookedSlotCard = ({ active,id, name, charges, type, startTime, endTime, ve
                         <Paper sx={{ backgroundColor: theme.palette.primary.dark, color: "white", borderRadius: "10px", width: "80%", margin: "auto", boxShadow: "10px 5px 5px gray" }}>
                             <Grid sx={styles.dialog} container spacing={2} alignItems="center" >
                                 <Grid item textAlign="end" xs={12}>
-                                    <Chip label={`${type}`} />
+                                    <Chip color="secondary" label={`${type}`} />
                                 </Grid>
                                 <Grid item xs={2}>
                                     <LocationOnIcon fontSize="large" />
