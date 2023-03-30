@@ -7,6 +7,7 @@ import dayjs from 'dayjs'
 import Alert from "../../Utils/Alert"
 import BookedSlotCardAdmin from "./BookedSlotCardAdmin";
 import CustomCircularProgress from "../../Utils/CustomCircularProgress";
+import { useNavigate } from "react-router-dom";
 
 const RefundAnalysis = () => {
     const theme = useTheme()
@@ -18,12 +19,18 @@ const RefundAnalysis = () => {
             padding: "2em",
         },
         slotsCont: {
-            padding: "1em"
+            marginTop:"1em",
+            [theme.breakpoints.up('sm')]:{
+                padding: "1em"
+            }
+           
         }
     }
     const dispatch = useDispatch()
+    const navigate = useNavigate()
     const bookedTimeSlots = useSelector(state => state.auth.bookedTimeSlots)
     const inProgress1 = useSelector(state => state.auth.inProgress1)
+    const user = useSelector(state => state.auth.user)
     const [tabValue, setTabValue] = useState(0)
     const [tabValueInner, setTabValueInner] = useState(0)
     const handleChangeTabValue = (e, newValue) => {
@@ -36,6 +43,15 @@ const RefundAnalysis = () => {
         console.log("getting cancelled slots")
         dispatch(asyncgetCancelledSlots())
     }, [])
+    useEffect(() => {
+        if (!user._id) {
+            navigate("/login")
+        } else {
+            if (user.role === "user") {
+                navigate("/home")
+            }
+        }
+    }, [user])
     const TabPanel = (props) => {
         const { children, value, index, ...other } = props;
 
@@ -74,129 +90,149 @@ const RefundAnalysis = () => {
 
                 </AppBar>
                 <TabPanel value={tabValue} index={0} dir={theme.direction}>
-                {
-                    inProgress1 ? (
-                        <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
-                            <Grid item>
-                                <CustomCircularProgress inProgress={inProgress1}/>
+                    {
+                        inProgress1 ? (
+                            <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
+                                <Grid item>
+                                    <CustomCircularProgress inProgress={inProgress1} />
+                                </Grid>
                             </Grid>
-                        </Grid>
-                    ) : (
-                        <>
-                            {/* <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center"> */}
-                            <AppBar position="static" color="default">
-                                <Tabs value={tabValueInner} onChange={handleChangeTabValueInner} indicatorColor="primary" textColor="primary"
-                                    variant="fullWidth" aria-label="full width tabs">
-                                    <Tab style={{ overflow: "visible" }} label="Admin Cancelled" {...a11yProps} />
-                                    <Tab style={{ overflow: "visible" }} label="User Cancelled" {...a11yProps} />
-                                </Tabs>
+                        ) : (
+                            <>
+                                {/* <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center"> */}
+                                <AppBar position="static" color="default">
+                                    <Tabs value={tabValueInner} onChange={handleChangeTabValueInner} indicatorColor="primary" textColor="primary"
+                                        variant="fullWidth" aria-label="full width tabs">
+                                        <Tab style={{ overflow: "visible" }} label="Admin Cancelled" {...a11yProps} />
+                                        <Tab style={{ overflow: "visible" }} label="User Cancelled" {...a11yProps} />
+                                    </Tabs>
 
-                            </AppBar>
+                                </AppBar>
 
-                            {
-                                bookedTimeSlots.filter(slot => !slot.refunded).length > 0 ? (
-                                    <>
-                                        <TabPanel value={tabValueInner} index={0} dir={theme.direction}>
-                                            <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
-                                                {
+                                {
+                                    bookedTimeSlots.filter(slot => !slot.refunded).length > 0 ? (
+                                        <>
+                                            <TabPanel value={tabValueInner} index={0} dir={theme.direction}>
+                                                <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
+                                                    {
+                                                        bookedTimeSlots.filter(slot => !slot.refunded && slot.adminCancelled).length == 0 ? (
 
-                                                    bookedTimeSlots.filter(slot => !slot.refunded && slot.adminCancelled).map(slot => (
-                                                        <Grid item xs={12} sm={4}>
-                                                            <BookedSlotCardAdmin id={slot._id} bookerName={slot.booker.name} name={slot.parkingLot.name} charges={slot.charges} refundAmount={slot.adminCancelled ? slot.charges : (slot.charges * 0.7).toFixed(2)} refunded={false} startTime={dayjs(slot.startTime)} endTime={dayjs(slot.endTime)} vehicleNo={slot.vehicleNo} vehicleType={slot.vehicleType} address={slot.address} />
-                                                        </Grid>
-                                                    ))
+                                                            <Grid item xs={12} sx={{ textAlign: "center" }}>
+                                                                <Typography variant="h4" fontWeight="bold">No Admin Cancelled Pending Refunds</Typography>
+                                                            </Grid>
 
-                                                }
+                                                        ) : (
+                                                            bookedTimeSlots.filter(slot => !slot.refunded && slot.adminCancelled).map(slot => (
+                                                                <Grid item xs={12} md={6} lg={4}>
+                                                                    <BookedSlotCardAdmin id={slot._id} bookerName={slot.booker.name} name={slot.parkingLot.name} charges={slot.charges} refundAmount={slot.adminCancelled ? slot.charges : (slot.charges * 0.7).toFixed(2)} refunded={false} startTime={dayjs(slot.startTime)} endTime={dayjs(slot.endTime)} vehicleNo={slot.vehicleNo} vehicleType={slot.vehicleType} address={slot.address} />
+                                                                </Grid>
+                                                            ))
+                                                        )
+
+                                                    }
+                                                </Grid>
+                                            </TabPanel>
+                                            <TabPanel value={tabValueInner} index={1} dir={theme.direction}>
+                                                <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
+                                                    {
+                                                        bookedTimeSlots.filter(slot => !slot.refunded && !slot.adminCancelled).length === 0 ? (
+                                                            <Grid item xs={12} sx={{ textAlign: "center" }}>
+                                                                <Typography variant="h4" fontWeight="bold">No User Cancelled Pending Refunds</Typography>
+                                                            </Grid>
+                                                        ) : (
+                                                            bookedTimeSlots.filter(slot => !slot.refunded && !slot.adminCancelled).map(slot => (
+                                                                <Grid item xs={12} md={6} lg={4}>
+                                                                    <BookedSlotCardAdmin id={slot._id} bookerName={slot.booker.name} name={slot.parkingLot.name} charges={slot.charges} refundAmount={slot.adminCancelled ? slot.charges : (slot.charges * 0.7).toFixed(2)} refunded={false} startTime={dayjs(slot.startTime)} endTime={dayjs(slot.endTime)} vehicleNo={slot.vehicleNo} vehicleType={slot.vehicleType} address={slot.address} />
+                                                                </Grid>
+                                                            ))
+                                                        )
+
+                                                    }
+                                                </Grid>
+                                            </TabPanel>
+                                        </>
+                                    ) : (
+                                        <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
+                                            <Grid item xs={12} sx={{ textAlign: "center" }}>
+                                                <Typography variant="h4" fontWeight="bold">No Pending Refunds</Typography>
                                             </Grid>
-                                        </TabPanel>
-                                        <TabPanel value={tabValueInner} index={1} dir={theme.direction}>
-                                            <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
-                                                {
-
-                                                    bookedTimeSlots.filter(slot => !slot.refunded && !slot.adminCancelled).map(slot => (
-                                                        <Grid item xs={12} sm={4}>
-                                                            <BookedSlotCardAdmin id={slot._id} bookerName={slot.booker.name} name={slot.parkingLot.name} charges={slot.charges} refundAmount={slot.adminCancelled ? slot.charges : (slot.charges * 0.7).toFixed(2)} refunded={false} startTime={dayjs(slot.startTime)} endTime={dayjs(slot.endTime)} vehicleNo={slot.vehicleNo} vehicleType={slot.vehicleType} address={slot.address} />
-                                                        </Grid>
-                                                    ))
-
-                                                }
-                                            </Grid>
-                                        </TabPanel>
-                                    </>
-                                ) : (
-                                    <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
-                                        <Grid item>
-                                            <Typography variant="h4" fontWeight="bold">No Pending Refunds</Typography>
                                         </Grid>
-                                    </Grid>
-                                )
-                            }
+                                    )
+                                }
                             </>
-                    )
-                }
+                        )
+                    }
                 </TabPanel>
                 <TabPanel value={tabValue} index={1} dir={theme.direction}>
-                {
-                    inProgress1 ? (
-                        
-                        <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
-                            <Grid item>
+                    {
+                        inProgress1 ? (
 
-                                <CustomCircularProgress inProgress={inProgress1}/>
+                            <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
+                                <Grid item>
+
+                                    <CustomCircularProgress inProgress={inProgress1} />
+                                </Grid>
                             </Grid>
-                        </Grid>
-                    ) : (
-                        <>
-                            <AppBar position="static" color="default">
-                                <Tabs value={tabValueInner} onChange={handleChangeTabValueInner} indicatorColor="primary" textColor="primary"
-                                    variant="fullWidth" aria-label="full width tabs">
-                                    <Tab style={{ overflow: "visible" }} label="Admin Cancelled" {...a11yProps} />
-                                    <Tab style={{ overflow: "visible" }} label="User Cancelled" {...a11yProps} />
-                                </Tabs>
+                        ) : (
+                            <>
+                                <AppBar position="static" color="default">
+                                    <Tabs value={tabValueInner} onChange={handleChangeTabValueInner} indicatorColor="primary" textColor="primary"
+                                        variant="fullWidth" aria-label="full width tabs">
+                                        <Tab style={{ overflow: "visible" }} label="Admin Cancelled" {...a11yProps} />
+                                        <Tab style={{ overflow: "visible" }} label="User Cancelled" {...a11yProps} />
+                                    </Tabs>
 
-                            </AppBar>
-                            {
-                                bookedTimeSlots.filter(slot => slot.refunded).length > 0 ? (
-                                    <>
-                                        <TabPanel value={tabValueInner} index={0} dir={theme.direction}>
-                                            <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
-                                                {
-
-                                                    bookedTimeSlots.filter(slot => slot.refunded && slot.adminCancelled).map(slot => (
-                                                        <Grid item xs={12} sm={4}>
-                                                            <BookedSlotCardAdmin id={slot._id} bookerName={slot.booker.name} name={slot.parkingLot.name} charges={slot.charges} refundAmount={slot.adminCancelled ? slot.charges : (slot.charges * 0.7).toFixed(2)} refunded={true} startTime={dayjs(slot.startTime)} endTime={dayjs(slot.endTime)} vehicleNo={slot.vehicleNo} vehicleType={slot.vehicleType} address={slot.address} />
-                                                        </Grid>
-                                                    ))
-
-                                                }
+                                </AppBar>
+                                {
+                                    bookedTimeSlots.filter(slot => slot.refunded).length > 0 ? (
+                                        <>
+                                            <TabPanel value={tabValueInner} index={0} dir={theme.direction}>
+                                                <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
+                                                    {
+                                                        bookedTimeSlots.filter(slot => slot.refunded && slot.adminCancelled).length === 0 ? (
+                                                            <Grid item xs={12} sx={{ textAlign: "center" }}>
+                                                                <Typography variant="h4" fontWeight="bold">No Admin Cancelled Paid Refunds</Typography>
+                                                            </Grid>
+                                                        ) : (
+                                                            bookedTimeSlots.filter(slot => slot.refunded && slot.adminCancelled).map(slot => (
+                                                                <Grid item xs={12} md={6} lg={4}>
+                                                                    <BookedSlotCardAdmin id={slot._id} bookerName={slot.booker.name} name={slot.parkingLot.name} charges={slot.charges} refundAmount={slot.adminCancelled ? slot.charges : (slot.charges * 0.7).toFixed(2)} refunded={true} startTime={dayjs(slot.startTime)} endTime={dayjs(slot.endTime)} vehicleNo={slot.vehicleNo} vehicleType={slot.vehicleType} address={slot.address} />
+                                                                </Grid>
+                                                            ))
+                                                        )
+                                                    }
+                                                </Grid>
+                                            </TabPanel>
+                                            <TabPanel value={tabValueInner} index={1} dir={theme.direction}>
+                                                <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
+                                                    {
+                                                        bookedTimeSlots.filter(slot => slot.refunded && !slot.adminCancelled).length === 0 ? (
+                                                            <Grid item xs={12} sx={{ textAlign: "center" }}>
+                                                                <Typography variant="h4" fontWeight="bold">No User Cancelled Paid Refunds</Typography>
+                                                            </Grid>
+                                                        ) : (
+                                                            bookedTimeSlots.filter(slot => slot.refunded && !slot.adminCancelled).map(slot => (
+                                                                <Grid item xs={12} md={6} lg={4}>
+                                                                    <BookedSlotCardAdmin id={slot._id} bookerName={slot.booker.name} name={slot.parkingLot.name} charges={slot.charges} refundAmount={slot.adminCancelled ? slot.charges : (slot.charges * 0.7).toFixed(2)} refunded={true} startTime={dayjs(slot.startTime)} endTime={dayjs(slot.endTime)} vehicleNo={slot.vehicleNo} vehicleType={slot.vehicleType} address={slot.address} />
+                                                                </Grid>
+                                                            ))
+                                                        )
+                                                    }
+                                                </Grid>
+                                            </TabPanel>
+                                        </>
+                                    ) : (
+                                        <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
+                                            <Grid item xs={12} sx={{ textAlign: "center" }}>
+                                                <Typography variant="h4" fontWeight="bold">No Refunds Paid Till Now</Typography>
                                             </Grid>
-                                        </TabPanel>
-                                        <TabPanel value={tabValueInner} index={1} dir={theme.direction}>
-                                            <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
-                                                {
-
-                                                    bookedTimeSlots.filter(slot => slot.refunded && !slot.adminCancelled).map(slot => (
-                                                        <Grid item xs={12} sm={4}>
-                                                            <BookedSlotCardAdmin id={slot._id} bookerName={slot.booker.name} name={slot.parkingLot.name} charges={slot.charges} refundAmount={slot.adminCancelled ? slot.charges : (slot.charges * 0.7).toFixed(2)} refunded={true} startTime={dayjs(slot.startTime)} endTime={dayjs(slot.endTime)} vehicleNo={slot.vehicleNo} vehicleType={slot.vehicleType} address={slot.address} />
-                                                        </Grid>
-                                                    ))
-
-                                                }
-                                            </Grid>
-                                        </TabPanel>
-                                    </>
-                                ) : (
-                                    <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
-                                        <Grid item>
-                                            <Typography variant="h4" fontWeight="bold">No Refunds Paid Till Now</Typography>
                                         </Grid>
-                                    </Grid>
-                                )
-                            }
+                                    )
+                                }
                             </>
-                        
-                    )
-                }
+
+                        )
+                    }
                 </TabPanel>
             </Container>
         </Grow>

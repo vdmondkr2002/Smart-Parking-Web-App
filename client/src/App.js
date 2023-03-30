@@ -26,6 +26,8 @@ import RefundAnalysis from './components/AdminDashboardComponents/RefundAnalysis
 import ResetPassword from './components/LoginPageComponents/ResetPassword';
 import PaymentSuccess from './components/PaymentsComponents/PaymentSuccess';
 import PaymentFailure from './components/PaymentsComponents/PaymentFailure';
+import PrivateUserRoute from './Utils/PrivateUserRoute';
+import PrivateAdminRoute from './Utils/PrivateAdminRoute';
 
 
 
@@ -52,7 +54,7 @@ const App = () => {
         await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
         await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL)
         setModelisLoaded(true)
-        const {Canvas,Image,ImageData} = canvas
+        const { Canvas, Image, ImageData } = canvas
         faceapi.env.monkeyPatch({
             fetch: fetch,
             Canvas: window.HTMLCanvasElement,
@@ -73,14 +75,26 @@ const App = () => {
                         <Route exact path="/register" element={<RegisterPage />} />
                         <Route exact path="/login" element={<LoginPage />} />
                         <Route exact path="/aboutus" element={<AboutUs />} />
+
                         <Route exact path="/admindb" element={<AdminDashboard />} />
+
+
                         <Route exact path="/profile" element={<ProfilePage />} />
+
+
                         <Route exact path="/home" element={<HomePage />} />
+
+
                         <Route exact path="/addparkingLot" element={<AddParkingLot />} />
+
                         <Route exact path="/contactus" element={<ContactUs />} />
                         <Route exact path="/news" element={<News />} />
+
                         <Route exact path="/analysis" element={<AnalyzeHistory />} />
+
+
                         <Route exact path="/refunds" element={<RefundAnalysis />} />
+
                         <Route exact path="/resetPassword/:code" element={<ResetPassword />} />
                         <Route exact path="/paymentSuccess" element={<PaymentSuccess />} />
                         <Route exact path="/paymentFailure" element={<PaymentFailure />} />

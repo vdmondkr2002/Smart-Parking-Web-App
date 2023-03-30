@@ -1,4 +1,4 @@
-import { Button, CircularProgress, Grid, Grow, IconButton, ImageList, ImageListItem, Paper, TextField, Typography } from "@mui/material"
+import { Button, CircularProgress, FormControl, FormControlLabel, FormLabel, Grid, Grow, IconButton, ImageList, ImageListItem, Paper, Radio, RadioGroup, TextField, Typography } from "@mui/material"
 import { Container } from "@mui/system"
 import { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
@@ -18,13 +18,14 @@ import { DateTimePicker, LocalizationProvider, StaticTimePicker } from "@mui/x-d
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs"
 import PhotoCamera from "@mui/icons-material/PhotoCamera"
 import LocationOn from "@mui/icons-material/LocationOn"
+import PersonIcon from '@mui/icons-material/Person';
 import Search from "@mui/icons-material/Search"
 import { getLocByAddress } from "../../api"
 
 
 
 const addressInState = {
-    city:'',state:'',country:'',postalCode:''
+    city: '', state: '', country: '', postalCode: ''
 }
 
 const AddParkingLot = () => {
@@ -118,14 +119,14 @@ const AddParkingLot = () => {
 
         }, [map])
 
-        useEffect(()=>{
-            if(changePos){
-                console.log("Flying to",position[0],position[1])
-                map.flyTo({ 'lat': position[0], 'lng': position[1] },zoomLvl)
+        useEffect(() => {
+            if (changePos) {
+                console.log("Flying to", position[0], position[1])
+                map.flyTo({ 'lat': position[0], 'lng': position[1] }, zoomLvl)
                 setChangePos(false)
             }
-           
-        },[changePos])
+
+        }, [changePos])
         return null;
     }
 
@@ -137,24 +138,28 @@ const AddParkingLot = () => {
         padding: theme.spacing(1),
     }));
 
-    const [openTime,setOpenTime] = useState(dayjs('2022-04-17T15:30'))
-    const [closeTime,setCloseTime] = useState(dayjs('2022-04-17T15:30'))
-    const [changePos,setChangePos] = useState(false)
-    const [imgFiles,setImgFiles] = useState([])
-    
-    const [parkName,setParkName] = useState('')
-    const [address,setAddress] = useState('')
-    const [noOfCarSlots,setNoOfCarSlots] = useState(0)
-    const [noOfBikeSlots,setNoOfBikeSlots] = useState(0)
-    const [parkingChargesBike,setParkingChargesBike] = useState(0)
-    const [parkingChargesCar,setParkingChargesCar] = useState(0)
-    const [lat,setLat] = useState('19.1485')
-    const [lng,setLng] = useState('73.133')
+    const [openTime, setOpenTime] = useState(dayjs('2022-04-17T15:30'))
+    const [closeTime, setCloseTime] = useState(dayjs('2022-04-17T15:30'))
+    const [mobileNo, setMobileNo] = useState('')
+    const [emailID, setEmailID] = useState('')
+    const [ownerName, setOwnerName] = useState('')
+    const [changePos, setChangePos] = useState(false)
+    const [imgFiles, setImgFiles] = useState([])
+    const [type, setType] = useState('public')
+    const [parkName, setParkName] = useState('')
+    const [address, setAddress] = useState('')
+    const [noOfCarSlots, setNoOfCarSlots] = useState(0)
+    const [noOfBikeSlots, setNoOfBikeSlots] = useState(0)
+    const [parkingChargesBike, setParkingChargesBike] = useState(0)
+    const [parkingChargesCar, setParkingChargesCar] = useState(0)
+    const [lat, setLat] = useState('19.1485')
+    const [lng, setLng] = useState('73.133')
     const [addressData, setAddressData] = useState(addressInState)
     const user = useSelector(state => state.auth.user)
     const alert = useSelector(state => state.auth.alert)
+    const [typePrivate,setTypePrivate] = useState(false)
     const [foundCurrLoc, setFoundCurrLoc] = useState(false)
-    const inProgress1 = useSelector(state=>state.auth.inProgress1)
+    const inProgress1 = useSelector(state => state.auth.inProgress1)
     const compress = new Compress()
     const dispatch = useDispatch()
     const [zoomLvl, setZoomLvl] = useState(13);
@@ -172,6 +177,7 @@ const AddParkingLot = () => {
         }
     }, [user])
 
+
     useEffect(() => {
         if (alert.msg == "Parking Lot Added") {
             navigate("/admindb")
@@ -186,7 +192,7 @@ const AddParkingLot = () => {
     }, [position])
     const handleSubmit = (e) => {
         e.preventDefault()
-        const data = { parkName,noOfCarSlots,noOfBikeSlots,address,parkingChargesBike,parkingChargesCar,lat,lng,imgFiles,openTime: openTime.format('HH').toString(), closeTime: closeTime.format('HH').toString(),currTimeStamp:Date.now() }
+        const data = { parkName, noOfCarSlots, noOfBikeSlots, address, parkingChargesBike, parkingChargesCar, lat, lng, imgFiles, ownerName, emailID, mobileNo, type, openTime: openTime.format('HH').toString(), closeTime: closeTime.format('HH').toString(), currTimeStamp: Date.now() }
         console.log(data)
         dispatch(asyncpostParkingLot(data))
     }
@@ -232,33 +238,41 @@ const AddParkingLot = () => {
         setAddressData({ ...addressData, [e.target.name]: e.target.value })
     }
 
-    const handleSearchLoc = async()=>{
-        
-        const loc = await getLocByAddress(addressData)
-        console.log(loc)
-        if(loc.msg){
-            dispatch(setAlert({msg:loc.msg,type:'info'}))
-            return;
+    const handleSearchLoc = async (e) => {
+        const id = e.target.id
+        if(id==="searchAddr"){
+            const loc = await getLocByAddress(addressData)
+            console.log(loc)
+            if (loc.msg) {
+                dispatch(setAlert({ msg: loc.msg, type: 'info' }))
+                return;
+            }
+            setPosition([parseFloat(loc['lat']), parseFloat(loc['lng'])])
+            setChangePos(true)
+            console.log("i am running 5")
+        }else{
+            setPosition([parseFloat(lat), parseFloat(lng)])
+            setChangePos(true)
         }
-        setPosition([parseFloat(loc['lat']),parseFloat(loc['lng'])])
-        setChangePos(true)
-        console.log("i am running 5")
         
+
     }
 
     return (
         <Grow in>
             <Container sx={styles.formCont}>
                 <Alert />
+                <Grid container alignItems="center" justifyContent="center">
+                    <Grid item xs={12} sm={12}>
+                        <Paper sx={{ ...styles.titlePaper, color: "yellow" }}>
+                            <Typography variant="h3" >
+                                Add a New Parking Lot
+                            </Typography>
+                        </Paper>
+                    </Grid>
+                </Grid>
                 <form autoComplete="off" noValidate sx={styles.form} onSubmit={handleSubmit}>
                     <Grid container sx={styles.formContainer} spacing={3} justifyContent="center">
-                        <Grid item xs={12} sm={12}>
-                            <Button sx={{ padding: "1em" }} fullWidth variant="contained" startIcon={<AddBox fontSize="large" />}>
-                                <Typography variant="h3">
-                                    Add a New Parking Lot
-                                </Typography>
-                            </Button>
-                        </Grid>
                         <Grid item sm={12} xs={12} sx={styles.ipFields}>
                             <TextField
                                 name="parkName"
@@ -267,16 +281,37 @@ const AddParkingLot = () => {
                                 required
                                 fullWidth
                                 label="Enter The name of Parking"
-                                onChange={(e)=>setParkName(e.target.value)}
+                                onChange={(e) => setParkName(e.target.value)}
                                 value={parkName}
                             />
                         </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <Paper sx={styles.titlePaper}>
+                                <Typography sx={{ display: 'inline', padding: "1em" }} variant="h3">
+                                    Select Type of Parking
+                                </Typography>
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={12} sm={6} sx={{ textAlign: "center" }}>
+                            <   FormControl>
+                                <RadioGroup
+                                    row
+                                    aria-labelledby="demo-row-radio-buttons-group-label"
+                                    name="row-radio-buttons-group"
+                                    value={type}
+                                    onChange={e => setType(e.target.value)}
+                                >
+                                    <FormControlLabel value="public" control={<Radio sx={{ '& .MuiSvgIcon-root': { fontSize: 28 }, }} />} label={<Typography fontSize={20} >Public</Typography>} />
+                                    <FormControlLabel value="private" control={<Radio sx={{ '& .MuiSvgIcon-root': { fontSize: 28 }, }} />} label={<Typography fontSize={20} >Private</Typography>} />
+                                </RadioGroup>
+                            </FormControl>
+                        </Grid>
                         <Grid item sm={6} xs={12} sx={styles.ipFields}>
                             <Grid container>
-                                <Grid item sm={5}>
-                                    <Div>{"Number of Slots for Bike"}</Div>
+                                <Grid item sm={5} xs={6}>
+                                    <Div>{"Number of Bike Slots"}</Div>
                                 </Grid>
-                                <Grid item sm={6}>
+                                <Grid item sm={6} xs={6}>
                                     <TextField
                                         name="noOfBikeSlots"
                                         type="number"
@@ -285,7 +320,7 @@ const AddParkingLot = () => {
                                         fullWidth
                                         label="Bike"
 
-                                        onChange={(e)=>setNoOfBikeSlots(e.target.value)}
+                                        onChange={(e) => setNoOfBikeSlots(e.target.value)}
                                         value={noOfBikeSlots}
                                     />
                                 </Grid>
@@ -294,10 +329,10 @@ const AddParkingLot = () => {
                         </Grid>
                         <Grid item sm={6} xs={12} sx={styles.ipFields}>
                             <Grid container>
-                                <Grid item sm={5}>
-                                    <Div>{"Number of Slots for Car"}</Div>
+                                <Grid item sm={5} xs={6}>
+                                    <Div>{"Number of Car Slots"}</Div>
                                 </Grid>
-                                <Grid item sm={6}>
+                                <Grid item sm={6} xs={6}>
                                     <TextField
                                         name="noOfCarSlots"
                                         type="number"
@@ -306,55 +341,63 @@ const AddParkingLot = () => {
                                         fullWidth
                                         label="Car"
 
-                                        onChange={(e)=>setNoOfCarSlots(e.target.value)}
+                                        onChange={(e) => setNoOfCarSlots(e.target.value)}
                                         value={noOfCarSlots}
                                     />
                                 </Grid>
                             </Grid>
 
                         </Grid>
-                        <Grid item sm={6} xs={12} sx={styles.ipFields}>
-                            <Grid container>
-                                <Grid item sm={5}>
-                                    <Div>{"Parking Charges for Bike / HR"}</Div>
-                                </Grid>
-                                <Grid item sm={6}>
-                                    <TextField
-                                        name="parkingChargesBike"
-                                        type="number"
-                                        variant="outlined"
-                                        required
-                                        fullWidth
-                                        label="Bike"
+                        {
+                            type==="private"?(
+                                <>
+                                <Grid item sm={6} xs={12} sx={styles.ipFields}>
+                                    <Grid container>
+                                        <Grid item sm={5} xs={8}>
+                                            <Div>{"Parking Charges for Bike / HR"}</Div>
+                                        </Grid>
+                                        <Grid item sm={6} xs={4}>
+                                            <TextField
+                                                name="parkingChargesBike"
+                                                type="number"
+                                                variant="outlined"
+                                                required
+                                                fullWidth
+                                                label="Bike"
 
-                                        onChange={e=>setParkingChargesBike(e.target.value)}
-                                        value={parkingChargesBike}
-                                    />
-                                </Grid>
-                            </Grid>
+                                                onChange={e => setParkingChargesBike(e.target.value)}
+                                                value={parkingChargesBike}
+                                            />
+                                        </Grid>
+                                    </Grid>
 
-                        </Grid>
-                        <Grid item sm={6} xs={12} sx={styles.ipFields}>
-                            <Grid container>
-                                <Grid item sm={5}>
-                                    <Div>{"Parking Charges for Car / HR"}</Div>
                                 </Grid>
-                                <Grid item sm={6}>
-                                    <TextField
-                                        name="parkingChargesCar"
-                                        type="number"
-                                        variant="outlined"
-                                        required
-                                        fullWidth
-                                        label="Car"
+                                <Grid item sm={6} xs={12} sx={styles.ipFields}>
+                                    <Grid container>
+                                        <Grid item sm={5} xs={8}>
+                                            <Div>{"Parking Charges for Car / HR"}</Div>
+                                        </Grid>
+                                        <Grid item sm={6} xs={4}>
+                                            <TextField
+                                                name="parkingChargesCar"
+                                                type="number"
+                                                variant="outlined"
+                                                required
+                                                fullWidth
+                                                label="Car"
 
-                                        onChange={e=>setParkingChargesCar(e.target.value)}
-                                        value={parkingChargesCar}
-                                    />
+                                                onChange={e => setParkingChargesCar(e.target.value)}
+                                                value={parkingChargesCar}
+                                            />
+                                        </Grid>
+                                    </Grid>
+
                                 </Grid>
-                            </Grid>
-
-                        </Grid>
+                            </>
+                            ):null
+                        }
+                        
+                        
                         <Grid item xs={12} sm={12}>
                             <Paper sx={styles.titlePaper}>
                                 <Typography variant="h3" sx={styles.tit}>
@@ -363,14 +406,14 @@ const AddParkingLot = () => {
                             </Paper>
                         </Grid>
                         <Grid item xs={0} sm={2}></Grid>
-                        <Grid item xs={6} sm={4}>
+                        <Grid item xs={12} sm={4}>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <StaticTimePicker label="Select Open Time" value={openTime} renderInput={(params) => <TextField {...params} />} views={['hours']} onChange={handleChangeOpen} defaultValue={dayjs('2022-04-17T15:30')} />
+                                <StaticTimePicker  label="Select Open Time" value={openTime} renderInput={(params) => <TextField {...params} />} views={['hours']} onChange={handleChangeOpen} defaultValue={dayjs('2022-04-17T15:30')} />
                             </LocalizationProvider>
                         </Grid>
-                        <Grid item xs={6} sm={4}>
+                        <Grid item xs={12} sm={4}>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <StaticTimePicker label="Select Close Time" value={closeTime} renderInput={(params) => <TextField {...params} />} views={['hours']} onChange={handleChangeClose} defaultValue={dayjs('2022-04-17T15:30')} />
+                                <StaticTimePicker  label="Select Close Time" value={closeTime} renderInput={(params) => <TextField {...params} />} views={['hours']} onChange={handleChangeClose} defaultValue={dayjs('2022-04-17T15:30')} />
                             </LocalizationProvider>
                         </Grid>
                         <Grid item xs={0} sm={2}></Grid>
@@ -382,11 +425,66 @@ const AddParkingLot = () => {
                                 required
                                 fullWidth
                                 label="Enter The address"
-                                onChange={e=>setAddress(e.target.value)}
+                                onChange={e => setAddress(e.target.value)}
                                 value={address}
 
                             />
                         </Grid>
+                        
+                        {
+                            type==="private"?(
+                                <>
+                                <Grid item xs={12} sm={12}>
+                            <Paper sx={styles.titlePaper}>
+                                <Typography sx={{ display: 'inline' }} variant="h3">
+                                    Add Owner Details
+                                </Typography>
+                                <PersonIcon fontSize="large" />
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={12} sm={4} sx={styles.ipFields}>
+                            <TextField
+                                name="ownerName"
+                                type="text"
+                                variant="outlined"
+                                required
+                                fullWidth
+                                label="Enter Owner Name"
+                                onChange={e => setOwnerName(e.target.value)}
+                                value={ownerName}
+
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={3} sx={styles.ipFields}>
+                            <TextField
+                                name="mobileNo"
+                                type="text"
+                                variant="outlined"
+                                required
+                                fullWidth
+                                label="Enter Mobile No"
+                                onChange={e => setMobileNo(e.target.value)}
+                                value={mobileNo}
+
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={5} sx={styles.ipFields}>
+                            <TextField
+                                name="emailID"
+                                type="text"
+                                variant="outlined"
+                                required
+                                fullWidth
+                                label="Enter Email ID"
+                                onChange={e => setEmailID(e.target.value)}
+                                value={emailID}
+
+                            />
+                        </Grid>
+                                </>
+                            ):null
+                        }
+                        
                         <Grid item xs={12} sm={12}>
                             <Paper sx={styles.titlePaper}>
                                 <Typography sx={{ display: 'inline' }} variant="h3">
@@ -396,9 +494,9 @@ const AddParkingLot = () => {
                             </Paper>
                         </Grid>
                         <Grid item xs={0} sm={2}></Grid>
-                        <Grid item xs={8} sm={8} sx={styles.ipFields}>
+                        <Grid item xs={12} sm={8} sx={styles.ipFields}>
                             <Grid container spacing={1} justifyContent="center">
-                                <Grid item xs={12} sm={6}>
+                                <Grid item xs={6} sm={6}>
                                     <Grid container justifyContent="center">
                                         <Grid item sm={6}>
                                             <TextField
@@ -410,13 +508,13 @@ const AddParkingLot = () => {
                                                 fullWidth
                                                 label="Latitude"
 
-                                                onChange={e=>setLat(e.target.value)}
+                                                onChange={e => setLat(e.target.value)}
                                                 value={lat}
                                             />
                                         </Grid>
                                     </Grid>
                                 </Grid>
-                                <Grid item xs={12} sm={6}>
+                                <Grid item xs={6} sm={6}>
                                     <Grid container justifyContent="center">
                                         <Grid item sm={6}>
                                             <TextField
@@ -428,14 +526,19 @@ const AddParkingLot = () => {
                                                 fullWidth
                                                 label="Longitude"
 
-                                                onChange={e=>setLng(e.target.value)}
+                                                onChange={e => setLng(e.target.value)}
                                                 value={lng}
                                             />
                                         </Grid>
                                     </Grid>
                                 </Grid>
+                                <Grid item xs={6} sm={5}>
+                                    <Button fullWidth id="searchlatLon"  color="secondary" sx={{ margin: "auto", paddingX: "2em", paddingY: "1em" }} variant="contained" endIcon={<Search />} onClick={handleSearchLoc}>Search</Button>
+                                </Grid>
                             </Grid>
+
                         </Grid>
+
                         <Grid item xs={0} sm={2}></Grid>
                         <Grid item xs={12} sx={{ textAlign: "center" }}>
                             <Typography variant="h2" component="h2">OR</Typography>
@@ -495,8 +598,8 @@ const AddParkingLot = () => {
                                 value={addressData.postalCode}
                             />
                         </Grid>
-                        <Grid item xs={5}>
-                            <Button fullWidth color="secondary" sx={{ margin: "auto", paddingX: "2em", paddingY: "1em" }} variant="contained" endIcon={<Search />} onClick={handleSearchLoc}>Search</Button>
+                        <Grid item xs={6} sm={5}>
+                            <Button fullWidth id="searchAddr" color="secondary" sx={{ margin: "auto", paddingX: "2em", paddingY: "1em" }} variant="contained" endIcon={<Search />} onClick={handleSearchLoc}>Search</Button>
                         </Grid>
                         <Grid item xs={12}>
                             <MapContainer style={{ height: "400px" }} center={position} zoom={zoomLvl} >
@@ -516,12 +619,12 @@ const AddParkingLot = () => {
                         <Grid item xs={12} sm={12}>
                             <Paper sx={styles.titlePaper}>
                                 <Typography variant="h3" sx={styles.tit}>
-                                    Add some photos of parking lot (Add upto 3 photos)
+                                    Add some photos of parking lot (Upto 3)
                                 </Typography>
                             </Paper>
                         </Grid>
 
-                        <Grid item xs={3} alignContent="center">
+                        <Grid item xs={6} sm={3} alignContent="center">
                             <Button variant="contained" sx={{ marginLeft: "1em" }} component="label">
                                 Upload
                                 <input hidden accept="image/*" type="file" multiple onChange={handleUploadClick} />
@@ -552,13 +655,13 @@ const AddParkingLot = () => {
                         </Grid>
                         <Grid item xs={12}>
                             {
-                                inProgress1?(
-                                    <Button sx={{ width: "100%", padding: "1em",fontWeight:"bold",fontSize:14  }} color="info" variant="contained" startIcon={<CircularProgress size={20} sx={{color:"yellow"}}/>}>Submitting</Button>
-                                ):(
-                                    <Button sx={{ width: "100%", padding: "1em",fontWeight:"bold",fontSize:14 }} color="primary" variant="contained" type="submit">Submit</Button>
+                                inProgress1 ? (
+                                    <Button sx={{ width: "100%", padding: "1em", fontWeight: "bold", fontSize: 14 }} color="info" variant="contained" startIcon={<CircularProgress size={20} sx={{ color: "yellow" }} />}>Submitting</Button>
+                                ) : (
+                                    <Button sx={{ width: "100%", padding: "1em", fontWeight: "bold", fontSize: 14 }} color="primary" variant="contained" type="submit">Submit</Button>
                                 )
                             }
-                            
+
                         </Grid>
                     </Grid>
                 </form>

@@ -60,7 +60,22 @@ const ParkingLotSchema = mongoose.Schema({
         type:Boolean,
         default:true,
         required:true
-    }
+    },
+    ownerName:{
+        type:String
+    },
+    ownerEmail:{
+        type:String
+    },
+    ownermobileNo:{
+        type:String
+    },
+    type:{
+        type:String,
+        enum:["public","private"],
+        default:"public",
+        required:true
+    },
 })
 
 ParkingLotSchema.index({location:"2dsphere"})

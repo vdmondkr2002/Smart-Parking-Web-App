@@ -182,7 +182,7 @@ const Footer1 = () => {
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid item xs={6} sm={3}>
+                <Grid item xs={12} sm={3}>
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
                             <Typography variant="h3" textTransform="uppercase" fontWeight="bold">
@@ -253,7 +253,7 @@ const Footer1 = () => {
                         </Grid>
                     </Grid>
                 </Grid>
-                <Grid item xs={6} sm={3}>
+                <Grid item xs={12} sm={3}>
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
                             <Typography variant="h3" textTransform="uppercase" fontWeight="bold">

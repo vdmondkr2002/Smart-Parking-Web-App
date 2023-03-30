@@ -25,6 +25,7 @@ import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
 import LocationOn from "@mui/icons-material/LocationOn"
 import { getLocByAddress } from "../../api"
 import CustomCircularProgress from "../../Utils/CustomCircularProgress"
+import { StaticDateTimePicker } from "@mui/x-date-pickers"
 
 const initialState = {
     city: '', state: '', country: '', postalCode: ''
@@ -51,8 +52,11 @@ const HomePage = () => {
             },
         },
         slotsCont: {
-            marginTop: "2em",
-            width: "auto"
+            marginTop:"1em",
+            [theme.breakpoints.up('sm')]:{
+                padding: "1em"
+            }
+           
         },
         titlePaper: {
             // display: "flex",
@@ -66,24 +70,28 @@ const HomePage = () => {
             padding: "0.5em 0 0.5em 0",
             color: "#ffc",
             fontWeight: 600
-        }
+        },
+        
     }
     const user = useSelector(state => state.auth.user)
     const alert = useSelector(state => state.auth.alert)
     const freeParkingLots = useSelector(state => state.auth.freeParkingLots)
     const inProgress1 = useSelector(state => state.auth.inProgress1)
-    const [startTime, setStartTime] = useState(dayjs(format(Date.now() + 1000 * 60 * 60, 'yyyy-MM-dd hh:00 a')))
-    const [endTime, setEndTime] = useState(dayjs(format(Date.now() + 1000 * 60 * 60 * 2, 'yyyy-MM-dd hh:00 a')));
+    const [startTime, setStartTime] = useState(dayjs(format(Date.now() + 1000 * 60 * 60, 'yyyy-MM-dd hh:00 a..aa')))
+    const [endTime, setEndTime] = useState(dayjs(format(Date.now() + 1000 * 60 * 60 * 2, 'yyyy-MM-dd hh:00 a..aa')));
     const [vehicleType, setVehicleType] = useState('')
     const [position, setPosition] = useState([19.1485, 73.133]);
     const [formData, setFormData] = useState(initialState)
     const [polyline, setPolyline] = useState([[19.2735184, 73.1183625], [19.2735184, 73.1724625], [19.2159482, 73.1724625], [19.2159482, 73.1183625], [19.2735184, 73.1183625]])
     const [distances, setDistances] = useState([])
     const [times, setTimes] = useState([])
-    const [changePos,setChangePos] = useState(false)
+    const [changePos, setChangePos] = useState(false)
     const [foundCurrLoc, setFoundCurrLoc] = useState(false)
     const [sortBy, setSortBy] = useState('distance')
+    const [mobileView, setMobileView] = useState(false)
     const [zoomLvl, setZoomLvl] = useState(13)
+    const [lat, setLat] = useState('19.1485')
+    const [lng, setLng] = useState('73.133')
     const navigate = useNavigate()
     const dispatch = useDispatch()
     const greenIcon = new L.Icon({
@@ -170,13 +178,13 @@ const HomePage = () => {
         }, [map])
 
         useEffect(() => {
-            if(changePos){
+            if (changePos) {
                 console.log(changePos)
-                console.log("FLying to position",position[0],position[1])
+                console.log("FLying to position", position[0], position[1])
                 map.flyTo({ 'lat': position[0], 'lng': position[1] }, zoomLvl)
                 setChangePos(false)
             }
-            
+
         }, [changePos])
 
         // useEffect(() => {
@@ -199,6 +207,27 @@ const HomePage = () => {
         return null
     }
 
+    useEffect(() => {
+        const setResponsiveness = () => {
+            return window.innerWidth < 600 && window.innerWidth > 100
+                ? setMobileView(true)
+                : setMobileView(false);
+        };
+        setResponsiveness();
+
+        window.addEventListener("resize", setResponsiveness);
+    }, []);
+
+    useEffect(()=>{
+        if(alert.msg){
+            if(alert.msg==="Slot Booking Successful"){
+                navigate("/profile")
+            }
+        }
+    },[alert])
+
+
+
     const handleSubmit = (e) => {
         e.preventDefault()
         console.log(startTime, endTime, position)
@@ -208,6 +237,9 @@ const HomePage = () => {
             lat: position[0], lng: position[1], vehicleType: vehicleType,
             currTime: dayjs(Date.now()).format('YYYY-MM-DD HH:00')
         }
+
+        setStartTime(dayjs(format(startTime.unix() * 1000, 'yyyy-MM-dd hh:00 a..aa')))
+        setEndTime(dayjs(format(endTime.unix() * 1000, 'yyyy-MM-dd hh:00 a..aa')))
         console.log(data)
         dispatch(asyncgetParkingLot(data))
     }
@@ -228,26 +260,24 @@ const HomePage = () => {
         console.log(newValue)
         setEndTime(newValue)
     }
-    const handleSearchLoc = async () => {
-        console.log("i am called")
-        const loc = await getLocByAddress(formData)
-        console.log(loc)
-        if (loc.msg) {
-            dispatch(setAlert({ msg: loc.msg, type: 'info' }))
-            return;
+    const handleSearchLoc = async (e) => {
+        const id = e.target.id
+        if(id==="searchAddr"){
+            console.log("i am called")
+            const loc = await getLocByAddress(formData)
+            console.log(loc)
+            if (loc.msg) {
+                dispatch(setAlert({ msg: loc.msg, type: 'info' }))
+                return;
+            }
+            setPosition([parseFloat(loc['lat']), parseFloat(loc['lng'])])
+            setChangePos(true)
+        }else{
+            setPosition([parseFloat(lat), parseFloat(lng)])
+            setChangePos(true)
         }
-        setPosition([parseFloat(loc['lat']), parseFloat(loc['lng'])])
-        setChangePos(true)
-
     }
 
-    const handleChangePos = (e) => {
-        if (e.target.name == "lat")
-            setPosition(position.map((pos, ind) => ind == 0 ? e.target.value : pos))
-        else
-            setPosition(position.map((pos, ind) => ind == 1 ? e.target.value : pos))
-        dispatch(clearFreeParkingLots())
-    }
 
 
 
@@ -289,7 +319,6 @@ const HomePage = () => {
                         <Paper sx={{ ...styles.titlePaper, color: "yellow" }}>
                             <Typography variant="h3" >
                                 Search & Book a Slot
-
                             </Typography>
                         </Paper>
                     </Grid>
@@ -305,8 +334,13 @@ const HomePage = () => {
                                 </Typography>
                             </Paper>
                         </Grid>
-                        <Grid item xs={2}></Grid>
-                        <Grid item xs={3}>
+                        {
+                            !mobileView ? (
+                                <Grid item xs={2}></Grid>
+                            ) : null
+                        }
+
+                        <Grid item xs={6} sm={3} >
                             {
                                 vehicleType === "Car" ? (
                                     <Button onClick={() => setVehicleType("")}>
@@ -325,8 +359,12 @@ const HomePage = () => {
 
 
                         </Grid>
-                        <Grid item xs={2}></Grid>
-                        <Grid item xs={3}>
+                        {
+                            !mobileView ? (
+                                <Grid item xs={2}></Grid>
+                            ) : null
+                        }
+                        <Grid item xs={6} sm={3}>
                             {
                                 vehicleType === "Bike" ? (
                                     <Button onClick={() => setVehicleType("")}>
@@ -351,8 +389,13 @@ const HomePage = () => {
                                 </Typography>
                             </Paper>
                         </Grid>
-                        <Grid item xs={0} sm={2}></Grid>
-                        <Grid item xs={6} sm={4}>
+                        {
+                            !mobileView ? (
+                                <Grid item xs={0} sm={2}></Grid>
+                            ) : null
+                        }
+
+                        <Grid item sx={{textAlign:"center"}} xs={12} sm={4}>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DateTimePicker
                                     disablePast
@@ -367,7 +410,7 @@ const HomePage = () => {
                                 />
                             </LocalizationProvider>
                         </Grid>
-                        <Grid item xs={6} sm={4}>
+                        <Grid item sx={{textAlign:"center"}} xs={12} sm={4}>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DateTimePicker
                                     minDateTime={startTime.add(1, 'hour')}
@@ -381,7 +424,12 @@ const HomePage = () => {
                                 />
                             </LocalizationProvider>
                         </Grid>
-                        <Grid item xs={0} sm={2}></Grid>
+                        {
+                            !mobileView ? (
+                                <Grid item xs={0} sm={2}></Grid>
+                            ) : null
+                        }
+
                         <Grid item xs={12} >
                             <Typography align="center" sx={{ mb: 2 }} variant="h6" component="div">
                                 Instructions
@@ -410,11 +458,11 @@ const HomePage = () => {
                             </Paper>
                         </Grid>
                         <Grid item xs={0} sm={2}></Grid>
-                        <Grid item xs={8} sx={styles.ipFields}>
-                            <Grid container spacing={1} >
-                                <Grid item xs={12} sm={6}>
-                                    <Grid container justifyContent="center">
-                                        <Grid item sm={6}>
+                        <Grid item xs={12} sm={8} sx={styles.ipFields}>
+                            <Grid container spacing={1} justifyContent="center" >
+                                <Grid item xs={6} >
+                                    <Grid container sx={{textAlign:"center"}} justifyContent="center">
+                                        <Grid item xs={12}>
                                             <TextField
                                                 name="lat"
                                                 type="text"
@@ -424,15 +472,15 @@ const HomePage = () => {
                                                 fullWidth
                                                 label="Latitude"
 
-                                                onChange={handleChangePos}
-                                                value={position[0]}
+                                                onChange={e => setLat(e.target.value)}
+                                                value={lat}
                                             />
                                         </Grid>
                                     </Grid>
                                 </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <Grid container justifyContent="center">
-                                        <Grid item sm={6}>
+                                <Grid item xs={6} >
+                                    <Grid container sx={{textAlign:"center"}} justifyContent="center">
+                                        <Grid item xs={12}>
                                             <TextField
                                                 name="lng"
                                                 type="text"
@@ -442,13 +490,15 @@ const HomePage = () => {
                                                 fullWidth
                                                 label="Longitude"
 
-                                                onChange={handleChangePos}
-                                                value={position[1]}
+                                                onChange={e =>  setLng(e.target.value)}
+                                                value={lng}
                                             />
                                         </Grid>
                                     </Grid>
                                 </Grid>
-                                <Grid item xs={0} sm={2}></Grid>
+                                <Grid item xs={6} sm={5}>
+                                    <Button fullWidth id="searchlatLon"  color="secondary" sx={{ margin: "auto", paddingX: "2em", paddingY: "1em" }} variant="contained" endIcon={<SearchIcon />} onClick={handleSearchLoc}>Search</Button>
+                                </Grid>
 
 
 
@@ -457,6 +507,7 @@ const HomePage = () => {
 
 
                         </Grid>
+                        <Grid item xs={0} sm={2}></Grid>
                         <Grid item xs={12} sx={{ textAlign: "center" }}>
                             <Typography variant="h2" component="h2">OR</Typography>
                         </Grid>
@@ -516,7 +567,7 @@ const HomePage = () => {
                             />
                         </Grid>
                         <Grid item xs={5}>
-                            <Button fullWidth color="secondary" sx={{ margin: "auto", paddingX: "2em", paddingY: "1em" }} variant="contained" endIcon={<SearchIcon />} onClick={handleSearchLoc}>Search</Button>
+                            <Button fullWidth id="searchAddr" color="secondary" sx={{ margin: "auto", paddingX: "2em", paddingY: "1em" }} variant="contained" endIcon={<SearchIcon />} onClick={handleSearchLoc}>Search</Button>
                         </Grid>
                         <Grid item xs={12}>
                             <MapContainer style={{ height: "400px" }} center={position} zoom={zoomLvl} >
@@ -568,52 +619,52 @@ const HomePage = () => {
                         </Grid>
                     ) : (
                         <>
-                        {
-                            freeParkingLots.length > 0 ? (
-                                <>
-                                    <Grid container sx={styles.slotsCont} spacing={3}>
-                                        <Grid item xs={8}>
+                            {
+                                freeParkingLots.length > 0 ? (
+                                    <>
+                                        <Grid container sx={styles.slotsCont} spacing={3}>
+                                            <Grid item xs={6} sm={8}>
 
+                                            </Grid>
+                                            <Grid item xs={6} sm={4}>
+                                                <FormControl fullWidth>
+                                                    <InputLabel id="demo-simple-select-label">Sort By</InputLabel>
+                                                    <Select
+                                                        labelId="demo-simple-select-label"
+                                                        id="demo-simple-select"
+                                                        value={sortBy}
+                                                        defaultValue={"distance"}
+                                                        label="Sort By"
+                                                        onChange={handleChangeSortBy}
+                                                    >
+                                                        <MenuItem value={"distance"}>Distance</MenuItem>
+                                                        <MenuItem value={"charges"}>Charges</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                            </Grid>
                                         </Grid>
-                                        <Grid item xs={4}>
-                                            <FormControl fullWidth>
-                                                <InputLabel id="demo-simple-select-label">Sort By</InputLabel>
-                                                <Select
-                                                    labelId="demo-simple-select-label"
-                                                    id="demo-simple-select"
-                                                    value={sortBy}
-                                                    defaultValue={"distance"}
-                                                    label="Sort By"
-                                                    onChange={handleChangeSortBy}
-                                                >
-                                                    <MenuItem value={"distance"}>Distance</MenuItem>
-                                                    <MenuItem value={"charges"}>Charges</MenuItem>
-                                                </Select>
-                                            </FormControl>
-                                        </Grid>
-                                    </Grid>
-                                    <Grid container sx={styles.slotsCont} spacing={3}>
-                                        {
-                                            (sortBy == "distance") ? (
-                                                freeParkingLots.map((freeLot) => (
-                                                    <Grid item xs={12} sm={4}>
-                                                        <ParkingLotCard startTime={startTime} endTime={endTime} vehicleType={vehicleType} lotImages={freeLot.lotImages} key={freeLot.id} id={freeLot.id} freeSlots={freeLot.freeSlots} engagedSlots={freeLot.engagedSlots} address={freeLot.address} lat={freeLot.location[0]} lng={freeLot.location[1]} currLoc={position} charges={freeLot.charges} name={freeLot.name} noOfFreeSlots={freeLot.freeSlots.length} distance={parseInt(freeLot.distance)} />
-                                                    </Grid>
-                                                ))
-                                            ) : (
-                                                [...freeParkingLots].sort((a, b) => a.charges - b.charges).map((freeLot) => (
-                                                    <Grid item xs={12} sm={4}>
-                                                        <ParkingLotCard startTime={startTime} endTime={endTime} vehicleType={vehicleType} lotImages={freeLot.lotImages} key={freeLot.id} id={freeLot.id} freeSlots={freeLot.freeSlots} engagedSlots={freeLot.engagedSlots} address={freeLot.address} lat={freeLot.location[0]} lng={freeLot.location[1]} currLoc={position} charges={freeLot.charges} name={freeLot.name} noOfFreeSlots={freeLot.freeSlots.length} distance={parseInt(freeLot.distance)} />
-                                                    </Grid>
+                                        <Grid container sx={styles.slotsCont} spacing={3}>
+                                            {
+                                                (sortBy == "distance") ? (
+                                                    freeParkingLots.map((freeLot) => (
+                                                        <Grid item xs={12} sm={4}>
+                                                            <ParkingLotCard startTime={startTime} endTime={endTime} vehicleType={vehicleType} type={freeLot.type} lotImages={freeLot.lotImages} key={freeLot.id} id={freeLot.id} freeSlots={freeLot.freeSlots} engagedSlots={freeLot.engagedSlots} address={freeLot.address} lat={freeLot.location[0]} lng={freeLot.location[1]} currLoc={position} charges={freeLot.charges} name={freeLot.name} noOfFreeSlots={freeLot.freeSlots.length} distance={parseInt(freeLot.distance)} />
+                                                        </Grid>
+                                                    ))
+                                                ) : (
+                                                    [...freeParkingLots].sort((a, b) => a.charges - b.charges).map((freeLot) => (
+                                                        <Grid item xs={12} sm={4}>
+                                                            <ParkingLotCard startTime={startTime} endTime={endTime} vehicleType={vehicleType} type={freeLot.type}  lotImages={freeLot.lotImages} key={freeLot.id} id={freeLot.id} freeSlots={freeLot.freeSlots} engagedSlots={freeLot.engagedSlots} address={freeLot.address} lat={freeLot.location[0]} lng={freeLot.location[1]} currLoc={position} charges={freeLot.charges} name={freeLot.name} noOfFreeSlots={freeLot.freeSlots.length} distance={parseInt(freeLot.distance)} />
+                                                        </Grid>
 
-                                                ))
-                                            )
-                                        }
-                                    </Grid>
-                                        </>
-                            ) :null
-                }
-                            </>
+                                                    ))
+                                                )
+                                            }
+                                        </Grid>
+                                    </>
+                                ) : null
+                            }
+                        </>
                     )
                 }
             </Container>

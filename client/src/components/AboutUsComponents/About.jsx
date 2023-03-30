@@ -22,6 +22,11 @@ const AboutUs = ()=>{
             maxWidth:"900px",
             margin:"auto",
             paddingY:"2em",
+        },
+        innerCont1:{
+            [theme.breakpoints.down('sm')]:{
+                flexDirection:"column-reverse"
+            }
         }
     }
     return (
@@ -29,7 +34,7 @@ const AboutUs = ()=>{
             <Container sx={styles.mainCont}>
                 <Alert/>
                 <Paper sx={styles.paper}>
-                    <Grid container spacing={2} justifyContent="center" alignItems="center">
+                    <Grid container spacing={2} sx={styles.innerCont1} justifyContent="center" alignItems="center">
                         <Grid item xs={12} sm={7}>
                             <Grid container spacing={2} sx={{padding:"2em"}}>
                                 <Grid item xs={12}>
@@ -37,7 +42,7 @@ const AboutUs = ()=>{
                                         Smart Parker
                                     </Typography>
                                 </Grid>
-                                <Grid item xs={12}>
+                                <Grid item xs={12} sx={{textAlign:"justify"}}>
                                     <Typography variant="h4" component="p" sx={{fontSize:"20px",color:"white"}}>
                                         Our application aims to provide parking facility for Light motor vehicles. Here, the users will be able to book a 
                                         parking slot according to their convenience. Also, the parking space owners will be able to generate revenue from it. 

@@ -1,13 +1,13 @@
 import AccessTimeIcon from "@mui/icons-material/AccessTime"
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import { Button, Card, CardActions, CardContent, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, ImageList, ImageListItem, Paper, Typography, useTheme } from "@mui/material"
+import { Button, Card, CardActions, CardContent, Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, ImageList, ImageListItem, Paper, Typography, useTheme } from "@mui/material"
 import { useMapEvents, MapContainer, Marker, Popup, TileLayer, Polyline, Polygon } from "react-leaflet"
 import { useEffect, useState } from "react"
 import L from 'leaflet'
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { asyncCancelParkingSlot, asynccheckoutRefund } from "../../state";
 
-const BookedSlotCardAdmin = ({ id, name, charges, refundAmount,startTime, endTime, vehicleType, bookerName, vehicleNo, cancellable, address, carImage,refunded }) => {
+const BookedSlotCardAdmin = ({ id, name,type, charges, refundAmount,startTime, endTime, vehicleType, bookerName, vehicleNo, cancellable, address, carImage,refunded }) => {
     const theme = useTheme()
     const styles = {
         dialog: {
@@ -16,6 +16,7 @@ const BookedSlotCardAdmin = ({ id, name, charges, refundAmount,startTime, endTim
     }
 
     const [open, setOpen] = useState(false)
+    const user = useSelector(state=>state.auth.user)
     const [open2, setOpen2] = useState(false)
     const [position, setPosition] = useState([19.2, 73.2])
     const [zoomLvl, setZoomLvl] = useState(13)
@@ -32,7 +33,7 @@ const BookedSlotCardAdmin = ({ id, name, charges, refundAmount,startTime, endTim
 
     const handlePayRefund = ()=>{
         console.log("Pay Refund",refundAmount)
-        dispatch(asynccheckoutRefund({amount:refundAmount,bookerName,vehicleType,name,startTime,endTime,id}))
+        dispatch(asynccheckoutRefund({amount:refundAmount,bookerName,vehicleType,name,startTime,endTime,id,emailID:user.email,charges,userName:user.firstName+" "+user.lastName}))
     }
 
     const redIcon = new L.Icon({
@@ -56,9 +57,15 @@ const BookedSlotCardAdmin = ({ id, name, charges, refundAmount,startTime, endTim
 
     return (
         <>
-            <Card sx={{ maxWidth: 320, minHeight: 300 }}>
+            <Card sx={{ maxWidth: 320, minHeight: 300,margin:"auto" }}>
                 <CardContent >
                     <Grid container spacing={2} alignItems="center" justifyContent="end" sx={{ padding: "0.3em" }}>
+                        {type?(
+                            <Grid item textAlign="end" xs={12}>
+                            <Chip label={`${type}`}/>
+                        </Grid>
+                        ):null}
+                        
                         {name ? (
                             <>
                                 <Grid item xs={2}>

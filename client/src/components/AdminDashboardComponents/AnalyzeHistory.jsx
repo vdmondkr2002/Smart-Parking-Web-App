@@ -1,4 +1,4 @@
-import { AppBar, Button, CircularProgress, Container, Dialog, FormControl, Grid, Grow, InputLabel, MenuItem, Paper, Select, Tab, Tabs, Typography, useTheme } from "@mui/material"
+import { AppBar, Button, Chip, CircularProgress, Container, Dialog, FormControl, Grid, Grow, InputLabel, MenuItem, Paper, Select, Tab, Tabs, Typography, useTheme } from "@mui/material"
 import { Box } from "@mui/system"
 import { useEffect, useState } from "react"
 import AccessTimeIcon from "@mui/icons-material/AccessTime"
@@ -27,7 +27,11 @@ const AnalyzeHistory = () => {
             padding: "2em",
         },
         slotsCont: {
-            padding: "1em"
+            marginTop: "1em",
+            [theme.breakpoints.up('sm')]: {
+                padding: "1em"
+            }
+
         }
     }
 
@@ -65,6 +69,7 @@ const AnalyzeHistory = () => {
     const [tabValueOuter, setTabValueOuter] = useState(0)
     const [tabValueSupInner, setTabValueSupInner] = useState(0)
     const [open, setOpen] = useState(false)
+    const [mobileView, setMobileView] = useState(false)
 
     useEffect(() => {
         dispatch(asyncgetUsersName())
@@ -91,14 +96,27 @@ const AnalyzeHistory = () => {
         console.log(inProgress1)
     }, [inProgress1])
 
-    useEffect(()=>{
+    useEffect(() => {
         setTabValueInner(0)
         setTabValueSupInner(0)
-    },[tabValueOuter])
+    }, [tabValueOuter])
+
+    useEffect(() => {
+        const setResponsiveness = () => {
+            return window.innerWidth < 600 && window.innerWidth > 100
+                ? setMobileView(true)
+                : setMobileView(false);
+        };
+        setResponsiveness();
+
+        window.addEventListener("resize", setResponsiveness);
+    }, []);
 
     const handleCloseDialog = () => {
         setOpen(false)
     }
+
+
 
     const handleChangeUser = (e) => {
         setUserName(e.target.value)
@@ -110,7 +128,7 @@ const AnalyzeHistory = () => {
     }
     const handleDeleteParkingLot = () => {
         console.log("deleting", parkingLotDetails._id)
-        dispatch(asyncDeleteParkingLot({id:parkingLotDetails._id}))
+        dispatch(asyncDeleteParkingLot({ id: parkingLotDetails._id }))
     }
 
     const handleRestartParkingLot = () => {
@@ -128,6 +146,10 @@ const AnalyzeHistory = () => {
     const handleChangeInnerTabs = (event, newValue) => {
         setTabValueInner(newValue);
     };
+
+    const handleChangeSelect = (e) => {
+        setTabValueInner(e.target.value)
+    }
 
     const handleChangeSupInnerTabs = (event, newValue) => {
         setTabValueSupInner(newValue)
@@ -153,7 +175,7 @@ const AnalyzeHistory = () => {
                 </AppBar>
                 <TabPanel value={tabValueOuter} index={0} dir={theme.direction}>
 
-                    <FormControl fullWidth>
+                    <FormControl sx={{ marginBottom: "1em" }} fullWidth>
                         <InputLabel id="demo-simple-select-label">Select a User</InputLabel>
                         <Select
                             labelId="demo-simple-select-label"
@@ -189,44 +211,49 @@ const AnalyzeHistory = () => {
                                             </Grid>
                                         </Grid>
                                     ) : (
-                                        <>
-                                            {
-                                                bookedTimeSlots.length > 0 ? (
-                                                    <>
-                                                        <AppBar position="static" color="default">
-                                                            <Tabs value={tabValueInner} onChange={handleChangeInnerTabs} indicatorColor="primary" textColor="primary"
-                                                                variant="fullWidth" aria-label="full width tabs">
-                                                                <Tab style={{ overflow: "visible" }} label="Active Bookings" {...a11yProps} />
-                                                                <Tab style={{ overflow: "visible" }} label="Past Bookings" {...a11yProps} />
-                                                                <Tab style={{ overflow: "visible" }} label="Cancelled Bookings" {...a11yProps} />
-                                                            </Tabs>
-                                                        </AppBar>
-                                                        <TabPanel value={tabValueInner} index={0} dir={theme.direction}>
+                                        mobileView ? (
+                                            <>
+                                                <FormControl sx={{ marginTop: "1em" }} fullWidth>
+                                                    <InputLabel id="demo-simple-select-label">Booking Type</InputLabel>
+                                                    <Select
+                                                        labelId="demo-simple-select-label"
+                                                        id="demo-simple-select"
+                                                        value={tabValueInner}
 
-                                                            <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
-                                                                {
-                                                                    bookedTimeSlots.length > 0 ? (
-                                                                        bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf() >= Date.now() && !slot.cancelled).map(slot => (
-                                                                            <Grid item xs={12} sm={4}>
-                                                                                <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} bookerName={null} name={slot.parkingLot.name} charges={slot.charges} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} carImage={slot.carImage} />
-                                                                            </Grid>
-                                                                        ))
-                                                                    ) : (
-                                                                        <Grid item>
-                                                                            <Typography variant="h4" fontWeight="bold">No Active Bookings </Typography>
+                                                        label="Booking Type"
+                                                        onChange={handleChangeSelect}
+                                                    >
+                                                        <MenuItem value={0}>Active Booking</MenuItem>
+                                                        <MenuItem value={1}>Past Bookings</MenuItem>
+                                                        <MenuItem value={2}>Cancelled Bookings</MenuItem>
+                                                    </Select>
+                                                </FormControl>
+                                                {
+                                                    tabValueInner === 0 ? (
+                                                        <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
+                                                            {
+                                                                bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf() >= Date.now() && !slot.cancelled).length > 0 ? (
+                                                                    bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf() >= Date.now() && !slot.cancelled).map(slot => (
+                                                                        <Grid item xs={12} sm={6} lg={4}>
+                                                                            <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} type={slot.parkingLot.type} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} bookerName={null} name={slot.parkingLot.name} charges={slot.charges} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} carImage={slot.carImage} />
                                                                         </Grid>
-                                                                    )
+                                                                    ))
+                                                                ) : (
+                                                                    <Grid item>
+                                                                        <Typography variant="h4" fontWeight="bold">No Active Bookings </Typography>
+                                                                    </Grid>
+                                                                )
 
-                                                                }
-                                                            </Grid>
-                                                        </TabPanel>
-                                                        <TabPanel value={tabValueInner} index={1} dir={theme.direction}>
+                                                            }
+                                                        </Grid>
+                                                    ) : (
+                                                        tabValueInner == 1 ? (
                                                             <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
                                                                 {
-                                                                    bookedTimeSlots.length > 0 ? (
-                                                                        bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf()< Date.now() && !slot.cancelled).map(slot => (
-                                                                            <Grid item xs={12} sm={4}>
-                                                                                <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} bookerName={null} name={slot.parkingLot.name} charges={slot.charges} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} carImage={slot.carImage} />
+                                                                    bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf() < Date.now() && !slot.cancelled).length > 0 ? (
+                                                                        bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf() < Date.now() && !slot.cancelled).map(slot => (
+                                                                            <Grid item xs={12} sm={6} lg={4}>
+                                                                                <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} type={slot.parkingLot.type} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} bookerName={null} name={slot.parkingLot.name} charges={slot.charges} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} carImage={slot.carImage} />
                                                                             </Grid>
                                                                         ))
                                                                     ) : (
@@ -236,70 +263,187 @@ const AnalyzeHistory = () => {
                                                                     )
                                                                 }
                                                             </Grid>
-                                                        </TabPanel>
-                                                        <TabPanel value={tabValueInner} index={2} dir={theme.direction}>
-                                                            {/*  */}
-                                                            {
-                                                                bookedTimeSlots.length > 0 ? (
-                                                                    <>
-                                                                        <AppBar position="static" color="default">
-                                                                            <Tabs value={tabValueSupInner} onChange={handleChangeSupInnerTabs} indicatorColor="primary" textColor="primary"
-                                                                                variant="fullWidth" aria-label="full width tabs">
-                                                                                <Tab style={{ overflow: "visible" }} label="Admin Cancelled" {...a11yProps} />
-                                                                                <Tab style={{ overflow: "visible" }} label="User Cancelled" {...a11yProps} />
-                                                                            </Tabs>
-                                                                        </AppBar>
-                                                                        <TabPanel value={tabValueSupInner} index={0} dir={theme.direction} >
-                                                                            <Grid container spacing={3} justifyContent="center">
-                                                                                {
+                                                        ) : (
 
+                                                            bookedTimeSlots.filter(slot => slot.cancelled).length > 0 ? (
+                                                                <>
+                                                                    <AppBar position="static" color="default">
+                                                                        <Tabs value={tabValueSupInner} onChange={handleChangeSupInnerTabs} indicatorColor="primary" textColor="primary"
+                                                                            variant="fullWidth" aria-label="full width tabs">
+                                                                            <Tab style={{ overflow: "visible" }} label="Admin Cancelled" {...a11yProps} />
+                                                                            <Tab style={{ overflow: "visible" }} label="User Cancelled" {...a11yProps} />
+                                                                        </Tabs>
+                                                                    </AppBar>
+                                                                    <TabPanel value={tabValueSupInner} index={0} dir={theme.direction} >
+                                                                        <Grid container spacing={3} justifyContent="center">
+                                                                            {
+                                                                                bookedTimeSlots.filter(slot => slot.cancelled && slot.adminCancelled).length == 0 ? (
+                                                                                    <Grid item>
+
+                                                                                        <Typography variant="h4" fontWeight="bold">No Admin Cancelled Bookings </Typography>
+                                                                                    </Grid>
+                                                                                ) : (
                                                                                     bookedTimeSlots.filter(slot => slot.cancelled && slot.adminCancelled).map(slot => (
-                                                                                        <Grid item xs={12} sm={4}>
-                                                                                            <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} bookerName={null} name={slot.parkingLot.name} charges={slot.charges} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} carImage={slot.carImage} />
+                                                                                        <Grid item xs={12} sm={6} lg={4}>
+                                                                                            <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} type={slot.parkingLot.type} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} bookerName={null} name={slot.parkingLot.name} charges={slot.charges} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} carImage={slot.carImage} />
                                                                                         </Grid>
-                                                                                    ))
+                                                                                    )))
 
-                                                                                }
-                                                                            </Grid>
-                                                                        </TabPanel>
-                                                                        <TabPanel value={tabValueSupInner} index={1} dir={theme.direction} >
-                                                                            <Grid container spacing={3} justifyContent="center">
-                                                                                {
+                                                                            }
+                                                                        </Grid>
+                                                                    </TabPanel>
+                                                                    <TabPanel value={tabValueSupInner} index={1} dir={theme.direction} >
+                                                                        <Grid container spacing={3} justifyContent="center">
+                                                                            {
+                                                                                bookedTimeSlots.filter(slot => slot.cancelled && !slot.adminCancelled).length == 0 ? (
+                                                                                    <Grid item>
 
+                                                                                        <Typography variant="h4" fontWeight="bold">No Self Cancelled Bookings </Typography>
+                                                                                    </Grid>
+                                                                                ) : (
 
                                                                                     bookedTimeSlots.filter(slot => slot.cancelled && !slot.adminCancelled).map(slot => (
-                                                                                        <Grid item xs={12} sm={4}>
-                                                                                            <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} bookerName={null} name={slot.parkingLot.name} charges={slot.charges} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} carImage={slot.carImage} />
+                                                                                        <Grid item xs={12} sm={6} lg={4}>
+                                                                                            <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} type={slot.parkingLot.type} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} bookerName={null} name={slot.parkingLot.name} charges={slot.charges} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} carImage={slot.carImage} />
                                                                                         </Grid>
                                                                                     ))
-
-                                                                                }
-                                                                            </Grid>
-                                                                        </TabPanel>
-                                                                    </>
-                                                                ) : (
-                                                                    <Grid container sx={styles.slotsCont} justifyContent="center">
-                                                                        <Grid item>
-                                                                            <Typography variant="h4" fontWeight="bold">No Cancelled Bookings </Typography>
+                                                                                )
+                                                                            }
                                                                         </Grid>
+                                                                    </TabPanel>
+                                                                </>
+                                                            ) : (
+                                                                <Grid container sx={styles.slotsCont} justifyContent="center">
+                                                                    <Grid item>
+                                                                        <Typography variant="h4" fontWeight="bold">No Cancelled Bookings </Typography>
+                                                                    </Grid>
+                                                                </Grid>
+                                                            )
+
+                                                        )
+                                                    )
+                                                }
+                                            </>
+                                        ) : (
+                                            bookedTimeSlots.length > 0 ? (
+                                                <>
+                                                    <AppBar position="static" color="default">
+                                                        <Tabs value={tabValueInner} onChange={handleChangeInnerTabs} indicatorColor="primary" textColor="primary"
+                                                            variant="fullWidth" aria-label="full width tabs">
+                                                            <Tab style={{ overflow: "visible" }} label="Active Bookings" {...a11yProps} />
+                                                            <Tab style={{ overflow: "visible" }} label="Past Bookings" {...a11yProps} />
+                                                            <Tab style={{ overflow: "visible" }} label="Cancelled Bookings" {...a11yProps} />
+                                                        </Tabs>
+                                                    </AppBar>
+                                                    <TabPanel value={tabValueInner} index={0} dir={theme.direction}>
+
+                                                        <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
+                                                            {
+                                                                bookedTimeSlots.length > 0 ? (
+                                                                    bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf() >= Date.now() && !slot.cancelled).map(slot => (
+                                                                        <Grid item xs={12} sm={6} lg={4}>
+                                                                            <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} type={slot.parkingLot.type} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} bookerName={null} name={slot.parkingLot.name} charges={slot.charges} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} carImage={slot.carImage} />
+                                                                        </Grid>
+                                                                    ))
+                                                                ) : (
+                                                                    <Grid item>
+                                                                        <Typography variant="h4" fontWeight="bold">No Active Bookings </Typography>
+                                                                    </Grid>
+                                                                )
+
+                                                            }
+                                                        </Grid>
+                                                    </TabPanel>
+                                                    <TabPanel value={tabValueInner} index={1} dir={theme.direction}>
+                                                        <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
+                                                            {
+                                                                bookedTimeSlots.length > 0 ? (
+                                                                    bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf() < Date.now() && !slot.cancelled).map(slot => (
+                                                                        <Grid item xs={12} sm={6} lg={4}>
+                                                                            <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} type={slot.parkingLot.type} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} bookerName={null} name={slot.parkingLot.name} charges={slot.charges} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} carImage={slot.carImage} />
+                                                                        </Grid>
+                                                                    ))
+                                                                ) : (
+                                                                    <Grid item>
+                                                                        <Typography variant="h4" fontWeight="bold">No Past Bookings </Typography>
                                                                     </Grid>
                                                                 )
                                                             }
-                                                            {/* </Grid> */}
-                                                        </TabPanel>
-                                                    </>
-                                                ) : (
-                                                    <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
-                                                        <Grid item>
-
-                                                            <Typography variant="h4" fontWeight="bold">No Slots Booked Till Now</Typography>
                                                         </Grid>
+                                                    </TabPanel>
+                                                    <TabPanel value={tabValueInner} index={2} dir={theme.direction}>
+                                                        {/*  */}
+                                                        {
+                                                            bookedTimeSlots.filter(slot => slot.cancelled).length > 0 ? (
+                                                                <>
+                                                                    <AppBar position="static" color="default">
+                                                                        <Tabs value={tabValueSupInner} onChange={handleChangeSupInnerTabs} indicatorColor="primary" textColor="primary"
+                                                                            variant="fullWidth" aria-label="full width tabs">
+                                                                            <Tab style={{ overflow: "visible" }} label="Admin Cancelled" {...a11yProps} />
+                                                                            <Tab style={{ overflow: "visible" }} label="User Cancelled" {...a11yProps} />
+                                                                        </Tabs>
+                                                                    </AppBar>
+                                                                    <TabPanel value={tabValueSupInner} index={0} dir={theme.direction} >
+                                                                        <Grid container spacing={3} justifyContent="center">
+                                                                            {
+                                                                                bookedTimeSlots.filter(slot => slot.cancelled && slot.adminCancelled).length == 0 ? (
+                                                                                    <Grid item>
+
+                                                                                        <Typography variant="h4" fontWeight="bold">No Admin Cancelled Bookings </Typography>
+                                                                                    </Grid>
+                                                                                ) : (
+                                                                                    bookedTimeSlots.filter(slot => slot.cancelled && slot.adminCancelled).map(slot => (
+                                                                                        <Grid item xs={12} sm={6} lg={4}>
+                                                                                            <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} type={slot.parkingLot.type} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} bookerName={null} name={slot.parkingLot.name} charges={slot.charges} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} carImage={slot.carImage} />
+                                                                                        </Grid>
+                                                                                    ))
+                                                                                )
+                                                                            }
+                                                                        </Grid>
+                                                                    </TabPanel>
+                                                                    <TabPanel value={tabValueSupInner} index={1} dir={theme.direction} >
+                                                                        <Grid container spacing={3} justifyContent="center">
+                                                                            {
+
+                                                                                bookedTimeSlots.filter(slot => slot.cancelled && !slot.adminCancelled).length == 0 ? (
+                                                                                    <Grid item>
+
+                                                                                        <Typography variant="h4" fontWeight="bold">No Self Cancelled Bookings </Typography>
+                                                                                    </Grid>
+                                                                                ) : (
+                                                                                    bookedTimeSlots.filter(slot => slot.cancelled && !slot.adminCancelled).map(slot => (
+                                                                                        <Grid item xs={12} sm={6} lg={4}>
+                                                                                            <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} type={slot.parkingLot.type} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} bookerName={null} name={slot.parkingLot.name} charges={slot.charges} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} carImage={slot.carImage} />
+                                                                                        </Grid>
+                                                                                    ))
+                                                                                )
+                                                                            }
+                                                                        </Grid>
+                                                                    </TabPanel>
+                                                                </>
+                                                            ) : (
+                                                                <Grid container sx={styles.slotsCont} justifyContent="center">
+                                                                    <Grid item>
+                                                                        <Typography variant="h4" fontWeight="bold">No Cancelled Bookings </Typography>
+                                                                    </Grid>
+                                                                </Grid>
+                                                            )
+                                                        }
+                                                        {/* </Grid> */}
+                                                    </TabPanel>
+                                                </>
+                                            ) : (
+                                                <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
+                                                    <Grid item>
+
+                                                        <Typography variant="h4" fontWeight="bold">No Slots Booked Till Now</Typography>
                                                     </Grid>
-                                                )
-                                            }
-                                        </>
+                                                </Grid>
+                                            )
+                                        )
                                     )
                                 }
+
                             </>
                         )
                     }
@@ -368,53 +512,58 @@ const AnalyzeHistory = () => {
                                                 parkingLotDetails.name ? (
                                                     <Paper sx={{ backgroundColor: theme.palette.primary.dark, padding: "1em", marginTop: "1em", borderRadius: "10px", color: "white" }}>
                                                         <Grid container spacing={1} justifyContent="center" alignItems="center">
-                                                            <Grid item sm={6}>
+                                                            <Grid item xs={12} sx={{ textAlign: "center" }}>
+                                                                <Paper sx={{ backgroundColor: theme.palette.secondary.dark, padding: "0.5em", width: 'fit-content', margin: "auto" }} color="secondary">
+                                                                    {parkingLotDetails.type.toUpperCase()}
+                                                                </Paper>
+                                                            </Grid>
+                                                            <Grid item xs={12} sm={6} sx={{ textAlign: "center" }}>
                                                                 <LocationOn sx={{ display: "inline", marginX: "5px" }} fontSize="large" />
                                                                 <Typography sx={{ display: "inline" }} variant="h5" component="p">{parkingLotDetails.address}</Typography>
                                                             </Grid>
-                                                            <Grid item sm={2}>
+                                                            <Grid item xs={12} sm={3} sx={{ textAlign: "center" }}>
                                                                 <DirectionsCarIcon sx={{ display: "inline", marginX: "5px" }} fontSize="large" />
                                                                 <Typography sx={{ display: "inline", fontWeight: "bold" }} variant="h5" component="p" >Car slots:</Typography>
                                                                 <Typography sx={{ display: "inline" }} variant="h5" component="p">{parkingLotDetails.noOfCarSlots}</Typography>
                                                             </Grid>
-                                                            <Grid item sm={2}>
+                                                            <Grid item xs={12} sm={3} sx={{ textAlign: "center" }}>
                                                                 <TwoWheelerIcon sx={{ display: "inline", marginX: "10px" }} fontSize="large" />
                                                                 <Typography sx={{ display: "inline", fontWeight: "bold" }} variant="h5" component="p" >Bike slots:</Typography>
                                                                 <Typography sx={{ display: "inline" }} variant="h5" component="p">{parkingLotDetails.noOfBikeSlots}</Typography>
                                                             </Grid>
-                                                            <Grid item>
+                                                            <Grid item xs={12} sm={6} sx={{ textAlign: "center" }}>
                                                                 <CurrencyRupeeIcon sx={{ display: "inline", marginX: "10px" }} fontSize="large" />
                                                                 <Typography sx={{ display: "inline", fontWeight: "bold" }} variant="h5" component="p" >Bike Parking Charges:</Typography>
                                                                 <Typography sx={{ display: "inline" }} variant="h5" component="p">{parkingLotDetails.parkingChargesBike}</Typography>
                                                             </Grid>
-                                                            <Grid item >
+                                                            <Grid item xs={12} sm={6} sx={{ textAlign: "center" }}>
                                                                 <CurrencyRupeeIcon sx={{ display: "inline", marginX: "10px" }} fontSize="large" />
                                                                 <Typography sx={{ display: "inline", fontWeight: "bold" }} variant="h5" component="p" >Car Parking Charges:</Typography>
                                                                 <Typography sx={{ display: "inline" }} variant="h5" component="p">{parkingLotDetails.parkingChargesCar}</Typography>
                                                             </Grid>
-                                                            <Grid item >
+                                                            <Grid item xs={12} sx={{ textAlign: "center" }}>
                                                                 <AccessTimeIcon sx={{ display: "inline", marginX: "10px" }} fontSize="large" />
                                                                 <Typography sx={{ display: "inline", fontWeight: "bold" }} variant="h5" component="p" >Open Between :</Typography>
                                                                 <Typography sx={{ display: "inline" }} variant="h5" component="p">{parkingLotDetails.openTime % 12 || 12}{parkingLotDetails.openTime < 12 ? " AM" : " PM"} - {parkingLotDetails.closeTime % 12 || 12}{parkingLotDetails.closeTime < 12 ? " AM" : " PM"}</Typography>
                                                             </Grid>
                                                             <Grid item xs={12}></Grid>
-                                                            <Grid item xs={6} sx={{ textAlign: "center" }}>
+                                                            <Grid item sm={6} xs={12} sx={{ textAlign: "center" }}>
                                                                 <Button variant="contained" color="secondary" onClick={() => setOpen(true)} >View On Map</Button>
                                                             </Grid>
-                                                            <Grid item xs={6} sx={{ textAlign: "center" }}>
+                                                            <Grid item sm={6} xs={12} sx={{ textAlign: "center" }}>
                                                                 {
                                                                     parkingLotDetails.isActive ? (
                                                                         inProgress2 ? (
-                                                                            <Button variant="contained" color="success" startIcon={<CircularProgress size={20} color="warning" />}>Mark This Parking Lot as Inactive</Button>
+                                                                            <Button variant="contained" color="success" startIcon={<CircularProgress size={20} color="warning" />}>Mark as Inactive</Button>
                                                                         ) : (
-                                                                            <Button variant="contained" color="warning" onClick={handleDeleteParkingLot} >Mark This Parking Lot as Inactive</Button>
+                                                                            <Button variant="contained" color="warning" onClick={handleDeleteParkingLot} >Mark as Inactive</Button>
                                                                         )
 
                                                                     ) : (
                                                                         inProgress2 ? (
-                                                                            <Button variant="contained" color="warning" startIcon={<CircularProgress size={20} color="success" />}>Mark Parking Lot Active Again</Button>
+                                                                            <Button variant="contained" color="warning" startIcon={<CircularProgress size={20} color="success" />}>Mark Active Again</Button>
                                                                         ) : (
-                                                                            <Button variant="contained" color="success" onClick={handleRestartParkingLot} >Mark Parking Lot Active Again</Button>
+                                                                            <Button variant="contained" color="success" onClick={handleRestartParkingLot} >Make Active Again</Button>
                                                                         )
 
                                                                     )
@@ -427,121 +576,251 @@ const AnalyzeHistory = () => {
                                                 ) : null
                                             }
                                             {
-                                                bookedTimeSlots.length > 0 ? (
+                                                mobileView ? (
                                                     <>
-                                                        <AppBar position="static" color="default">
-                                                            <Tabs value={tabValueInner} onChange={handleChangeInnerTabs} indicatorColor="primary" textColor="primary"
-                                                                variant="fullWidth" aria-label="full width tabs">
-                                                                <Tab style={{ overflow: "visible" }} label="Active Bookings" {...a11yProps} />
-                                                                <Tab style={{ overflow: "visible" }} label="Past Bookings" {...a11yProps} />
-                                                                <Tab style={{ overflow: "visible" }} label="Cancelled Bookings" {...a11yProps} />
-                                                            </Tabs>
-                                                        </AppBar>
-                                                        <TabPanel value={tabValueInner} index={0} dir={theme.direction}>
-                                                            <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
+                                                        <FormControl sx={{ marginTop: "1em" }} fullWidth>
+                                                            <InputLabel id="demo-simple-select-label">Booking Type</InputLabel>
+                                                            <Select
+                                                                labelId="demo-simple-select-label"
+                                                                id="demo-simple-select"
+                                                                value={tabValueInner}
 
-                                                                {
-                                                                    bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf()>= Date.now() && !slot.cancelled).length > 0 ? (
-                                                                        bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf()>= Date.now() && !slot.cancelled).map(slot => (
-                                                                            <Grid item xs={12} sm={4}>
-                                                                                <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} endTime={dayjs(slot.endTime)} vehicleType={slot.vehicleType} name={null} bookerName={slot.booker.name} vehicleNo={slot.vehicleNo} charges={slot.charges} carImage={slot.carImage} />
+                                                                label="Booking Type"
+                                                                onChange={handleChangeSelect}
+                                                            >
+                                                                <MenuItem value={0}>Active Booking</MenuItem>
+                                                                <MenuItem value={1}>Past Bookings</MenuItem>
+                                                                <MenuItem value={2}>Cancelled Bookings</MenuItem>
+                                                            </Select>
+                                                        </FormControl>
+                                                        {
+                                                            tabValueInner === 0 ? (
+                                                                <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
+                                                                    {
+                                                                        bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf() >= Date.now() && !slot.cancelled).length > 0 ? (
+                                                                            bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf() >= Date.now() && !slot.cancelled).map(slot => (
+                                                                                <Grid item xs={12} sm={6} lg={4}>
+                                                                                    <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} bookerName={slot.booker.name} name={slot.parkingLot.name} charges={slot.charges} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} carImage={slot.carImage} />
+                                                                                </Grid>
+                                                                            ))
+                                                                        ) : (
+                                                                            <Grid item>
+                                                                                <Typography variant="h4" fontWeight="bold">No Active Bookings </Typography>
                                                                             </Grid>
+                                                                        )
 
-                                                                        ))
-                                                                    ) : (
-
-                                                                        <Grid item>
-                                                                            <Typography variant="h4" fontWeight="bold">No Active Bookings </Typography>
-                                                                        </Grid>
-
-                                                                    )
-                                                                }
-                                                            </Grid>
-                                                        </TabPanel>
-                                                        <TabPanel value={tabValueInner} index={1} dir={theme.direction}>
-                                                            <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
-
-                                                                {
-                                                                    bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf()< Date.now() && !slot.cancelled).length > 0 ? (
-                                                                        bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf()< Date.now() && !slot.cancelled).map(slot => (
-                                                                            <Grid item xs={12} sm={4}>
-                                                                                <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} endTime={dayjs(slot.endTime)} vehicleType={slot.vehicleType} name={null} bookerName={slot.booker.name} vehicleNo={slot.vehicleNo} charges={slot.charges} carImage={slot.carImage} />
-                                                                            </Grid>
-
-                                                                        ))
-                                                                    ) : (
-                                                                        <Grid item>
-
-                                                                            <Typography variant="h4" fontWeight="bold">No Past Bookings </Typography>
-                                                                        </Grid>
-                                                                    )
-                                                                }
-                                                            </Grid>
-                                                        </TabPanel>
-                                                        <TabPanel value={tabValueInner} index={2} dir={theme.direction}>
-                                                            {
-                                                                bookedTimeSlots.filter(slot => slot.cancelled ? true : false).length > 0 ? (
-                                                                    <>
-                                                                        <AppBar position="static" color="default">
-                                                                            <Tabs value={tabValueSupInner} onChange={handleChangeSupInnerTabs} indicatorColor="primary" textColor="primary"
-                                                                                variant="fullWidth" aria-label="full width tabs">
-                                                                                <Tab style={{ overflow: "visible" }} label="Admin Cancelled" {...a11yProps} />
-                                                                                <Tab style={{ overflow: "visible" }} label="User Cancelled" {...a11yProps} />
-                                                                            </Tabs>
-                                                                        </AppBar>
-                                                                        <TabPanel value={tabValueSupInner} index={0} dir={theme.direction} >
-                                                                            <Grid container spacing={3} justifyContent="center">
-                                                                                {
-
-                                                                                    bookedTimeSlots.filter(slot => slot.cancelled && slot.adminCancelled ? true : false).map(slot => (
-                                                                                        <Grid item xs={12} sm={4}>
-                                                                                            <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} endTime={dayjs(slot.endTime)} vehicleType={slot.vehicleType} name={null} bookerName={slot.booker.name} vehicleNo={slot.vehicleNo} charges={slot.charges} carImage={slot.carImage} />
-                                                                                        </Grid>
-
-                                                                                    ))
-
-                                                                                }
-                                                                            </Grid>
-                                                                        </TabPanel>
-                                                                        <TabPanel value={tabValueSupInner} index={1} dir={theme.direction} >
-                                                                            <Grid container spacing={3} justifyContent="center">
-                                                                                {
-
-
-                                                                                    bookedTimeSlots.filter(slot => slot.cancelled && !slot.adminCancelled ? true : false).map(slot => (
-                                                                                        <Grid item xs={12} sm={4}>
-                                                                                            <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} endTime={dayjs(slot.endTime)} vehicleType={slot.vehicleType} name={null} bookerName={slot.booker.name} vehicleNo={slot.vehicleNo} charges={slot.charges} carImage={slot.carImage} />
-                                                                                        </Grid>
-
-                                                                                    ))
-
-                                                                                }
-                                                                            </Grid>
-                                                                        </TabPanel>
-                                                                    </>
-
-                                                                ) : (
+                                                                    }
+                                                                </Grid>
+                                                            ) : (
+                                                                tabValueInner == 1 ? (
                                                                     <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
-                                                                        <Grid item>
-
-                                                                            <Typography variant="h4" fontWeight="bold">No Cancelled Bookings </Typography>
-                                                                        </Grid>
+                                                                        {
+                                                                            bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf() < Date.now() && !slot.cancelled).length > 0 ? (
+                                                                                bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf() < Date.now() && !slot.cancelled).map(slot => (
+                                                                                    <Grid item xs={12} sm={6} lg={4}>
+                                                                                        <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} bookerName={slot.booker.name} name={slot.parkingLot.name} charges={slot.charges} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} carImage={slot.carImage} />
+                                                                                    </Grid>
+                                                                                ))
+                                                                            ) : (
+                                                                                <Grid item>
+                                                                                    <Typography variant="h4" fontWeight="bold">No Past Bookings </Typography>
+                                                                                </Grid>
+                                                                            )
+                                                                        }
                                                                     </Grid>
+                                                                ) : (
+
+                                                                    bookedTimeSlots.filter(slot => slot.cancelled).length > 0 ? (
+                                                                        <>
+                                                                            <AppBar position="static" color="default">
+                                                                                <Tabs value={tabValueSupInner} onChange={handleChangeSupInnerTabs} indicatorColor="primary" textColor="primary"
+                                                                                    variant="fullWidth" aria-label="full width tabs">
+                                                                                    <Tab style={{ overflow: "visible" }} label="Admin Cancelled" {...a11yProps} />
+                                                                                    <Tab style={{ overflow: "visible" }} label="User Cancelled" {...a11yProps} />
+                                                                                </Tabs>
+                                                                            </AppBar>
+                                                                            <TabPanel value={tabValueSupInner} index={0} dir={theme.direction} >
+                                                                                <Grid container spacing={3} justifyContent="center">
+                                                                                    {
+                                                                                        bookedTimeSlots.filter(slot => slot.cancelled && slot.adminCancelled).length == 0 ? (
+                                                                                            <Grid item>
+
+                                                                                                <Typography variant="h4" fontWeight="bold">No Admin Cancelled Bookings </Typography>
+                                                                                            </Grid>
+                                                                                        ) : (
+                                                                                            bookedTimeSlots.filter(slot => slot.cancelled && slot.adminCancelled).map(slot => (
+                                                                                                <Grid item xs={12} sm={6} lg={4}>
+                                                                                                    <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} bookerName={slot.booker.name} name={slot.parkingLot.name} charges={slot.charges} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} carImage={slot.carImage} />
+                                                                                                </Grid>
+                                                                                            ))
+                                                                                        )
+                                                                                    }
+                                                                                </Grid>
+                                                                            </TabPanel>
+                                                                            <TabPanel value={tabValueSupInner} index={1} dir={theme.direction} >
+                                                                                <Grid container spacing={3} justifyContent="center">
+                                                                                    {
+                                                                                        bookedTimeSlots.filter(slot => slot.cancelled && !slot.adminCancelled).length == 0 ? (
+                                                                                            <Grid item>
+
+                                                                                                <Typography variant="h4" fontWeight="bold">No Self Cancelled Bookings </Typography>
+                                                                                            </Grid>
+                                                                                        ) : (
+
+                                                                                            bookedTimeSlots.filter(slot => slot.cancelled && !slot.adminCancelled).map(slot => (
+                                                                                                <Grid item xs={12} sm={6} lg={4}>
+                                                                                                    <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} bookerName={slot.booker.name} name={slot.parkingLot.name} charges={slot.charges} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} carImage={slot.carImage} />
+                                                                                                </Grid>
+                                                                                            ))
+                                                                                        )
+                                                                                    }
+                                                                                </Grid>
+                                                                            </TabPanel>
+                                                                        </>
+                                                                    ) : (
+                                                                        <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
+                                                                            <Grid item>
+                                                                                <Typography variant="h4" fontWeight="bold">
+                                                                                    No Cancelled Bookings
+                                                                                </Typography>
+                                                                            </Grid>
+                                                                        </Grid>
+                                                                    )
+
                                                                 )
-                                                            }
-                                                        </TabPanel>
-
-
-
+                                                            )
+                                                        }
                                                     </>
                                                 ) : (
-                                                    <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
-                                                        <Grid item>
+                                                    bookedTimeSlots.length > 0 ? (
+                                                        <>
+                                                            <AppBar position="static" color="default">
+                                                                <Tabs value={tabValueInner} onChange={handleChangeInnerTabs} indicatorColor="primary" textColor="primary"
+                                                                    variant="fullWidth" aria-label="full width tabs">
+                                                                    <Tab style={{ overflow: "visible" }} label="Active Bookings" {...a11yProps} />
+                                                                    <Tab style={{ overflow: "visible" }} label="Past Bookings" {...a11yProps} />
+                                                                    <Tab style={{ overflow: "visible" }} label="Cancelled Bookings" {...a11yProps} />
+                                                                </Tabs>
+                                                            </AppBar>
+                                                            <TabPanel value={tabValueInner} index={0} dir={theme.direction}>
+                                                                <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
 
-                                                            <Typography variant="h4" fontWeight="bold">No Slots Booked Till Now</Typography>
+                                                                    {
+                                                                        bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf() >= Date.now() && !slot.cancelled).length > 0 ? (
+                                                                            bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf() >= Date.now() && !slot.cancelled).map(slot => (
+                                                                                <Grid item xs={12} sm={6} lg={4}>
+                                                                                    <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} endTime={dayjs(slot.endTime)} vehicleType={slot.vehicleType} name={null} bookerName={slot.booker.name} vehicleNo={slot.vehicleNo} charges={slot.charges} carImage={slot.carImage} />
+                                                                                </Grid>
+
+                                                                            ))
+                                                                        ) : (
+
+                                                                            <Grid item>
+                                                                                <Typography variant="h4" fontWeight="bold">No Active Bookings </Typography>
+                                                                            </Grid>
+
+                                                                        )
+                                                                    }
+                                                                </Grid>
+                                                            </TabPanel>
+                                                            <TabPanel value={tabValueInner} index={1} dir={theme.direction}>
+                                                                <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
+
+                                                                    {
+                                                                        bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf() < Date.now() && !slot.cancelled).length > 0 ? (
+                                                                            bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf() < Date.now() && !slot.cancelled).map(slot => (
+                                                                                <Grid item xs={12} sm={6} lg={4}>
+                                                                                    <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} endTime={dayjs(slot.endTime)} vehicleType={slot.vehicleType} name={null} bookerName={slot.booker.name} vehicleNo={slot.vehicleNo} charges={slot.charges} carImage={slot.carImage} />
+                                                                                </Grid>
+
+                                                                            ))
+                                                                        ) : (
+                                                                            <Grid item>
+
+                                                                                <Typography variant="h4" fontWeight="bold">No Past Bookings </Typography>
+                                                                            </Grid>
+                                                                        )
+                                                                    }
+                                                                </Grid>
+                                                            </TabPanel>
+                                                            <TabPanel value={tabValueInner} index={2} dir={theme.direction}>
+                                                                {
+                                                                    bookedTimeSlots.filter(slot => slot.cancelled).length > 0 ? (
+                                                                        <>
+                                                                            <AppBar position="static" color="default">
+                                                                                <Tabs value={tabValueSupInner} onChange={handleChangeSupInnerTabs} indicatorColor="primary" textColor="primary"
+                                                                                    variant="fullWidth" aria-label="full width tabs">
+                                                                                    <Tab style={{ overflow: "visible" }} label="Admin Cancelled" {...a11yProps} />
+                                                                                    <Tab style={{ overflow: "visible" }} label="User Cancelled" {...a11yProps} />
+                                                                                </Tabs>
+                                                                            </AppBar>
+                                                                            <TabPanel value={tabValueSupInner} index={0} dir={theme.direction} >
+                                                                                <Grid container spacing={3} justifyContent="center">
+                                                                                    {
+                                                                                        bookedTimeSlots.filter(slot => slot.cancelled && slot.adminCancelled).length == 0 ? (
+                                                                                            <Grid item>
+
+                                                                                                <Typography variant="h4" fontWeight="bold">No Admin Cancelled Bookings </Typography>
+                                                                                            </Grid>
+                                                                                        ) : (
+                                                                                            bookedTimeSlots.filter(slot => slot.cancelled && slot.adminCancelled).map(slot => (
+                                                                                                <Grid item xs={12} sm={6} lg={4}>
+                                                                                                    <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} endTime={dayjs(slot.endTime)} vehicleType={slot.vehicleType} name={null} bookerName={slot.booker.name} vehicleNo={slot.vehicleNo} charges={slot.charges} carImage={slot.carImage} />
+                                                                                                </Grid>
+
+                                                                                            ))
+                                                                                        )
+
+
+                                                                                    }
+                                                                                </Grid>
+                                                                            </TabPanel>
+                                                                            <TabPanel value={tabValueSupInner} index={1} dir={theme.direction} >
+                                                                                <Grid container spacing={3} justifyContent="center">
+                                                                                    {
+                                                                                        bookedTimeSlots.filter(slot => slot.cancelled && !slot.adminCancelled).length == 0 ? (
+                                                                                            <Grid item>
+
+                                                                                                <Typography variant="h4" fontWeight="bold">No Self Cancelled Bookings </Typography>
+                                                                                            </Grid>
+                                                                                        ) : (
+
+                                                                                            bookedTimeSlots.filter(slot => slot.cancelled && !slot.adminCancelled).map(slot => (
+                                                                                                <Grid item xs={12} sm={6} lg={4}>
+                                                                                                    <BookedSlotCardAdmin startTime={dayjs(slot.startTime)} endTime={dayjs(slot.endTime)} vehicleType={slot.vehicleType} name={null} bookerName={slot.booker.name} vehicleNo={slot.vehicleNo} charges={slot.charges} carImage={slot.carImage} />
+                                                                                                </Grid>
+
+                                                                                            ))
+                                                                                        )
+                                                                                    }
+                                                                                </Grid>
+                                                                            </TabPanel>
+                                                                        </>
+
+                                                                    ) : (
+                                                                        <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
+                                                                            <Grid item>
+
+                                                                                <Typography variant="h4" fontWeight="bold">No Cancelled Bookings </Typography>
+                                                                            </Grid>
+                                                                        </Grid>
+                                                                    )
+                                                                }
+                                                            </TabPanel>
+
+
+
+                                                        </>
+                                                    ) : (
+                                                        <Grid container sx={styles.slotsCont} spacing={3} justifyContent="center">
+                                                            <Grid item>
+
+                                                                <Typography variant="h4" fontWeight="bold">No Slots Booked Till Now</Typography>
+                                                            </Grid>
                                                         </Grid>
-                                                    </Grid>
+                                                    )
                                                 )
+
                                             }
                                         </>
                                     )

@@ -10,9 +10,7 @@ const sendEmail2 = require('../Utils/sendEmail2')
 //query to craete an admin not accessible from frontend
 //but one can query using postman to create a new admin
 exports.createAdmin = async (req, res) => {
-    // const salt = await bcrypt.genSalt(10)
     const hashedPassword = passwordHash.generate('admin123')
-    // const hashedPassword = await bcrypt.hash('admin123', salt)
     const newUser = await User.create({
         email: 'smartparking678@gmail.com', password: hashedPassword,
         firstName: 'Smart', lastName: 'Parker',
@@ -96,20 +94,20 @@ exports.getUserHistory = async (req, res) => {
         var parkingLotMap= {}
         for(let lot of parkingLots){
             parkingLotMap[lot._id]={_id:lot._id,name:lot.name,address:lot.address,location:lot.location.coordinates,
-                                    parkingChargesBike:lot.parkingChargesBike,parkingChargesCar:lot.parkingChargesCar}
+                                    parkingChargesBike:lot.parkingChargesBike,parkingChargesCar:lot.parkingChargesCar,type:lot.type}
         }
 
 
         bookedTimeSlots = bookedTimeSlots.map(timeSlot => {
             if (timeSlot.vehicleType === "Bike") {
                 //calculate charges
-                const charges = ((timeSlot.endTime - timeSlot.startTime) / (1000 * 60 * 60)) * parkingLotMap[timeSlot.parkingLot].parkingChargesBike
+                const charges = parkingLotMap[timeSlot.parkingLot].type==="public"?0:((timeSlot.endTime - timeSlot.startTime) / (1000 * 60 * 60)) * parkingLotMap[timeSlot.parkingLot].parkingChargesBike
                 //pas startTime and endTime as formatted strings
                 //put details of parkingLot instead of just its ID
                 return { ...timeSlot._doc, parkingLot: parkingLotMap[timeSlot.parkingLot],startTime:dayjs(timeSlot.startTime).format('YYYY-MM-DD HH:00'),endTime:dayjs(timeSlot.endTime).format('YYYY-MM-DD HH:00'), charges: charges }
             } else {
                 //calculate charges
-                const charges = ((timeSlot.endTime - timeSlot.startTime) / (1000 * 60 * 60)) * parkingLotMap[timeSlot.parkingLot].parkingChargesCar
+                const charges = parkingLotMap[timeSlot.parkingLot].type==="public"?0:((timeSlot.endTime - timeSlot.startTime) / (1000 * 60 * 60)) * parkingLotMap[timeSlot.parkingLot].parkingChargesCar
                 //pas startTime and endTime as formatted strings
                 //put details of parkingLot instead of just its ID
                 return { ...timeSlot._doc, parkingLot: parkingLotMap[timeSlot.parkingLot],startTime:dayjs(timeSlot.startTime).format('YYYY-MM-DD HH:00'),endTime:dayjs(timeSlot.endTime).format('YYYY-MM-DD HH:00'), charges: charges }
@@ -246,13 +244,13 @@ exports.getParkingLotHistory = async (req, res) => {
         bookedTimeSlots = bookedTimeSlots.map(timeSlot => {
             if (timeSlot.vehicleType == "Bike") {
                 //calculate charges
-                const charges = ((timeSlot.endTime - timeSlot.startTime) / (1000 * 60 * 60)) * parkingLot.parkingChargesBike
+                const charges = parkingLot.type==="public"?0:((timeSlot.endTime - timeSlot.startTime) / (1000 * 60 * 60)) * parkingLot.parkingChargesBike
                 //pas startTime and endTime as formatted strings
                 //put details of booker instead of just its ID
                 return { ...timeSlot._doc, charges: charges,startTime:dayjs(timeSlot.startTime).format('YYYY-MM-DD HH:00'),endTime:dayjs(timeSlot.endTime).format('YYYY-MM-DD HH:00'), booker: userMap[timeSlot.booker] }
             } else {
                 //calculate charges
-                const charges = ((timeSlot.endTime - timeSlot.startTime) / (1000 * 60 * 60)) * parkingLot.parkingChargesCar
+                const charges = parkingLot.type==="public"?0:((timeSlot.endTime - timeSlot.startTime) / (1000 * 60 * 60)) * parkingLot.parkingChargesCar
                 //pas startTime and endTime as formatted strings
                 //put details of booker instead of just its ID
                 return { ...timeSlot._doc, charges: charges,startTime:dayjs(timeSlot.startTime).format('YYYY-MM-DD HH:00'),endTime:dayjs(timeSlot.endTime).format('YYYY-MM-DD HH:00'), booker: userMap[timeSlot.booker] }
@@ -331,21 +329,30 @@ exports.deleteParkingLot = async (req, res) => {
                 const html = `
                     Dear ${userMap[ts.booker].name}, 
                         We are sorry to inform you that due to some issues your parking booking for a Bike at ${updatedLot.name} between ${dayjs(ts.startTime).format('DD MMM hh:00 A')} and ${dayjs(ts.endTime).format('DD MMM hh:00 A')} has been cancelled. 
-                        The charges for this parking you booked ${charges}, will be refunded to your account within 2 days
+                        ${updatedLot.type==="public"?"":`The charges for this parking you booked ${charges}, will be refunded to your account within 2 days`}
                 `
                 await sendEmail2({html,subject,receiverMail})
                 //mark those slots as cancelled and adminCancelled as they are cancelledBy Admin
+                if(updatedLot.type==="public"){
+                    await BookedTimeSlot.findByIdAndUpdate(ts._id,{cancelled:true,adminCancelled:true,cancelledAt:Date.now(),refunded:true})
+                }else{
+                //mark those slots as cancelled and adminCancelled as they are cancelledBy Admin
                 await BookedTimeSlot.findByIdAndUpdate(ts._id,{cancelled:true,adminCancelled:true,cancelledAt:Date.now(),refunded:false})
+                }
             } else {
                 const charges = ((ts.endTime - ts.startTime) / (1000 * 60 * 60)) * updatedLot.parkingChargesCar
                 const html = `
                     Dear ${userMap[ts.booker].name}, 
-                        We are sorry to inform you that due to some issues your parking booking for a Bike at ${updatedLot.name} between ${dayjs(ts.startTime).format('DD MMM hh:00 A')} and ${dayjs(ts.endTime).format('DD MMM hh:00 A')} has been cancelled. 
-                        The charges for this parking you booked ${charges}, will be refunded to your account within 2 days
+                        We are sorry to inform you that due to some issues your parking booking for a Car at ${updatedLot.name} between ${dayjs(ts.startTime).format('DD MMM hh:00 A')} and ${dayjs(ts.endTime).format('DD MMM hh:00 A')} has been cancelled. 
+                        ${updatedLot.type==="public"?"":`The charges for this parking you booked ${charges}, will be refunded to your account within 2 days`}
                 `
                 await sendEmail({html,subject,receiverMail})
+                if(updatedLot.type==="public"){
+                    await BookedTimeSlot.findByIdAndUpdate(ts._id,{cancelled:true,adminCancelled:true,cancelledAt:Date.now(),refunded:true})
+                }else{
                 //mark those slots as cancelled and adminCancelled as they are cancelledBy Admin
                 await BookedTimeSlot.findByIdAndUpdate(ts._id,{cancelled:true,adminCancelled:true,cancelledAt:Date.now(),refunded:false})
+                }
             }
 
         }
@@ -426,10 +433,10 @@ exports.getCancelledSlots = async(req,res)=>{
             }
         },
         {
-            name:1,parkingChargesBike:1,parkingChargesCar:1
+            name:1,parkingChargesBike:1,parkingChargesCar:1,type:1
         })
 
-
+        
         //create maps for quick access to details from IDs
         var userMap = {}
         for (let user of users) {
@@ -440,7 +447,7 @@ exports.getCancelledSlots = async(req,res)=>{
         for(let lot of parkingLots){
             parkingLotMap[lot._id] = lot
         }
-
+        cancelledTimeSlots=cancelledTimeSlots.filter(slot=>parkingLotMap[slot.parkingLot].type==="private")
 
         //put the details and calculated charge in cancelledTimeSlots
         cancelledTimeSlots= cancelledTimeSlots.map(slot=>(

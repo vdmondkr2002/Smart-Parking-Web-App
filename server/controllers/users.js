@@ -183,7 +183,8 @@ exports.signIn = async (req, res) => {
         //sign a token for user to login into his account and send it frontend where token will be stored in localstorage
         const payload = {
             email: oldUser.email,
-            id: oldUser._id
+            id: oldUser._id,
+            role:oldUser.role
         }
         const token = jwt.sign(payload, process.env.TOKEN_SECRET, { expiresIn: "3h" })
         

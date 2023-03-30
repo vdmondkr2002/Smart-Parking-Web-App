@@ -1,4 +1,4 @@
-import { Box, Button, Card, CardActions, CardContent, CardMedia, CircularProgress, Dialog, DialogTitle, FormHelperText, Grid, IconButton, ImageList, ImageListItem, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, Card, CardActions, CardContent, CardMedia, Chip, CircularProgress, Dialog, DialogTitle, FormHelperText, Grid, IconButton, ImageList, ImageListItem, Stack, TextField, Typography, useTheme } from "@mui/material";
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { useEffect, useState } from "react";
 import ParkingSlot from "./ParkingSlot";
@@ -20,7 +20,8 @@ import CloseIcon from '@mui/icons-material/Close';
 const initialState = {
     selectedImg: '', vehicleNo: ''
 }
-const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, charges, distance, id, freeSlots, engagedSlots, address, lat, lng, currLoc, lotImages }) => {
+const ParkingLotCard = ({ vehicleType, startTime,type, endTime, name, noOfFreeSlots, charges, distance, id, freeSlots, engagedSlots, address, lat, lng, currLoc, lotImages }) => {
+    const theme = useTheme()
     const styles = {
         dialog: {
             padding: "2em"
@@ -29,6 +30,14 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
             flexGrow: 1,
             padding: "1em"
         },
+        dialogCont:{
+            [theme.breakpoints.down('sm')]:{
+                flexDirection:"column-reverse"
+            }
+        },
+        alignCenter:{
+            textAlign:"center"
+        }
     }
     const [open, setOpen] = useState(false)
     const [open2, setOpen2] = useState(false)
@@ -96,6 +105,10 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
     }
 
     const handleOpenDialog2 = () => {
+        if(changed==""){
+            dispatch(setAlert({msg:"Please select a slot first",type:"warning"}))
+            return
+        }
         setOpen2(true)
     }
 
@@ -164,16 +177,21 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
             startTime: startTime.format('YYYY-MM-DD HH:00'), endTime: endTime.format('YYYY-MM-DD HH:00'),
             lotId: id, slotId: changed, vehicleType: vehicleType,
             vehicleNo: formData.vehicleNo, carImg: formData.selectedImg, cancellable, charges: charges,
-            currTime: dayjs(Date.now()).format('YYYY-MM-DD HH:00')
+            currTime: dayjs(Date.now()).format('YYYY-MM-DD HH:00'),type:type
         }
         console.log(data)
+        if(type==="public"){
+            const userData = {}
+            dispatch(asynccheckOutBookSlot({formData:data,userData}))
+            return
+        }
+        
         const userData = {
             name: user.firstName + " " + user.lastName,
             email: user.email,
             mobileNo: user.mobileNo,
             lotName: name
         }
-        // dispatch(asyncBookSlot(data))
 
         dispatch(asynccheckOutBookSlot({formData:data, userData}))
 
@@ -184,6 +202,9 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
             <Card sx={{ maxWidth: 300, minHeight: 300 }}>
                 <CardContent >
                     <Grid container spacing={2} alignItems="center" justifyContent="end">
+                        <Grid item textAlign="end" xs={12}>
+                            <Chip label={`${type}`}/>
+                        </Grid>
                         <Grid item xs={2}>
                             <LocationOnIcon fontSize="large" />
                         </Grid>
@@ -192,6 +213,7 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
                                 {name}
                             </Typography>
                         </Grid>
+                    
                         <Grid item xs={8} sx={{ fontWeight: "bold" }}>
                             Total Charges:
                         </Grid>
@@ -218,8 +240,8 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
             </Card>
             <Dialog maxWidth='lg' fullWidth onClose={handleClose} open={open} sx={styles.dialog}>
 
-                <Grid container>
-                    <Grid item sm={5}>
+                <Grid container sx={styles.dialogCont}>
+                    <Grid item xs={12} md={5}>
                         <Grid sx={styles.dialog} container spacing={2} alignItems="center" >
                             <Grid item xs={2}>
                                 <LocationOnIcon fontSize="large" />
@@ -229,10 +251,10 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
                                     {name}
                                 </Typography>
                             </Grid>
-                            <Grid item xs={4} sx={{ fontWeight: "bold" }}>
+                            <Grid item xs={12} md={4} sx={{ fontWeight: "bold" }}>
                                 Time Slot For Booking:
                             </Grid>
-                            <Grid item xs={8}>
+                            <Grid item xs={12} md={8}>
                                 <Grid container>
                                     <Grid item xs={2}>
                                         <AccessTimeIcon fontSize="large" />
@@ -295,7 +317,7 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
                             </Grid>
                         </Grid>
                     </Grid>
-                    <Grid item sm={7}>
+                    <Grid item xs={12} md={7}>
                         <MapContainer style={{ height: "400px", width: "100%" }} center={position} zoom={zoomLvl} >
 
                             <TileLayer
@@ -370,10 +392,14 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
                         </Grid>
                         <Grid item sm={8} xs={12} sx={styles.ipFields}>
                             <Typography variant="h5" display="inline">Do you want the Slot to be cancellable:</Typography>
-
-                            <FormHelperText sx={{ color: "red" }} required children="*Cancelling a slot will deduct 30% of your parking charge" />
+                            {
+                                type==="private"?(
+                                    <FormHelperText sx={{ color: "red" }} required children="*Cancelling a slot will deduct 30% of your parking charge" />
+                                ):null
+                            }
+                            
                         </Grid>
-                        <Grid item sm={4} xs={12} sx={styles.ipFields}>
+                        <Grid item sm={4} xs={12} sx={{...styles.ipFields,textAlign:"center"}}>
                             <Button variant={cancellable ? "contained" : "outlined"} color={cancellable ? "success" : "inherit"} startIcon={<DoneIcon />} onClick={() => setCancellable(true)}>Yes</Button>
                             <Button variant={!cancellable ? "contained" : "outlined"} color={!cancellable ? "warning" : "inherit"} startIcon={<CloseIcon />} onClick={() => setCancellable(false)}>No</Button>
                         </Grid>
@@ -383,10 +409,17 @@ const ParkingLotCard = ({ vehicleType, startTime, endTime, name, noOfFreeSlots, 
                                     <Button fullWidth type="submit" variant="contained" color="info" startIcon={<CircularProgress size={20} sx={{ color: "yellow" }} />}>Slot Booking</Button>
                                     
                                 ) : (
+                                    type==="public"?(
+                                        <>
+                                            <Button fullWidth type="submit" variant="contained">Confirm Slot & Book Free</Button>
+                                            <FormHelperText sx={{ color: "green" }} required children="*Free Booking for Public parking Lots " />
+                                        </>
+                                       
+                                    ):
                                     <Button fullWidth type="submit" variant="contained">Confirm Slot & Pay</Button>
                                 )
                             }
-
+                            
                         </Grid>
                     </Grid>
                 </form>

@@ -94,7 +94,10 @@ const RegisterPage = () => {
         },
         otpField: {
             flexGrow: 0.5,
-            maxWidth: "30em"
+            maxWidth: "30em",
+            [theme.breakpoints.down('sm')]:{
+                flexGrow:1
+            }
         }
 
     }

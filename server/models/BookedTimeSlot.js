@@ -57,8 +57,7 @@ const BookedTimeSlotSchema = mongoose.Schema({
         required:true
     },
     orderID:{
-        type:String,
-        required:true,
+        type:String
     },
     paymentDetails:{
         type:Object

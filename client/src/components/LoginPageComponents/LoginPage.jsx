@@ -253,7 +253,7 @@ const LoginPage = () => {
                                                 }
 
                                             </Grid>
-                                            <Grid item sm={12}>
+                                            <Grid item sm={12} sx={styles.submitBtn}>
                                                 <Button variant="outlined" onClick={handleClickOpenDialog}>Forgot Password?</Button>
                                             </Grid>
                                         </Grid>

@@ -87,12 +87,13 @@ const DeskTopNav = ()=>{
         <>
              <Toolbar sx={styles.root}>
                 <Link href="#" color="inherit">
-                    <img src={logo} width="150rem" alt="Logo"/>
+                    <img src={logo} width="60rem" alt="Logo"/>
                 </Link>
                 <div sx={styles.middle}>
-                    <Button component={RouterLink} to={user._id?"/home":"/"} color="inherit" sx={styles.home}>
+                
+                    <Button component={RouterLink} to={user._id?(user.role==="user"?"/home":"/admindb"):"/"} color="inherit" sx={styles.home}>
                         <Typography variant="h6" sx={styles.name}>
-                            Home
+                            {user._id?(user.role==="user"?"Book Slot":"Add Lot"):"Home"}
                         </Typography>
                     </Button>
                     <Button component={RouterLink} color="inherit" to="/news" sx={styles.about}>

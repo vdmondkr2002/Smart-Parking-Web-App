@@ -30,17 +30,22 @@ const verifyEmailValidator = joi.object({
 
 const postParkingValidator = joi.object({
     parkName:joi.string().required(),
-    noOfCarSlots:joi.string().required(),
-    noOfBikeSlots:joi.string().required(),
+    noOfCarSlots:joi.number().required(),
+    noOfBikeSlots:joi.number().required(),
     address:joi.string().required(),
-    parkingChargesCar:joi.string().required(),
-    parkingChargesBike:joi.string().required(),
+    parkingChargesCar:joi.number().required(),
+    parkingChargesBike:joi.number().required(),
     lat:joi.string().required(),
     lng:joi.string().required(),
     openTime:joi.string().required(),
     closeTime:joi.string().required(),
     imgFiles:joi.array().required(),
-    currTimeStamp:joi.number().required()
+    currTimeStamp:joi.number().required(),
+    ownerName:joi.string().required(),
+    emailID:joi.string().required().email(),
+    mobileNo:joi.string().required(),
+    type:joi.string().required()
+
 })
 
 const getParkingValidator = joi.object({
@@ -58,11 +63,12 @@ const bookSlotValidator = joi.object({
     startTime:joi.string().required(),
     endTime:joi.string().required(),
     vehicleType:joi.string().required(),
-    vehicleNo:joi.string().required(),
+    vehicleNo:joi.string().pattern(/[A-Z]{2}[0-9]{2}[A-Z]{2}[0-9]{4}/).required(),
     carImg:joi.string().required(),
     cancellable:joi.boolean().required(),
     charges:joi.number().required(),
-    currTime: joi.string().required()
+    currTime: joi.string().required(),
+    type: joi.string().required()
 })
 
 const feedbackValidator = joi.object({

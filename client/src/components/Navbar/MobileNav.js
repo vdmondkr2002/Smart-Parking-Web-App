@@ -93,12 +93,22 @@ const MobileNav = ({ mobileDrawer, setMobileDrawer }) => {
                 >
                     <Grid container spacing={2} sx={styles.navCont}>
                         <Grid item >
-                            <Button component={RouterLink} variant="contained" to="/" color="primary" sx={styles.navItems}>
+                            <Button component={RouterLink} to={user._id ? "/home" : "/"} variant="contained" color="primary" sx={styles.navItems}>
                                 <MenuItem>Home</MenuItem>
                             </Button>
                         </Grid>
                         <Grid item >
-                            <Button component={RouterLink} variant="contained" color="primary" to="/aboutus" sx={styles.navItems}>
+                            <Button component={RouterLink} color="primary" variant="contained" to="/news" sx={styles.navItems}>
+                                <MenuItem>News</MenuItem>
+                            </Button>
+                        </Grid>
+                        <Grid item >
+                            <Button component={RouterLink} color="primary" variant="contained" to="/contactus" sx={styles.navItems}>
+                                <MenuItem>Contact Us</MenuItem>
+                            </Button>
+                        </Grid>
+                        <Grid item >
+                            <Button component={RouterLink} color="primary" variant="contained" to="/aboutus" sx={styles.navItems}>
                                 <MenuItem>About Us</MenuItem>
                             </Button>
                         </Grid>

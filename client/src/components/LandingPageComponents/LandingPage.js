@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import mainImage from '../../images/landingImg.svg'
 import heroImage from '../../images/hero_parking.svg'
+import heroImage2 from '../../images/hero_parking_2.svg'
 import { useNavigate } from 'react-router-dom'
 import { useTheme } from '@emotion/react'
 import Alert from "../../Utils/Alert";
@@ -127,6 +128,13 @@ const LandingPage = () => {
             display: 'block',
             maxWidth: 400,
             overflow: 'hidden',
+            
+        },
+        hero1:{
+            [theme.breakpoints.down('sm')]:{
+                flexDirection:"column-reverse"
+            }
+            
         }
     }
 
@@ -162,21 +170,21 @@ const LandingPage = () => {
     return (
         <Grow in>
             <Container sx={styles.bgImg} maxWidth="1400px">
-                <Grid container justifyItems="center" alignItems="center">
-                    <Alert />
+            <Alert />
+                <Grid container sx={styles.hero1} justifyItems="center" alignItems="center">
                     <Grid item sm={6} xs={12}>
                         <Paper sx={{ backgroundColor: theme.palette.primary.dark }}>
                             <Grid container sx={styles.heroLeft} justifyContent="center">
-                                <Grid item>
+                                <Grid item sx={{textAlign:"center"}}>
                                     <Typography color="white" sx={{ fontWeight: "bold" }} variant='h2' component='h2' >START YOUR PARKING JOURNEY</Typography>
                                 </Grid>
-                                <Grid item>
+                                <Grid item sx={{textAlign:"center"}}>
                                     <Typography color="white" sx={{ fontWeight: "bold" }} variant='body' component='h3' >Find new places to park your vehicle.</Typography>
                                 </Grid>
-                                <Grid item xs={12}>
+                                <Grid item xs={12} sx={{textAlign:"center"}} >
                                     <SearchBar placeholder='Enter a location' width="100%" onSearch={handleSearchClick} />
                                 </Grid>
-                                <Grid item xs={3}>
+                                <Grid item sx={{textAlign:"center"}} xs={12} sm={3}>
                                     <Button color="secondary" sx={{ margin: "auto", paddingX: "2em", paddingY: "1em" }} component={RouterLink}  to="/login" variant="contained" endIcon={<SearchIcon />}>Search</Button>
                                 </Grid>
                             </Grid>
@@ -188,7 +196,30 @@ const LandingPage = () => {
                     </Grid>
                 </Grid>
                 <hr style={{ borderTop: "10px solid #666", borderRadius: "5px", width: "50%" }} />
+                <Grid container justifyItems="center" alignItems="center">
+                    
+                    
+                    <Grid item sm={4} sx={{ margin: "auto" }}>
+                        <Box component="img" width="100%" alt="parking image 2" src={heroImage2} />
+                    </Grid>
+                    <Grid item sm={6} xs={12}>
+                        <Paper sx={{ backgroundColor: theme.palette.primary.dark }}>
+                            <Grid container sx={styles.heroLeft} justifyContent="center">
+                                <Grid item sx={{textAlign:"center"}}>
+                                    <Typography color="white" sx={{ fontWeight: "bold" }} variant='h2' component='h2' >WANT TO ADD YOUR OWN PARKING?</Typography>
+                                </Grid>
+                                <Grid item sx={{textAlign:"center"}}>
+                                    <Typography color="white" sx={{ fontWeight: "bold" }} variant='body' component='h3' >Fill the form below, your parking lot will be live after kyc verification by our team</Typography>
+                                </Grid>
+                                <Grid item sx={{textAlign:"center"}} xs={12} sm={3}>
+                                    <Button color="secondary" sx={{ margin: "auto"}} href="https://docs.google.com/forms/d/1rPDZoiogmNY2OVufewJVq9QHPd_ujmyZbku7o5phLak/viewform" target="_blank"  variant="contained">Fill Now</Button>
+                                </Grid>
+                            </Grid>
+                        </Paper>
 
+                    </Grid>
+                </Grid>
+                <hr style={{ borderTop: "10px solid #666", borderRadius: "5px", width: "50%" }} />
                 <Carousel autoPlay={true} showArrows={true} showThumbs={false} >
                     {
                         descData.map((item, index) => (

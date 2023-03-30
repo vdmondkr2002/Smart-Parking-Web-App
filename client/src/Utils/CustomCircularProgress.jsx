@@ -8,7 +8,6 @@ const CustomCircularProgress = ({inProgress}) => {
       {
         inProgress ? (
           <Box sx={{ display: 'flex' }}>
-
             <CircularProgress />
           </Box>
         ) : null

@@ -17,17 +17,6 @@ const urlBase64toUint8Array = (base64String)=>{
 
 const  convertedVApidKey =  urlBase64toUint8Array(process.env.REACT_APP_PUBLIC_VAPID_KEY)
 
-// const sendSubscription = async(subcription)=>{
-//     console.log(process.env.REACT_APP_BACKEND_URL)
-//     return fetch(`${process.env.REACT_APP_BACKEND_URL}/api/v1/users/notifications/subscribe`,{
-//         method:'POST',
-//         body: JSON.stringify(subcription),
-//         headers:{
-//             'Content-Type':'application/json'
-//         }
-//     })
-// }
-
 export const subcribeUser = ()=>{
     if('serviceWorker' in navigator){
         navigator.serviceWorker.ready.then((reg)=>{

@@ -5,7 +5,8 @@ const BookedTimeSlot = require('../models/BookedTimeSlot.js')
 
 //send notification to user before their booking slot time arrives
 exports.sendNotifs = ()=>{
-    cron.schedule('5 * * * *',async()=>{
+    cron.schedule('3 * * * *',async()=>{
+        console.log("notifications cron job running...")
         try{
             const payload = JSON.stringify({
                 title:'Attention',
@@ -18,7 +19,9 @@ exports.sendNotifs = ()=>{
                     $gte:Date.now(),
                     $lte:Date.now()+1000*60*10
                 },
-                notified:false
+                notified:false,
+                paid:true,
+                cancelled:false
             })
             //for all such slots
             for(let slot of bookedTimeSlots){

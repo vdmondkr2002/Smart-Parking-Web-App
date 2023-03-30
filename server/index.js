@@ -30,7 +30,7 @@ app.use(express.urlencoded({limit:"80mb",extended:true}))
 // app.use(cors())
 
 //function to send recurring push notification before parking slot booking time
-// sendNotifs()
+sendNotifs()
 
 //for cross origin request
 app.use((req, res, next) => {

@@ -1,6 +1,6 @@
 import AccessTimeIcon from "@mui/icons-material/AccessTime"
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import { Button, Card, CardActions, CardContent, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, Paper, Typography, useTheme } from "@mui/material"
+import { Button, Card, CardActions, CardContent, Chip, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, Paper, Typography, useTheme } from "@mui/material"
 import { useMapEvents, MapContainer, Marker, Popup, TileLayer, Polyline, Polygon } from "react-leaflet"
 import { useEffect, useState } from "react"
 import dayjs from 'dayjs'
@@ -8,7 +8,7 @@ import L from 'leaflet'
 import { useDispatch, useSelector } from "react-redux";
 import { asyncCancelParkingSlot } from "../../state";
 
-const BookedSlotCard = ({ id, name, charges, startTime, endTime, vehicleType, bookerName, lat, lng, currLoc, address, vehicleNo, cancellable }) => {
+const BookedSlotCard = ({ id, name, charges, type, startTime, endTime, vehicleType, bookerName, lat, lng, currLoc, address, vehicleNo, cancellable }) => {
     const theme = useTheme()
     const styles = {
         dialog: {
@@ -22,10 +22,6 @@ const BookedSlotCard = ({ id, name, charges, startTime, endTime, vehicleType, bo
     const [position, setPosition] = useState([19.2, 73.2])
     const [zoomLvl, setZoomLvl] = useState(13)
     const dispatch = useDispatch()
-    useEffect(() => {
-        console.log(startTime, endTime)
-        console.log(dayjs(startTime).unix(),dayjs(endTime).unix())
-    }, [])
     const handleClose = () => {
         console.log("dialog  closed")
         setOpen(false)
@@ -37,12 +33,15 @@ const BookedSlotCard = ({ id, name, charges, startTime, endTime, vehicleType, bo
     const handleYesCancelDialog = () => {
         setOpen2(false)
         console.log("Slot  cancelled", id)
-        dispatch(asyncCancelParkingSlot({ id:id}))
+        dispatch(asyncCancelParkingSlot({ id: id }))
     }
     const handleNoCancelDialog = () => {
         setOpen2(false)
     }
 
+    const handleClickCancelBtn = ()=>{
+        setOpen2(true)
+    }
     const redIcon = new L.Icon({
         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
         shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -81,9 +80,12 @@ const BookedSlotCard = ({ id, name, charges, startTime, endTime, vehicleType, bo
 
     return (
         <>
-            <Card sx={{ maxWidth: 320, minHeight: 300 }}>
+            <Card sx={{ maxWidth: 320, minHeight: 300, margin: "auto" }}>
                 <CardContent >
                     <Grid container spacing={2} alignItems="center" justifyContent="end" sx={{ padding: "0.3em" }}>
+                        <Grid item textAlign="end" xs={12}>
+                            <Chip label={`${type}`} />
+                        </Grid>
                         {name ? (
                             <>
                                 <Grid item xs={2}>
@@ -164,7 +166,7 @@ const BookedSlotCard = ({ id, name, charges, startTime, endTime, vehicleType, bo
                             <Button variant="contained" onClick={handleShowDetails} fullWidth>Show Details</Button>
                         </Grid>
                         {
-                            cancellable && startTime.unix()*1000 > Date.now() ? (
+                            cancellable && startTime.unix() * 1000 > Date.now() ? (
                                 inProgress2 ? (
                                     <Grid item xs={12}>
                                         <Button variant="contained" color="warning" startIcon={<CircularProgress size={20} sx={{ color: "yellow" }} />} fullWidth>Cancel Booking</Button>
@@ -172,7 +174,7 @@ const BookedSlotCard = ({ id, name, charges, startTime, endTime, vehicleType, bo
 
                                 ) : (
                                     <Grid item xs={12}>
-                                        <Button variant="contained" color="warning" onClick={() => setOpen2(true)} fullWidth>Cancel Booking</Button>
+                                        <Button variant="contained" color="warning" onClick={handleClickCancelBtn} fullWidth>Cancel Booking</Button>
                                     </Grid>
                                 )
 
@@ -189,6 +191,9 @@ const BookedSlotCard = ({ id, name, charges, startTime, endTime, vehicleType, bo
                     <Grid item sm={5}>
                         <Paper sx={{ backgroundColor: theme.palette.primary.dark, color: "white", borderRadius: "10px", width: "80%", margin: "auto", boxShadow: "10px 5px 5px gray" }}>
                             <Grid sx={styles.dialog} container spacing={2} alignItems="center" >
+                                <Grid item textAlign="end" xs={12}>
+                                    <Chip label={`${type}`} />
+                                </Grid>
                                 <Grid item xs={2}>
                                     <LocationOnIcon fontSize="large" />
                                 </Grid>
@@ -283,7 +288,10 @@ const BookedSlotCard = ({ id, name, charges, startTime, endTime, vehicleType, bo
                 <DialogTitle color="black" fontWeight="bold">Cancel Booking</DialogTitle>
                 <DialogContent>
                     <DialogContentText fontWeight="bold" color="Highlight">
-                        Cancelling a slot will deduct 30% of your parking charge, Confirm Cancellation?
+                        {type=="private"?
+                        "Cancelling a slot will deduct 30% of your parking charge, Confirm Cancellation?":
+                        "Confirm Cancellation of Slot?"
+                            }
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>

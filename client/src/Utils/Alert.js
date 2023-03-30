@@ -8,18 +8,22 @@ const InnerAlert = (props)=>{
     return <MuiAlert elevation={6} variant="filled" {...props}/>
 }
 
+//This alert will display alert dynamically whenever alert from store is set
+//and in 5 seconds alert will be cleared
 const Alert = ()=>{
     const dispatch = useDispatch()
     const alert = useSelector(state=>state.auth.alert)
     
     const [openAlert,setOpenAlert] = useState(false);
 
+    //whenever the alert is set open the alert
     useEffect(()=>{
         if(alert.msg){
             setOpenAlert(true);
         }
     },[alert])
 
+    //cloes the alert and clear alert data
     const handleCloseAlert = (e)=>{
         setOpenAlert(false)
         dispatch(clearAlert())
@@ -32,7 +36,7 @@ const Alert = ()=>{
                 <Snackbar 
                     anchorOrigin={{ horizontal: "center", vertical: "top" }}
                     open={openAlert}
-                    autoHideDuration={5000}
+                    autoHideDuration={3000}
                     onClose={handleCloseAlert}
                 >
                     <div>

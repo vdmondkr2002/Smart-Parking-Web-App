@@ -18,8 +18,7 @@
 //     })
 // }
 
-
-import { CourierClient } from "@trycourier/courier";
+const {CourierClient} = require('@trycourier/courier')
 
 const API_KEY_COURIER = 'pk_prod_R87VK9DSNYMHBBMNSNPTB3TH2GCD'
 
@@ -44,6 +43,7 @@ const sendEmail2 = async(mailData)=>{
                     method:'single',
                     channels:['email']
                 },
+                
             }
         })
         console.log(requestId)

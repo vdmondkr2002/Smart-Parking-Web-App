@@ -3,6 +3,7 @@ import {signUp,sendOTP,verifyEmail, signIn, getCurrentUser,postParkingLot, getFr
 import decode from 'jwt-decode'
 import dayjs from 'dayjs'
 
+//This is the store which will be accessible to all the components in the website
 const initialStore = {
     user: {},
     alert: {},
@@ -17,36 +18,34 @@ const initialStore = {
     news:[],
 
 }
+/*In each of the below functions an api call is made to server to get data
+and then return that data with some modification which will be in turn captured by reducer made for that request when it is fulfilled
+or pending, we can modify the store with that data to make changes dynamically in website*/
 
+//send otp to user mail which will be used later to verify user account
 export const asyncsendOTP = createAsyncThunk('users/sendOTP',async(formData)=>{
-    console.log(formData)
     try{
         const {data} = await sendOTP(formData);
-        console.log(data)
+        //This will be used as alert
         return {...data,type:'success'};
     }catch(err){
         if(err.response){
             const data = err.response.data
-            console.log(data)
             return {...data,type:"error"};
         }else{
             console.log(err);
         }
     }
-    
-    
 })
 
+//resend otp to user mail
 export const asyncresendOtp = createAsyncThunk('users/resendOtp',async(formData)=>{
-    console.log(formData)
     try{
         const {data} = await resendOTP(formData);
-        console.log(data)
         return {...data,type:'success'};
     }catch(err){
         if(err.response){
             const data = err.response.data
-            console.log(data)
             return {...data,type:"error"};
         }else{
             console.log(err);
@@ -56,16 +55,15 @@ export const asyncresendOtp = createAsyncThunk('users/resendOtp',async(formData)
     
 })
 
+//verify the user's account with email and otp entered
 export const asyncverifyEmail = createAsyncThunk('users/verifyEmail',async(formData)=>{
-    console.log(formData)
     try{
         const {data} = await verifyEmail(formData);
-        console.log(data)
         return {...data,type:'success'}
     }catch(err){
         if(err.response){
             const data = err.response.data
-            console.log(data)
+            
             return {...data,type:"error"};
         }else{
             console.log("Error",err);
@@ -73,12 +71,12 @@ export const asyncverifyEmail = createAsyncThunk('users/verifyEmail',async(formD
     }
 })
 
-
+//sign In a user , it returns a token in response from server
+//The token will be saved in localstorage
+//current user is loaded to get userData
 export const asyncsignIn = createAsyncThunk('users/signIn',async(formData)=>{
-    console.log(formData)
     try{
         const {data} = await signIn(formData);
-        console.log(data)
         localStorage.setItem('authToken',JSON.stringify(data))
         const response = await getCurrentUser()
         const userData = response.data;
@@ -86,7 +84,7 @@ export const asyncsignIn = createAsyncThunk('users/signIn',async(formData)=>{
     }catch(err){
         if(err.response){
             const data = err.response.data
-            console.log(data)
+            
             return {alertData:{...data,type:"error"},userData:{}}
         }else{
             console.log("Error",err)
@@ -94,35 +92,40 @@ export const asyncsignIn = createAsyncThunk('users/signIn',async(formData)=>{
     }
 })
 
+
+//loading user data when authToken exists in localStorage
 export const asyncloadUser = createAsyncThunk('users/loadUser',async()=>{
     console.log("loading user")
     try{
-        if(localStorage.getItem('authToken')){
+        const token = localStorage.getItem('authToken')
+        if(token){
             console.log("user found")
-            const token = localStorage.getItem('authToken')
+            //decode the token and check if it is expired
+            //if yes then remove token from localstorage and reload page
             const decodedToken = decode(token);
             if(decodedToken.exp*1000<new Date().getTime()){
                 return {msg:"LogOut"};
             }else{
+                //if yes then loadUser
                 const {data} = await getCurrentUser()
-                console.log(data)
                 return data;
             }
+        }else{
+            console.log("not logged in")
         }
     }catch(err){
         console.log(err)
     }
 })
 
+//add a parking lot to database
 export const asyncpostParkingLot = createAsyncThunk('parkings/postParkingLot',async(formData)=>{
-    console.log("posting parking lot")
     try{
         const {data} = await postParkingLot(formData);
         return {...data,type:'success'}
     }catch(err){
         if(err.response){
             const data = err.response.data
-            console.log(data)
             return {...data,type:"error"};
         }else{
             console.log("Error",err);
@@ -130,18 +133,14 @@ export const asyncpostParkingLot = createAsyncThunk('parkings/postParkingLot',as
     }
 })
 
+//get free parking lots according to passed parameters
 export const asyncgetParkingLot = createAsyncThunk('parkings/getParkingLot',async(formData)=>{
-    
-    console.log("Get Booked Slots")
-    console.log(formData)
     try{
         const {data} = await getFreeParkingLots(formData);
-        console.log(formData)
         return {alertData:{msg:data.msg,type:'success'},freeParkingLots:data.freeParkingLots}
     }catch(err){
         if(err.response){
             const data = err.response.data
-            console.log(data)
             return {...data,type:"error"};
         }else{
             console.log("Error",err);
@@ -151,32 +150,29 @@ export const asyncgetParkingLot = createAsyncThunk('parkings/getParkingLot',asyn
 
 
 
-
+//post feedback from a user
 export const asyncpostFeedback = createAsyncThunk('users/postFeedback',async(formData)=>{
-    console.log("Post feedback form")
     try{
         const {data} = await postFeedback(formData);
-        console.log(data)
         return {msg:data.msg,type:'success'}
     }catch(err){
         if(err.response){
             const data = err.response.data
-            console.log(data)
             return {...data,type:"error"};
         }else{
             console.log("Error",err);
         }
     }
 })
+
+//get booked slots for the currently logged in user
 export const asyncgetBookedSlots = createAsyncThunk('parkings/getBookedSlots',async()=>{
-    
     try{
         const {data} = await getBookedSlots();
         return {alertData:{msg:data.msg,type:'success'},bookedTimeSlots:data.bookedTimeSlots}
     }catch(err){
         if(err.response){
             const data = err.response.data
-            console.log(data)
             return {...data,type:"error"};
         }else{
             console.log("Error",err);
@@ -184,16 +180,14 @@ export const asyncgetBookedSlots = createAsyncThunk('parkings/getBookedSlots',as
     }
 })
 
-
+//cancel a booked slot
 export const asyncCancelParkingSlot = createAsyncThunk('parkings/cancelParkingSlot',async(formData)=>{
     try{
-        console.log(formData)
         const {data} = await cancelBookedSlot(formData);
         return {alertData:{msg:data.msg,type:'success'},id:formData.id}
     }catch(err){
         if(err.response){
             const data = err.response.data
-            console.log(data)
             return {...data,type:"error"};
         }else{
             console.log("Error",err);
@@ -201,6 +195,7 @@ export const asyncCancelParkingSlot = createAsyncThunk('parkings/cancelParkingSl
     }
 })
 
+//get all the users name
 export const asyncgetUsersName = createAsyncThunk('admin/getUsersName',async()=>{
     try{
         const {data} = await getUsersName();
@@ -208,7 +203,7 @@ export const asyncgetUsersName = createAsyncThunk('admin/getUsersName',async()=>
     }catch(err){
         if(err.response){
             const data = err.response.data
-            console.log(data)
+            
             return {...data,type:"error"};
         }else{
             console.log("Error",err);
@@ -216,6 +211,7 @@ export const asyncgetUsersName = createAsyncThunk('admin/getUsersName',async()=>
     }
 })
 
+//get all the booked slots of a particular user
 export const asyncgetUserHistory = createAsyncThunk('admin/getUserHistory',async(formData)=>{
     try{
         const {data} = await getUserHistory(formData)
@@ -223,7 +219,6 @@ export const asyncgetUserHistory = createAsyncThunk('admin/getUserHistory',async
     }catch(err){
         if(err.response){
             const data = err.response.data
-            console.log(data)
             return {...data,type:"error"};
         }else{
             console.log("Error",err);
@@ -231,15 +226,14 @@ export const asyncgetUserHistory = createAsyncThunk('admin/getUserHistory',async
     }
 })
 
+//get parking lots names
 export const asyncgetParkingLots = createAsyncThunk('admin/getparkingLots',async()=>{
     try{
-        console.log("getting parking lots")
         const {data} = await getParkingLots();
         return {alertData:{msg:data.msg,type:'success'},parkingLots:data.parkingLots}
     }catch(err){
         if(err.response){
             const data = err.response.data
-            console.log(data)
             return {...data,type:"error"};
         }else{
             console.log("Error",err);
@@ -247,6 +241,7 @@ export const asyncgetParkingLots = createAsyncThunk('admin/getparkingLots',async
     }
 })
 
+//ignore
 export const asyncgetParkingLotsNear = createAsyncThunk('admin/getparkingLotsNear',async(formData)=>{
     try{
         const {data} = await getParkingLotsNear(formData);
@@ -254,7 +249,6 @@ export const asyncgetParkingLotsNear = createAsyncThunk('admin/getparkingLotsNea
     }catch(err){
         if(err.response){
             const data = err.response.data
-            console.log(data)
             return {...data,type:"error"};
         }else{
             console.log("Error",err);
@@ -262,15 +256,15 @@ export const asyncgetParkingLotsNear = createAsyncThunk('admin/getparkingLotsNea
     }
 })
 
+
+//get all booked slots for a particular parking lot
 export const asyncgetParkingLotHistory = createAsyncThunk('admin/getParkingLotHistory',async(formData)=>{
     try{
         const {data} = await getParkingLotHistory(formData);
-        console.log(data)
         return {alertData:{msg:data.msg,type:'success'},bookedTimeSlots:data.bookedTimeSlots,parkingLotDetails:data.parkingLotDetails}
     }catch(err){
         if(err.response){
             const data = err.response.data
-            console.log(data)
             return {...data,type:"error"};
         }else{
             console.log("Error",err);
@@ -278,15 +272,14 @@ export const asyncgetParkingLotHistory = createAsyncThunk('admin/getParkingLotHi
     }
 })
 
+//make a parking lot inactive
 export const asyncDeleteParkingLot = createAsyncThunk('admin/removeParkingLot',async(formData)=>{
     try{
         const {data} = await deleteParkingLot(formData);
-        console.log(data)
         return {alertData:{msg:data.msg,type:'success'},id:formData.id}
     }catch(err){
         if(err.response){
             const data = err.response.data
-            console.log(data)
             return {...data,type:"error"};
         }else{
             console.log("Error",err);
@@ -294,15 +287,14 @@ export const asyncDeleteParkingLot = createAsyncThunk('admin/removeParkingLot',a
     }
 })
 
+//make a parking lot acyive again
 export const asyncMakeActiveLot = createAsyncThunk('admin/makeActiveLot',async(formData)=>{
     try{
         const {data} = await makeActiveParkingLot(formData);
-        console.log(data)
         return {alertData:{msg:data.msg,type:'success'},id:formData}
     }catch(err){
         if(err.response){
             const data = err.response.data
-            console.log(data)
             return {...data,type:"error"};
         }else{
             console.log("Error",err);
@@ -310,15 +302,14 @@ export const asyncMakeActiveLot = createAsyncThunk('admin/makeActiveLot',async(f
     }
 })
 
+//get all the cancelled slots 
 export const asyncgetCancelledSlots = createAsyncThunk('admin/cancelledSlots',async()=>{
     try{
         const {data} = await getCancelledSlots();
-        console.log(data)
         return {alertData:{msg:data.msg,type:'success'},cancelledSlots:data.cancelledSlots}
     }catch(err){
         if(err.response){
             const data = err.response.data
-            console.log(data)
             return {...data,type:"error"};
         }else{
             console.log("Error",err);
@@ -326,15 +317,14 @@ export const asyncgetCancelledSlots = createAsyncThunk('admin/cancelledSlots',as
     }
 })
 
+//set profile pic 
 export const asyncsetProfilePic = createAsyncThunk('users/profilePic',async(formData)=>{
     try{
         const {data} = await setProfilePic(formData);
-        console.log(data)
         return {msg:data.msg,type:'success'}
     }catch(err){
         if(err.response){
             const data = err.response.data
-            console.log(data)
             return {...data,type:"error"};
         }else{
             console.log("Error",err);
@@ -343,16 +333,16 @@ export const asyncsetProfilePic = createAsyncThunk('users/profilePic',async(form
 })
 
 
-
+//send email to logged in user with link to reset password
 export const asyncSendResetEmail = createAsyncThunk('users/resetEmail',async(formData)=>{
     try{
         const {data} = await sendResetEmail(formData)
-        console.log(data)
+        
         return {msg:data.msg,type:'success'}
     }catch(err){
         if(err.response){
             const data = err.response.data
-            console.log(data)
+            
             return {...data,type:"error"};
         }else{
             console.log("Error",err);
@@ -360,15 +350,16 @@ export const asyncSendResetEmail = createAsyncThunk('users/resetEmail',async(for
     }
 })
 
+//send the new password to server to reset
 export const asyncresetPassword = createAsyncThunk('users/resetPassword',async(formData)=>{
     try{
         const {data} = await resetPassword(formData)
-        console.log(data)
+        
         return {msg:data.msg,type:'success'}
     }catch(err){
         if(err.response){
             const data = err.response.data
-            console.log(data)
+            
             return {...data,type:"error"};
         }else{
             console.log("Error",err);
@@ -376,13 +367,18 @@ export const asyncresetPassword = createAsyncThunk('users/resetPassword',async(f
     }
 })
 
-
+//open the razorpay UI and send request to server to create a payment order for a booked slot and then callback url will be called at server
+//which will verify the payment details and redirect to paymentSucces page if successs else redirect to paymentFailure page
 export const asynccheckOutBookSlot = createAsyncThunk('payments/checkoutBookSlot',async(param)=>{
     try{
         const {formData,userData} = param
+        if(formData.type==="public"){
+            const {data} = await checkoutBookSlot(formData)
+            return {msg:data.msg,type:'success'}
+        }
         console.log(userData)
         const {data} = await checkoutBookSlot(formData)
-        console.log(data)
+        
         const {data:{key}} = await getRazorPayKey()
         const {order} = data
         const options = {
@@ -394,7 +390,7 @@ export const asynccheckOutBookSlot = createAsyncThunk('payments/checkoutBookSlot
             image: "https://lh3.googleusercontent.com/N8LxEaBwVEQ_B31XdQL1_NZ-4QbGK2Jhpvp1i_wJ3HFJASijQtU6BPnGGmSNwF9K_j9lExWOvnT4L96PNH0Vaq4lJM5Qga0_ukTl8g",
             order_id: order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
             // callback_url: `${process.env.REACT_APP_BACKEND_URL || "http://localhost:5000"}/api/v1/payments/verifyBookingPayment`,
-            callback_url: `${process.env.REACT_APP_BACKEND_URL}/api/v1/payments/verifyBookingPayment`,
+            callback_url: `${process.env.REACT_APP_BACKEND_URL}/api/v1/payments/verifyBookingPayment?charges=${formData.charges}`,
             prefill: {
                 "name": userData.name,
                 "email": userData.email,
@@ -414,7 +410,7 @@ export const asynccheckOutBookSlot = createAsyncThunk('payments/checkoutBookSlot
     }catch(err){
         if(err.response){
             const data = err.response.data
-            console.log(data)
+            
             return {...data,type:"error"};
         }else{
             console.log("Error",err);
@@ -422,13 +418,15 @@ export const asynccheckOutBookSlot = createAsyncThunk('payments/checkoutBookSlot
     }
 })
 
+//open the razorpay UI and send request to server to create a payment order for slot to be refunded and then callback url will be called at server
+//which will verify the payment details and redirect to paymentSucces page if successs else redirect to paymentFailure page
 export const asynccheckoutRefund = createAsyncThunk('payments/checkoutRefund',async(formData)=>{
     try{
         console.log(formData)
         const {data} = await checkoutRefund({amount:formData.amount})
         const {data:{key}} = await getRazorPayKey()
         const {order} = data
-        console.log(data)
+        
         const options = {
             key: key, // Enter the Key ID generated from the Dashboard
             amount: order.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
@@ -437,7 +435,7 @@ export const asynccheckoutRefund = createAsyncThunk('payments/checkoutRefund',as
             description: `Payment for refund to ${formData.bookerName} for booking of a ${formData.vehicleType} at ${formData.name} between ${dayjs(formData.startTime)} and ${dayjs(formData.endTime)} `,
             image: "https://lh3.googleusercontent.com/N8LxEaBwVEQ_B31XdQL1_NZ-4QbGK2Jhpvp1i_wJ3HFJASijQtU6BPnGGmSNwF9K_j9lExWOvnT4L96PNH0Vaq4lJM5Qga0_ukTl8g",
             order_id: order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
-            callback_url: `${process.env.REACT_APP_BACKEND_URL}/api/v1/payments/verifyRefundPayment?slotID=${formData.id}`,
+            callback_url: `${process.env.REACT_APP_BACKEND_URL}/api/v1/payments/verifyRefundPayment?slotID=${formData.id}&emailID=${formData.emailID}&charges=${order.amount}&userName=${formData.userName}`,
             prefill: {
                 "name": 'Smart Parker',
                 "email": 'smartparking678@gmail.com',
@@ -456,7 +454,7 @@ export const asynccheckoutRefund = createAsyncThunk('payments/checkoutRefund',as
     }catch(err){
         if(err.response){
             const data = err.response.data
-            console.log(data)
+            
             return {...data,type:"error"};
         }else{
             console.log("Error",err);
@@ -464,15 +462,16 @@ export const asynccheckoutRefund = createAsyncThunk('payments/checkoutRefund',as
     }
 })
 
+//send request to server to fetch latest news
 export const asyncgetNews = createAsyncThunk('news/getNews',async()=>{
     try{
         const {data} = await getNews()
-        console.log(data)
+        
         return {alertData:{msg:data.msg,type:'success'},news:data.news}
     }catch(err){
         if(err.response){
             const data = err.response.data
-            console.log(data)
+            
             return {...data,type:"error"};
         }else{
             console.log("Error",err);
@@ -480,9 +479,11 @@ export const asyncgetNews = createAsyncThunk('news/getNews',async()=>{
     }
 })
 
+
 const authSlice = createSlice({
     name:"auth",
     initialState:initialStore,
+    //this are the functions which change state of the store with parameters inside action
     reducers:{
         setUser:(state,action)=>{
             state.user = action.payload;
@@ -495,6 +496,7 @@ const authSlice = createSlice({
             state.usersName = []
             state.parkingLotNames = []
             state.parkingLotDetails = {}
+            state.alert = {msg:"Logged out",type:"warning"}
         },
         clearAlert:(state)=>{
             state.alert = {}
@@ -516,8 +518,30 @@ const authSlice = createSlice({
         },
         setInProgress2:(state,action)=>{
             state.inProgress2 = action.payload
+        },
+        checkLoggedIn:(state)=>{
+            if(!localStorage.getItem('authToken')){
+                console.log("No token")
+                state.alert = {msg:"Please, Login to view this page",type:"warning"}
+            }else{
+                const token = localStorage.getItem('authToken')
+                const decodedToken = decode(token)
+                if(decodedToken.exp*1000< new Date().getTime()){
+                    console.log("token expired")
+                    localStorage.removeItem('authToken')
+                    state.user = {};
+                    state.bookedTimeSlots = []
+                    state.freeParkingLots = []
+                    state.usersName = []
+                    state.parkingLotNames = []
+                    state.parkingLotDetails = {}
+                    state.alert = {msg:"You have been logged Out, Login to view this page",type:"warning"}
+                }
+            }
         }
     },
+    //above async requests thunk when pending or fulfilled the returned data will be inside action
+    //which will be used to update the state which will in turn change the UI dynamically
     extraReducers(builder){
         builder.addCase(asyncsendOTP.pending,(state,action)=>{
             state.inProgress1 = true
@@ -559,6 +583,7 @@ const authSlice = createSlice({
             if(action.payload){
                 if(action.payload.msg){
                     localStorage.removeItem('authToken')
+                    window.location.reload()
                     state.user = {};
                 }else{
                     state.user = action.payload
@@ -782,5 +807,5 @@ const authSlice = createSlice({
 
 
 
-export const {setUser,setLogout,clearAlert,clearFreeParkingLots,clearBookedTimeSlots,clearParkingLotDetails,setAlert,setUserProfilePic,setInProgress2} = authSlice.actions
+export const {setUser,setLogout,clearAlert,checkLoggedIn,clearFreeParkingLots,clearBookedTimeSlots,clearParkingLotDetails,setAlert,setUserProfilePic,setInProgress2} = authSlice.actions
 export default authSlice.reducer;
