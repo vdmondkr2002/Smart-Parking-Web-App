@@ -93,7 +93,7 @@ const DeskTopNav = ()=>{
                 
                     <Button component={RouterLink} to={user._id?(user.role==="user"?"/home":"/admindb"):"/"} color="inherit" sx={styles.home}>
                         <Typography variant="h6" sx={styles.name}>
-                            {user._id?(user.role==="user"?"Book Slot":"Add Lot"):"Home"}
+                            {user._id?(user.role==="user"?"Book Slot":"Dashboard"):"Home"}
                         </Typography>
                     </Button>
                     <Button component={RouterLink} color="inherit" to="/news" sx={styles.about}>

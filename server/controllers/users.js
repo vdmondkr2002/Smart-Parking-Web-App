@@ -278,7 +278,7 @@ exports.sendResetEmail = async (req, res) => {
 
         //check if user exists with this email
         const currUser = await User.findOne({ email: req.body.email })
-        if (!currUser.email) {
+        if (!currUser) {
             return res.status(404).json({ msg: "No user exists with this email, create an account first" })
         }
 
