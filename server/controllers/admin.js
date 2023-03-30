@@ -319,12 +319,12 @@ exports.deleteParkingLot = async (req, res) => {
 
         //for each booked slot
         for (let ts of bookedTimeSlots) {
-            const subject = "[Smart Parker] Booking Cancellation"
             
-            const receiverMail = userMap[ts.booker].email
+            
 
             //send email to user that their slot has been cancelled
             if (ts.vehicleType === "Bike") {
+                const subject = "[Smart Parker] Booking Cancellation"
                 const charges = ((ts.endTime - ts.startTime) / (1000 * 60 * 60)) * updatedLot.parkingChargesBike
                 const html = `
                     Dear ${userMap[ts.booker].name}, 
@@ -341,6 +341,7 @@ exports.deleteParkingLot = async (req, res) => {
                 await BookedTimeSlot.findByIdAndUpdate(ts._id,{cancelled:true,adminCancelled:true,cancelledAt:Date.now(),refunded:false})
                 }
             } else {
+                const subject = "[Smart Parker] Booking Cancellation"
                 const charges = ((ts.endTime - ts.startTime) / (1000 * 60 * 60)) * updatedLot.parkingChargesCar
                 const html = `
                     Dear ${userMap[ts.booker].name}, 
@@ -348,7 +349,7 @@ exports.deleteParkingLot = async (req, res) => {
                         ${updatedLot.type==="public"?"":`The charges for this parking you booked ${charges}, will be refunded to your account within 2 days`}
                 `
                 const receiverMail=userMap[ts.booker].email
-                await sendEmail({html,subject,receiverMail})
+                await sendEmail2({html,subject,receiverMail})
                 if(updatedLot.type==="public"){
                     await BookedTimeSlot.findByIdAndUpdate(ts._id,{cancelled:true,adminCancelled:true,cancelledAt:Date.now(),refunded:true})
                 }else{
