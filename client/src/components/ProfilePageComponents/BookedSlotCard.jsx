@@ -186,6 +186,7 @@ const BookedSlotCard = ({ active,id, name, charges, type, startTime, endTime, ve
 
                 </CardActions>
             </Card>
+            {active?(
             <Dialog maxWidth='lg' fullWidth onClose={handleClose} open={open} sx={styles.dialog}>
                 <Grid container alignItems="center" justifyContent="center">
                     <Grid item sm={active?5:12}>
@@ -288,7 +289,94 @@ const BookedSlotCard = ({ active,id, name, charges, type, startTime, endTime, ve
                     
                 </Grid>
 
+            </Dialog>):(
+                <Dialog fullWidth onClose={handleClose} open={open} sx={styles.dialog}>
+                <Grid container sx={{ padding: "1em" }} alignItems="center" justifyContent="center">
+                    <Grid item sm={12}>
+                        <Paper sx={{ backgroundColor: theme.palette.primary.dark, color: "white", borderRadius: "10px", padding: "1em", margin: "auto", boxShadow: "10px 5px 5px gray" }}>
+                            <Grid sx={styles.dialog} container spacing={2} alignItems="center" >
+                                <Grid item xs={12} sm={12}>
+                                    <Grid container spacing={2} alignItems="center">
+                                        {name ? (
+                                            <Grid item xs={10}>
+                                                <Typography variant="h4" component="div" fontWeight="bold" gutterBottom>
+                                                    {name}
+                                                </Typography>
+                                            </Grid>
+                                        ) : null}
+                                        {
+                                            name ? (
+                                                <Grid item xs={10}>
+                                                    <Typography component="div" fontWeight="bold" gutterBottom>
+                                                        {address}
+                                                    </Typography>
+                                                </Grid>
+                                            ) : null
+                                        }
+                                        <Grid item xs={3} sx={{ fontWeight: "bold" }}>
+                                            Time Slot For Booking:
+                                        </Grid>
+                                        <Grid item xs={9}>
+                                            <Grid container>
+                                                <Grid item xs={2}>
+                                                    <AccessTimeIcon fontSize="large" />
+                                                </Grid>
+                                                <Grid item xs={10}>
+                                                    <Typography variant="h6">
+                                                        {startTime.format('DD MMM hh:00 A')} - {endTime.format('DD MMM hh:00 A')}
+                                                    </Typography>
+
+                                                </Grid>
+                                            </Grid>
+
+                                        </Grid>
+                                        <Grid item xs={4} sx={{ fontWeight: "bold" }}>
+                                            Total Charges:
+                                        </Grid>
+                                        <Grid item xs={2} >
+                                            {charges}
+                                        </Grid>
+                                        {/* <Grid item xs={6}></Grid> */}
+                                        <Grid item xs={4} sx={{ fontWeight: "bold" }}>
+                                            Vehicle Type:
+                                        </Grid>
+                                        <Grid item xs={2}>
+                                            {vehicleType}
+                                        </Grid>
+                                        {/* <Grid item xs={6}></Grid> */}
+                                        <Grid item xs={8} sx={{ fontWeight: "bold" }}>
+                                            Vehicle Number:
+                                        </Grid>
+                                        {
+                                            vehicleNo ? (
+                                                <>
+
+                                                    <Grid item xs={4}>
+                                                        {vehicleNo}
+                                                    </Grid>
+                                                </>
+                                            ) : (
+                                                <>
+
+                                                    <Grid item xs={4}>
+
+                                                    </Grid>
+                                                </>
+                                            )
+                                        }
+                                    </Grid>
+                                </Grid>
+
+                            </Grid>
+                        </Paper>
+
+                    </Grid>
+                    <Grid item sm={7}>
+                    </Grid>
+                </Grid>
+
             </Dialog>
+            )}
             <Dialog maxWidth='lg' onClose={handleNoCancelDialog} open={open2} sx={styles.dialog}>
                 <DialogTitle color="black" fontWeight="bold">Cancel Booking</DialogTitle>
                 <DialogContent>
