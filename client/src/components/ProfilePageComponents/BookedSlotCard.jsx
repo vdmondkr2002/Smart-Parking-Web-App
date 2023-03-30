@@ -8,7 +8,7 @@ import L from 'leaflet'
 import { useDispatch, useSelector } from "react-redux";
 import { asyncCancelParkingSlot } from "../../state";
 
-const BookedSlotCard = ({ id, name, charges, type, startTime, endTime, vehicleType, bookerName, lat, lng, currLoc, address, vehicleNo, cancellable }) => {
+const BookedSlotCard = ({ active,id, name, charges, type, startTime, endTime, vehicleType, bookerName, lat, lng, currLoc, address, vehicleNo, cancellable }) => {
     const theme = useTheme()
     const styles = {
         dialog: {
@@ -188,7 +188,7 @@ const BookedSlotCard = ({ id, name, charges, type, startTime, endTime, vehicleTy
             </Card>
             <Dialog maxWidth='lg' fullWidth onClose={handleClose} open={open} sx={styles.dialog}>
                 <Grid container alignItems="center" justifyContent="center">
-                    <Grid item sm={5}>
+                    <Grid item sm={active?5:12}>
                         <Paper sx={{ backgroundColor: theme.palette.primary.dark, color: "white", borderRadius: "10px", width: "80%", margin: "auto", boxShadow: "10px 5px 5px gray" }}>
                             <Grid sx={styles.dialog} container spacing={2} alignItems="center" >
                                 <Grid item textAlign="end" xs={12}>
@@ -261,7 +261,9 @@ const BookedSlotCard = ({ id, name, charges, type, startTime, endTime, vehicleTy
                         </Paper>
 
                     </Grid>
-                    <Grid item sm={7}>
+                    {
+                        active?(
+                            <Grid item sm={7}>
                         <MapContainer style={{ height: "400px", width: "100%" }} center={position} zoom={zoomLvl} >
 
                             <TileLayer
@@ -281,6 +283,9 @@ const BookedSlotCard = ({ id, name, charges, type, startTime, endTime, vehicleTy
                             <MyMapComponent />
                         </MapContainer>
                     </Grid>
+                        ):null
+                    }
+                    
                 </Grid>
 
             </Dialog>

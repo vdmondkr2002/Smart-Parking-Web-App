@@ -196,7 +196,7 @@ const ProfilePage = () => {
                                                                     {
                                                                         bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf() >= Date.now() && !slot.cancelled).map(slot => (
                                                                             <Grid item xs={12} sm={6} md={4}>
-                                                                                <BookedSlotCard startTime={dayjs(slot.startTime)} type={slot.parkingLot.type} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} address={slot.parkingLot.address} currLoc={position} vehicleNo={slot.vehicleNo} cancellable={slot.cancellable} id={slot._id} />
+                                                                                <BookedSlotCard startTime={dayjs(slot.startTime)} active={true} type={slot.parkingLot.type} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} address={slot.parkingLot.address} currLoc={position} vehicleNo={slot.vehicleNo} cancellable={slot.cancellable} id={slot._id} />
                                                                             </Grid>
 
                                                                         ))
@@ -232,7 +232,7 @@ const ProfilePage = () => {
                                                                                 {
                                                                                     bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf() < Date.now() && !slot.cancelled).map(slot => (
                                                                                         <Grid item xs={12} md={6} lg={4}>
-                                                                                            <BookedSlotCard startTime={dayjs(slot.startTime)} type={slot.parkingLot.type} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} currLoc={position} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} id={slot._id} />
+                                                                                            <BookedSlotCard startTime={dayjs(slot.startTime)} active={false} type={slot.parkingLot.type} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} currLoc={position} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} id={slot._id} />
                                                                                         </Grid>
                                                                                     ))
                                                                                 }
@@ -279,7 +279,7 @@ const ProfilePage = () => {
                                                                                             ) : (
                                                                                             bookedTimeSlots.filter(slot => slot.cancelled && slot.adminCancelled).map(slot => (
                                                                                                 <Grid item xs={12} md={6} lg={4}>
-                                                                                                    <BookedSlotCard startTime={dayjs(slot.startTime)} type={slot.parkingLot.type} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} currLoc={position} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} id={slot._id} />
+                                                                                                    <BookedSlotCard active={false} startTime={dayjs(slot.startTime)} type={slot.parkingLot.type} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} currLoc={position} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} id={slot._id} />
                                                                                                 </Grid>
                                                                                             )))
                                                                                         }
@@ -296,7 +296,7 @@ const ProfilePage = () => {
                                                                                             ) : (
                                                                                             bookedTimeSlots.filter(slot => slot.cancelled && !slot.adminCancelled).map(slot => (
                                                                                                 <Grid item xs={12} md={6} lg={4}>
-                                                                                                    <BookedSlotCard startTime={dayjs(slot.startTime)} type={slot.parkingLot.type} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} currLoc={position} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} id={slot._id} />
+                                                                                                    <BookedSlotCard  active={false} startTime={dayjs(slot.startTime)} type={slot.parkingLot.type} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} currLoc={position} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} id={slot._id} />
                                                                                                 </Grid>
                                                                                             ))
                                                                                             )
@@ -346,7 +346,7 @@ const ProfilePage = () => {
                                                             {
                                                                 bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf() >= Date.now() && !slot.cancelled).map(slot => (
                                                                     <Grid item xs={12} md={6} lg={4}>
-                                                                        <BookedSlotCard startTime={dayjs(slot.startTime)} type={slot.parkingLot.type} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} address={slot.parkingLot.address} currLoc={position} vehicleNo={slot.vehicleNo} cancellable={slot.cancellable} id={slot._id} />
+                                                                        <BookedSlotCard active={true} startTime={dayjs(slot.startTime)} type={slot.parkingLot.type} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} address={slot.parkingLot.address} currLoc={position} vehicleNo={slot.vehicleNo} cancellable={slot.cancellable} id={slot._id} />
                                                                     </Grid>
 
                                                                 ))
@@ -381,7 +381,7 @@ const ProfilePage = () => {
                                                             {
                                                                 bookedTimeSlots.filter(slot => new Date(slot.endTime).valueOf() < Date.now() && !slot.cancelled).map(slot => (
                                                                     <Grid item  xs={12} md={6} lg={4}>
-                                                                        <BookedSlotCard  startTime={dayjs(slot.startTime)} type={slot.parkingLot.type} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} currLoc={position} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} id={slot._id} />
+                                                                        <BookedSlotCard active={false}  startTime={dayjs(slot.startTime)} type={slot.parkingLot.type} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} currLoc={position} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} id={slot._id} />
                                                                     </Grid>
                                                                 ))
                                                             }
@@ -428,7 +428,7 @@ const ProfilePage = () => {
                                                                         ) : (
                                                                         bookedTimeSlots.filter(slot => slot.cancelled && slot.adminCancelled).map(slot => (
                                                                             <Grid item xs={12} md={6} lg={4}>
-                                                                                <BookedSlotCard startTime={dayjs(slot.startTime)} type={slot.parkingLot.type} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} currLoc={position} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} id={slot._id} />
+                                                                                <BookedSlotCard active={false} startTime={dayjs(slot.startTime)} type={slot.parkingLot.type} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} currLoc={position} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} id={slot._id} />
                                                                             </Grid>
                                                                         ))
                                                                         )
@@ -446,7 +446,7 @@ const ProfilePage = () => {
                                                                         ) : (
                                                                         bookedTimeSlots.filter(slot => slot.cancelled && !slot.adminCancelled).map(slot => (
                                                                             <Grid item xs={12} md={6} lg={4} >
-                                                                                <BookedSlotCard startTime={dayjs(slot.startTime)} type={slot.parkingLot.type} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} currLoc={position} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} id={slot._id} />
+                                                                                <BookedSlotCard active={false} startTime={dayjs(slot.startTime)} type={slot.parkingLot.type} vehicleType={slot.vehicleType} endTime={dayjs(slot.endTime)} name={slot.parkingLot.name} charges={slot.charges} lat={slot.parkingLot.location[0]} lng={slot.parkingLot.location[1]} currLoc={position} address={slot.parkingLot.address} vehicleNo={slot.vehicleNo} id={slot._id} />
                                                                             </Grid>
                                                                         ))
                                                                         )
