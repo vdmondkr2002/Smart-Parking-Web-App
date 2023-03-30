@@ -331,6 +331,7 @@ exports.deleteParkingLot = async (req, res) => {
                         We are sorry to inform you that due to some issues your parking booking for a Bike at ${updatedLot.name} between ${dayjs(ts.startTime).format('DD MMM hh:00 A')} and ${dayjs(ts.endTime).format('DD MMM hh:00 A')} has been cancelled. 
                         ${updatedLot.type==="public"?"":`The charges for this parking you booked ${charges}, will be refunded to your account within 2 days`}
                 `
+                const receiverMail=userMap[ts.booker].email
                 await sendEmail2({html,subject,receiverMail})
                 //mark those slots as cancelled and adminCancelled as they are cancelledBy Admin
                 if(updatedLot.type==="public"){
@@ -346,6 +347,7 @@ exports.deleteParkingLot = async (req, res) => {
                         We are sorry to inform you that due to some issues your parking booking for a Car at ${updatedLot.name} between ${dayjs(ts.startTime).format('DD MMM hh:00 A')} and ${dayjs(ts.endTime).format('DD MMM hh:00 A')} has been cancelled. 
                         ${updatedLot.type==="public"?"":`The charges for this parking you booked ${charges}, will be refunded to your account within 2 days`}
                 `
+                const receiverMail=userMap[ts.booker].email
                 await sendEmail({html,subject,receiverMail})
                 if(updatedLot.type==="public"){
                     await BookedTimeSlot.findByIdAndUpdate(ts._id,{cancelled:true,adminCancelled:true,cancelledAt:Date.now(),refunded:true})
