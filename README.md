@@ -15,6 +15,10 @@ People who want to find a parking lot around selected location can fill the deta
 #### https://parking-wheelz.vercel.app/
 
 ## Project Demo
+### Searching for & Booking a parking slot-
+![parking-slot-booking-final (1)](https://user-images.githubusercontent.com/64477617/229424576-fb3a44f4-8a61-4d5b-8f1e-6920378ccae7.gif)
+### Admin Side Functionality-
+![admin-functionality-final](https://user-images.githubusercontent.com/64477617/229428496-6462da5a-c078-4a40-8fb3-ccbd39ae0f9a.gif)
 
 
 # Tech Stack Used
